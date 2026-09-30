@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/BE/" />
+  <Folder Name="/BE/services/">
+    <Project Path="BE/services/DanhMucService/DanhMucService.csproj" />
+    <Project Path="BE/services/QuanTriHeThongService/QuanTriHeThongService.csproj" />
+  </Folder>
+  <Folder Name="/BE/shared/">
+    <Project Path="BE/shared/BuildingBlocks/BuildingBlocks.csproj" />
+  </Folder>
+</Solution>

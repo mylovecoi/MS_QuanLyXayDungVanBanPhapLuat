@@ -1,0 +1,10 @@
+namespace DanhMucService.Contracts.Requests.DanhMuc;
+
+public class DanhMucDiaDanhUpsertApiRequest
+{
+    public string TenDiaDanh { get; set; } = string.Empty;
+    public int Level { get; set; }
+    public int STTSapXep { get; set; }
+    public Guid DiaDanhCapTrenId { get; set; }
+}
+
