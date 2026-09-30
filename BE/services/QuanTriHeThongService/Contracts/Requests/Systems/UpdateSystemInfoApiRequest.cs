@@ -11,5 +11,6 @@ public class UpdateSystemInfoApiRequest
     public bool Train { get; set; }
     public bool IsChatBot { get; set; }
     public bool IsOPT { get; set; }
+    public string? MenuLayout { get; set; }
 }
 

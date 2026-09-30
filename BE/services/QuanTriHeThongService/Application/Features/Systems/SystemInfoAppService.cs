@@ -24,6 +24,12 @@ public class SystemInfoAppService(ISystemInfoRepository repository) : ISystemInf
             return (false, "Ngày hết hạn phải lớn hơn hoặc bằng ngày sản xuất.", null);
         }
 
+        var menuLayout = NormalizeMenuLayout(request.MenuLayout);
+        if (menuLayout is null)
+        {
+            return (false, "Kiểu hiển thị menu không hợp lệ.", null);
+        }
+
         var entity = new SystemInfoEntity
         {
             Id = request.Id,
@@ -34,11 +40,23 @@ public class SystemInfoAppService(ISystemInfoRepository repository) : ISystemInf
             LoginLock = request.LoginLock,
             Train = request.Train,
             IsChatBot = request.IsChatBot,
-            IsOPT = request.IsOPT
+            IsOPT = request.IsOPT,
+            MenuLayout = menuLayout
         };
 
         var saved = await _repository.SaveAsync(entity, cancellationToken);
         return (true, "Cập nhật cấu hình hệ thống thành công. Vui lòng đăng nhập lại để áp dụng đầy đủ thay đổi.", saved.ToDto());
+    }
+
+    private static string? NormalizeMenuLayout(string? menuLayout)
+    {
+        if (string.IsNullOrWhiteSpace(menuLayout))
+        {
+            return "vertical";
+        }
+
+        var normalized = menuLayout.Trim().ToLowerInvariant();
+        return normalized is "vertical" or "horizontal" ? normalized : null;
     }
 }
 

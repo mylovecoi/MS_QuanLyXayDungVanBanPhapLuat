@@ -16,5 +16,6 @@ namespace QuanTriHeThongService.Infrastructure.Persistence.Entities
         public bool Train { get; set; } = false;
         public bool IsChatBot { get; set; } = false;
         public bool IsOPT { get; set; } = false;
+        public string MenuLayout { get; set; } = "vertical";
     }
 }

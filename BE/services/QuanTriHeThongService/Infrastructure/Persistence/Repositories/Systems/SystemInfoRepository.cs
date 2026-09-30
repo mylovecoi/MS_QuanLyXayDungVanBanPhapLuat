@@ -24,7 +24,8 @@ public class SystemInfoRepository(QuanTriHeThongDbContext dbContext) : ISystemIn
                 LoginLock = x.LoginLock,
                 Train = x.Train,
                 IsChatBot = x.IsChatBot,
-                IsOPT = x.IsOPT
+                IsOPT = x.IsOPT,
+                MenuLayout = x.MenuLayout
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -44,7 +45,8 @@ public class SystemInfoRepository(QuanTriHeThongDbContext dbContext) : ISystemIn
                 LoginLock = entity.LoginLock,
                 Train = entity.Train,
                 IsChatBot = entity.IsChatBot,
-                IsOPT = entity.IsOPT
+                IsOPT = entity.IsOPT,
+                MenuLayout = entity.MenuLayout
             };
 
             _dbContext.SystemInfo.Add(dbEntity);
@@ -71,6 +73,7 @@ public class SystemInfoRepository(QuanTriHeThongDbContext dbContext) : ISystemIn
         current.Train = entity.Train;
         current.IsChatBot = entity.IsChatBot;
         current.IsOPT = entity.IsOPT;
+        current.MenuLayout = entity.MenuLayout;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return entity;

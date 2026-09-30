@@ -37,7 +37,8 @@ public class SystemInfoController(ISystemInfoAppService appService) : Controller
             LoginLock = request.LoginLock,
             Train = request.Train,
             IsChatBot = request.IsChatBot,
-            IsOPT = request.IsOPT
+            IsOPT = request.IsOPT,
+            MenuLayout = request.MenuLayout
         }, cancellationToken);
 
         if (!result.IsSuccess)

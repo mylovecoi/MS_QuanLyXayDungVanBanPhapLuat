@@ -322,6 +322,10 @@ namespace QuanTriHeThongService.Infrastructure.Persistence.Migrations
                     b.Property<int>("LoginLock")
                         .HasColumnType("int");
 
+                    b.Property<string>("MenuLayout")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("MfgDate")
                         .HasColumnType("datetime2");
 

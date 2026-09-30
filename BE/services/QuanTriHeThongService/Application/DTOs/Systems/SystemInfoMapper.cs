@@ -16,7 +16,8 @@ public static class SystemInfoMapper
             LoginLock = entity.LoginLock,
             Train = entity.Train,
             IsChatBot = entity.IsChatBot,
-            IsOPT = entity.IsOPT
+            IsOPT = entity.IsOPT,
+            MenuLayout = entity.MenuLayout
         };
     }
 }
