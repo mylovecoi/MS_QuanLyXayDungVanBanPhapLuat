@@ -76,6 +76,195 @@ public class DanhMucDbContext : DbContext
         modelBuilder.Entity<DanhMucTieuChiDiemMuc>().Property(x => x.TuGiaTri).HasPrecision(18, 2);
         modelBuilder.Entity<DanhMucTieuChiDiemMuc>().Property(x => x.DenGiaTri).HasPrecision(18, 2);
         modelBuilder.Entity<DanhMucTieuChiDiemMuc>().Property(x => x.Diem).HasPrecision(18, 2);
+
+        SeedQuyTrinhDangKyXayDungQppl(modelBuilder);
+    }
+
+    private static void SeedQuyTrinhDangKyXayDungQppl(ModelBuilder modelBuilder)
+    {
+        var seedDate = new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Local);
+        var seedUser = Guid.Empty;
+
+        modelBuilder.Entity<DanhMucQuyTrinhSoanThao>().HasData(new DanhMucQuyTrinhSoanThao
+        {
+            Id = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+            MaQuyTrinh = "DXDM_DKXD_QPPL",
+            TenQuyTrinh = "Đề xuất danh mục / Đăng ký xây dựng QPPL",
+            LoaiQuyTrinh = "DangKyXayDungQPPL",
+            CapApDung = "CapTinh",
+            PhienBan = 1,
+            TrangThai = true,
+            MoTa = "Quy trình đăng ký xây dựng văn bản QPPL cấp tỉnh",
+            CreatedBy = seedUser,
+            CreatedDate = seedDate,
+            UpdatedBy = seedUser,
+            UpdatedDate = seedDate
+        });
+
+        modelBuilder.Entity<DanhMucBuocQuyTrinh>().HasData(
+            new DanhMucBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.BuocDangKyXayDungQppl.LapHoSo,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                MaBuoc = "LAP_HO_SO",
+                TenBuoc = "Lập hồ sơ đề nghị/đăng ký",
+                ThuTuSapXep = 1,
+                LoaiBuoc = "NhapLieu",
+                BatBuoc = true,
+                MoTa = "Đơn vị soạn thảo lập hồ sơ đăng ký trên phần mềm",
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.BuocDangKyXayDungQppl.TrinhHoSo,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                MaBuoc = "TRINH_HO_SO",
+                TenBuoc = "Trình hồ sơ/Chờ phê duyệt",
+                ThuTuSapXep = 2,
+                LoaiBuoc = "XuLy",
+                BatBuoc = true,
+                MoTa = "Hồ sơ đã trình sang đơn vị phê duyệt",
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.BuocDangKyXayDungQppl.PheDuyet,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                MaBuoc = "PHE_DUYET",
+                TenBuoc = "Phê duyệt hồ sơ",
+                ThuTuSapXep = 3,
+                LoaiBuoc = "PheDuyet",
+                BatBuoc = true,
+                MoTa = "Đơn vị phê duyệt nhập kết quả phê duyệt hoặc trả lại",
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.BuocDangKyXayDungQppl.CapNhatKetQua,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                MaBuoc = "CAP_NHAT_KET_QUA",
+                TenBuoc = "Cập nhật kết quả phê duyệt",
+                ThuTuSapXep = 4,
+                LoaiBuoc = "NhapLieu",
+                BatBuoc = true,
+                YeuCauFileDinhKem = true,
+                MoTa = "Đơn vị soạn thảo cập nhật số/ngày văn bản và file kết quả",
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.BuocDangKyXayDungQppl.HoanThanh,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                MaBuoc = "HOAN_THANH",
+                TenBuoc = "Hoàn thành",
+                ThuTuSapXep = 5,
+                LoaiBuoc = "KetThuc",
+                BatBuoc = true,
+                MoTa = "Hoàn thành quy trình đăng ký xây dựng văn bản",
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            });
+
+        modelBuilder.Entity<DanhMucChuyenBuocQuyTrinh>().HasData(
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.LapHoSoToTrinhHoSo,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.LapHoSo,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.TrinhHoSo,
+                DieuKienKetQua = "TRINH_PHE_DUYET",
+                LoaiChuyenBuoc = "Forward",
+                LaNhanhMacDinh = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.TrinhHoSoToPheDuyet,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.TrinhHoSo,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.PheDuyet,
+                DieuKienKetQua = "TIEP_NHAN_PHE_DUYET",
+                LoaiChuyenBuoc = "Forward",
+                LaNhanhMacDinh = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.PheDuyetToCapNhatKetQua,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.PheDuyet,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.CapNhatKetQua,
+                DieuKienKetQua = "PHE_DUYET",
+                LoaiChuyenBuoc = "Forward",
+                LaNhanhMacDinh = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.PheDuyetToLapHoSo,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.TrinhHoSo,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.LapHoSo,
+                DieuKienKetQua = "TRA_LAI",
+                LoaiChuyenBuoc = "Return",
+                YeuCauNhapLyDo = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.PheDuyetToHoanThanh,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.TrinhHoSo,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.HoanThanh,
+                DieuKienKetQua = "KHONG_PHE_DUYET",
+                LoaiChuyenBuoc = "Reject",
+                YeuCauNhapLyDo = true,
+                IsKetThuc = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            },
+            new DanhMucChuyenBuocQuyTrinh
+            {
+                Id = DanhMucSeedIds.ChuyenBuocDangKyXayDungQppl.CapNhatKetQuaToHoanThanh,
+                QuyTrinhSoanThaoId = DanhMucSeedIds.QuyTrinh.DeXuatDangKyXayDungQppl,
+                TuBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.CapNhatKetQua,
+                DenBuocId = DanhMucSeedIds.BuocDangKyXayDungQppl.HoanThanh,
+                DieuKienKetQua = "HOAN_THANH",
+                LoaiChuyenBuoc = "Forward",
+                IsKetThuc = true,
+                CreatedBy = seedUser,
+                CreatedDate = seedDate,
+                UpdatedBy = seedUser,
+                UpdatedDate = seedDate
+            });
     }
 
     public override int SaveChanges()

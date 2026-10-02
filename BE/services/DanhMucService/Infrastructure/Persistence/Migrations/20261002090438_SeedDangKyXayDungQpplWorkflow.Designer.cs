@@ -4,6 +4,7 @@ using DanhMucService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DanhMucService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DanhMucDbContext))]
-    partial class DanhMucDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261002090438_SeedDangKyXayDungQpplWorkflow")]
+    partial class SeedDangKyXayDungQpplWorkflow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -422,7 +425,7 @@ namespace DanhMucService.Infrastructure.Persistence.Migrations
                             LaNhanhMacDinh = false,
                             LoaiChuyenBuoc = "Return",
                             QuyTrinhSoanThaoId = new Guid("33333333-3333-3333-3333-333333333301"),
-                            TuBuocId = new Guid("33333333-3333-3333-3333-333333333312"),
+                            TuBuocId = new Guid("33333333-3333-3333-3333-333333333313"),
                             UpdatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             UpdatedDate = new DateTime(2026, 10, 2, 0, 0, 0, 0, DateTimeKind.Local),
                             YeuCauNhapLyDo = true
@@ -438,7 +441,7 @@ namespace DanhMucService.Infrastructure.Persistence.Migrations
                             LaNhanhMacDinh = false,
                             LoaiChuyenBuoc = "Reject",
                             QuyTrinhSoanThaoId = new Guid("33333333-3333-3333-3333-333333333301"),
-                            TuBuocId = new Guid("33333333-3333-3333-3333-333333333312"),
+                            TuBuocId = new Guid("33333333-3333-3333-3333-333333333313"),
                             UpdatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             UpdatedDate = new DateTime(2026, 10, 2, 0, 0, 0, 0, DateTimeKind.Local),
                             YeuCauNhapLyDo = true

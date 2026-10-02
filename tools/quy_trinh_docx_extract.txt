@@ -1,0 +1,180 @@
+PARAGRAPHS
+P1: 2.5.1.1. Các quy trình nghiệp vụ sau tin học hóa (tổ chức, vận hành của quy trình, sản phẩm của quá trình nghiệp vụ, các giao tác xử lý của quy trình nghiệp vụ):
+P2: 2.5.1.1.1. Quy trình Đề xuất danh mục /Đăng ký xây dựng QPPL
+P3: Cơ quan chủ trì soạn thảo: Cơ quan chuyên môn thuộc UBND tỉnh, cơ quan quân sự, công an cấp tỉnh, cơ quan thuộc UBND cấp tỉnh.
+P4: Cơ quan thẩm quyền phê duyệt: Sở Tư pháp; UBND tỉnh; HĐND tỉnh;
+P5: Quy trình thực hiện:
+P6: Bước 1: Đề nghị/Đăng ký xây dựng danh mục văn bản Quy phạm pháp luật
+P7: - Cơ quan chủ trì soạn thảo lập hồ sơ đề nghị/đăng ký trên phần mềm.
+P8: - Cơ quan chủ trì soạn thảo trình hồ sơ đến cơ quan có thẩm quyền để xét duyệt. Hồ sơ chuyển đến:
+P9: + UBND tỉnh đối với dự thảo Quyết định của UBND tỉnh;
+P10: + HĐND tỉnh đối với dự thảo Nghị quyết của HĐND tỉnh.
+P11: - Hệ thống phần mềm: Lưu trữ hồ sơ đề nghị đăng ký.
+P12: Bước 2: Phê duyệt và cập nhật kết quả:
+P13: -	Cơ quan thẩm quyền phê duyệt chủ trì phối hợp với Sở Tư pháp xem xét kiểm tra việc đề nghị ban hành quyết định, báo cáo Chủ tịch UBND cấp tỉnh/ Chủ tỉnh HĐND tỉnh phê duyệt việc đăng ký hoặc ban hành danh mục văn bản QPPL. Sau đó, Cơ quan thẩm quyền phê duyệt gửi kết quả cho cơ quan chủ trì soạn thảo.
+P14: - Cơ quan chủ trì soạn thảo cập nhật kết quả phê duyệt việc đăng ký hoặc ban hành danh mục văn bản QPPL lên phần mềm sau khi Lãnh đạo HĐND; Lãnh đạo UBND tỉnh ban hành.
+P15: - Hệ thống phần mềm: Lưu trữ file Quyết định.
+P16: Biểu đồ mô tả quy trình
+P18: 2.5.1.1.2. Quy trình xây dựng văn bản QPPL cấp tỉnh đối vơi Quyết định UBND:
+P19: Quy trình thực hiện:
+P20: Bước 1. Tổ chức soạn thảo, Lấy ý kiến góp ý:
+P21: Đơn vị thực hiện Cơ quan chủ trì soạn thảo.
+P22: - Cơ quan chủ trì soạn thảo tạo Hồ sơ xây dựng dự thảo Quyết định lên phần mềm (Có thể tạo trực tiếp trên phần mềm hoặc khởi tạo ở ngoài sau đó nhập thông tin dự thảo lên phần mềm sau khi đã khởi tạo).. Hồ sơ gồm:
+P23: + Dự thảo quyết định.
+P24: + Bản tổng hợp ý kiến tiếp thu, giải trình ý kiến góp ý.
+P25: + Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản;
+P26: + Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có);
+P27: - Hệ thống phần mềm: Lưu trữ hồ sơ xây dựng dự thảo quyết định.
+P28: Bước 2: Gửi hồ sơ thẩm định
+P29: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; Sở Tư pháp; Hệ thống phần mềm.
+P30: Cái này thực hiện trên phần mềm Hệ thống quản lý văn bản của tỉnh, không thực hiện trên phần mềm này
+P31: -	Cơ quan chủ trì soạn thảo gửi hồ sơ dự thảo đến Sở Tư pháp để thẩm định dự thảo quyết định.
+P32: + Hồ sơ dự thảo gồm: Tờ trình; Dự thảo quyết định; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản; Bản so sánh, thuyết minh nội dung dự thảo;Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có); Bản tổng hợp ý kiến tiếp thu, giải trình ý kiến góp ý.
+P33: + Hệ thống phần mềm: Lưu trữ hồ sơ trình thẩm định (cái này do cơ quan soạn thảo nhập vào).
+P34: Bước 3: Thẩm định văn bản
+P35: Đơn vị thực hiện: Sở Tư pháp.
+P36: - Sở Tư pháp tiếp nhận hồ sơ trình thẩm định.
+P37: -	Sở Tư pháp thẩm định hồ sơ:
+P38: + Sở Tư pháp tự thẩm định hoặc tổ chức hội đồng thẩm định hoặc cuộc họp thẩm định hoặc lấy ý kiến thẩm định bằng văn bản. Trường hợp tổ chức hội đồng thẩm định hoặc cuộc họp thẩm định, Sở Tư pháp mời đại diện Sở Tài chính, Sở Nội vụ, Sở Khoa học và Công nghệ, cơ quan, tổ chức có liên quan, chuyên gia, nhà khoa học (nếu có) tham gia cuộc họp hội đồng thẩm định hoặc cuộc họp thẩm định.
+P39: + Báo cáo kết quả thẩm định.
+P40: + Hệ thống phần mềm: Lưu trữ hồ sơ thẩm định (cái này do Sở Tư pháp nhập vào).
+P41: - Thông báo kết quả thẩm định:
+P42: + Sở Tư pháp gửi kết quả thẩm định cho cơ quan chủ trì. Đính kèm văn bản thẩm định trên phần mềm.
+P43: + Trong trường hợp hồ sơ dự thảo không đạt yêu cầu, yêu cầu cơ quan chủ trì thực hiện cập nhật, bổ sung hồ sơ để gửi cho Sở Tư pháp thẩm định lại. Hệ thống phần mềm: Lưu trữ hồ sơ cập nhật, bổ sung.
+P44: Bước 4: Trình UBND tỉnh hồ sơ dự thảo văn bản
+P45: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; UBND tỉnh; Sở Tư pháp; Hệ thống phần mềm.
+P46: -	Cơ quan chủ trì soạn thảo lập hồ sơ dự thảo trình UBND tỉnh (đồng thời gửi Sở Tư pháp) để xem xét, thông qua dự thảo Quyết định.
+P47: + Hồ sơ trình gồm:Tờ trình; Dự thảo quyết định; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản; Bản so sánh, thuyết minh nội dung dự thảo. Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có);Báo cáo thẩm định; báo cáo tiếp thu, giải trình ý kiến thẩm định.
+P48: + Hệ thống phần mềm: Lưu trữ hồ sơ trình xem xét, thông qua dự thảo Quyết định (cái này do cơ quan chủ trì soạn thảo nhập vào).
+P49: Bước 5: Lấy ý kiến thành viên UBND tỉnh:
+P50: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; UBND tỉnh; Sở Tư pháp; Hệ thống phần mềm.
+P51: - UBND tỉnh tiếp nhận hồ sơ trình xem xét, thông qua dự thảo Quyết định.
+P52: - UBND tỉnh lấy ý kiến các thành viên UBND tỉnh.
+P53: + Lấy ý kiến các thành viên UBND tỉnh.
+P54: + Tổng hợp ý kiến thành viên UBND tỉnh:
+P55: Còn có ý kiến khác nhau (Không đồng ý): Trả về Cơ quan chủ trì soạn thảo thực hiện giải trình, cập nhật, bổ sung hồ sơ  .
+P56: Không có ý kiến khác nhau (Đồng ý): trình Lãnh đạo tỉnh ký ban hành quyết định.
+P57: - UBND tỉnh gửi ý kiến các thành viên UBND tỉnh cho cơ quan chủ trì soạn thảo.
+P58: - Cơ quan chủ trì soạn thảo cập nhập ý kiến các thành viên UBND do UBND tỉnh lên hệ thống phần mềm
+P59: + Hệ thống phần mềm: Lưu trữ hồ sơ lấy ý kiến thành viên UBND tỉnh.
+P60: Bước 6: Quyết định ban hành
+P61: -	Lãnh đạo UBND tỉnh ký ban hành Quyết định
+P62: - UBND tỉnh thông báo kết quả cho Cơ quan chủ trì soạn thảo.
+P63: - Cơ quan chủ trì soạn thảo cập nhật Quyết định được phê duyệt.
+P64: - Hệ thống phần mềm: Lưu trữ Quyết định được bạn hành.
+P75: Biểu đồ mô tả quy trình
+P77: 2.5.1.1.3. Quy trình xây dựng văn bản QPPL cấp tỉnh đối với Nghị quyết HĐND:
+P78: Quy trình thực hiện:
+P79: Bước 1. Tổ chức soạn thảo, Lấy ý kiến góp ý
+P80: Đơn vị thực hiện Cơ quan chủ trì soạn thảo.
+P81: - Cơ quan chủ trì soạn thảo tạo Hồ sơ xây dựng dự thảo nghị quyết lên phần mềm (Có thể tạo trực tiếp trên phần mềm hoặc khởi tạo ở ngoài sau đó nhập thông tin dự thảo lên phần mềm sau khi đã khởi tạo). Hồ sơ gồm:
+P82: + Dự thảo quyết định.
+P83: + Bản tổng hợp ý kiến tiếp thu, giải trình ý kiến góp ý.
+P84: + Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản;
+P85: + Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có);
+P86: - Hệ thống phần mềm: Lưu trữ hồ sơ xây dựng dự thảo nghị quyết (cái này do cơ quan soạn thảo nhập thông tin vào).
+P87: Bước 2: Gửi hồ sơ thẩm định
+P88: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; Sở Tư pháp; Hệ thống phần mềm. (Hồ sơ được gửi trên phần mềm quản lý văn bản điều hành của tỉnh không gửi trên phần mềm này)
+P89: -	Cơ quan chủ trì soạn thảo gửi hồ sơ dự thảo Nghị quyết đến Sở Tư pháp để thẩm định văn bản.
+P90: + Hồ sơ dự thảo gồm: Tờ trình; Dự thảo Nghị quyết; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản; Bản so sánh, thuyết minh nội dung dự thảo;Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có); Bản tổng hợp ý kiến tiếp thu, giải trình ý kiến góp ý.
+P91: + Hệ thống phần mềm: Lưu trữ hồ sơ trình thẩm định (Cơ quan chủ trì soạn thảo nhập thông tin vào).
+P92: Bước 3: Thẩm định chất lượng văn bản
+P93: Đơn vị thực hiện: Sở Tư pháp.
+P94: - Sở Tư pháp tiếp nhận hồ sơ trình thẩm định.
+P95: -	Sở Tư pháp thẩm định hồ sơ:
+P96: + Sở Tư pháp tự thẩm định hoặc tổ chức hội đồng thẩm định hoặc cuộc họp thẩm định hoặc lấy ý kiến thẩm định bằng văn bản. Trường hợp tổ chức hội đồng thẩm định hoặc cuộc họp thẩm định, Sở Tư pháp mời đại diện Sở Tài chính, Sở Nội vụ, Sở Khoa học và Công nghệ, cơ quan, tổ chức có liên quan, chuyên gia, nhà khoa học (nếu có) tham gia cuộc họp hội đồng thẩm định hoặc cuộc họp thẩm định.
+P97: + Báo cáo kết quả thẩm định.
+P98: + Hệ thống phần mềm: Lưu trữ hồ sơ thẩm định (nội dung này do Sở Tư pháp nhập thông tin sau khi có kết quả thẩm định).
+P99: - Thông báo kết quả thẩm định:
+P100: + Sở Tư pháp gửi kết quả thẩm định cho cơ quan chủ trì. Đính kèm văn bản thẩm định trên phần mềm.
+P101: + Trong trường hợp hồ sơ dự thảo không đạt yêu cầu, yêu cầu cơ quan chủ trì thực hiện cập nhật, bổ sung hồ sơ để gửi cho Sở Tư pháp thẩm định lại. Hệ thống phần mềm: Lưu trữ hồ sơ cập nhật, bổ sung.
+P102: Bước 4: Trình UBND tỉnh hồ sơ dự thảo văn bản:
+P103: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; UBND tỉnh; Sở Tư pháp; Hệ thống phần mềm.
+P104: -	Cơ quan chủ trì soạn thảo lập hồ sơ dự thảo trình UBND tỉnh (đồng thời gửi Sở Tư pháp) để xem xét, lấy ý kiến dự thảo Nghị quyết.
+P105: + Hồ sơ trình gồm:Tờ trình; Dự thảo Nghị quyết; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản; Bản so sánh, thuyết minh nội dung dự thảo. Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có);Báo cáo thẩm định; báo cáo tiếp thu, giải trình ý kiến thẩm định.
+P106: + Hệ thống phần mềm: Lưu trữ hồ sơ trình xem xét, lấy ý kiến dự thảo Nghị quyết (Cơ quan chủ trì soạn thảo nhập thông tin).
+P107: Bước 5: Lấy ý kiến thành viên UBND tỉnh:
+P108: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; UBND tỉnh; Sở Tư pháp; Hệ thống phần mềm.
+P109: - UBND tỉnh tiếp nhận hồ sơ trình xem xét, thông qua dự thảo Quyết định.
+P110: - Lấy ý kiến thành viên UBND tỉnh:
+P111: + UBND tỉnh lấy ý kiến các thành viên UBND tỉnh.
+P112: + Tổng hợp ý kiến thành viên UBND tỉnh:
+P113: Còn có ý kiến khác nhau (Không đồng ý): Trả về Cơ quan chủ trì soạn thảo thực hiện giải trình, cập nhật, bổ sung hồ sơ  .
+P114: Không có ý kiến khác nhau (Đồng ý): lập hồ sơ trình HĐND tỉnh xem xét, thông qua dự thảo Nghị quyết. Hồ sơ dự thảo nghị quyết gồm: Tờ trình; Dự thảo Nghị quyết; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản;  Bản so sánh, thuyết minh nội dung dự thả; Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có); Báo cáo thẩm định; báo cáo tiếp thu, giải trình ý kiến thẩm định; Ý kiến của thành viên UBND.
+P115: - UBND tỉnh gửi ý kiến các thành viên UBND tỉnh cho cơ quan chủ trì soạn thảo.
+P116: - Cơ quan chủ trì soạn thảo cập nhập ý kiến các thành viên UBND do UBND tỉnh lên hệ thống phần mềm.
+P117: + Hệ thống phần mềm: Lưu trữ hồ sơ lấy ý kiến thành viên UBND tỉnh.
+P118: Bước 6: Trình HĐND tỉnh thẩm tra dự thảo nghị quyết:
+P119: Đơn vị thực hiện: Cơ quan chủ trì soạn thảo; UBND tỉnh; HĐND tỉnh; Hệ thống phần mềm.
+P120: - Cơ quan chủ trì soạn thảo trình HĐND tỉnh thẩm tra dự thảo nghị quyết:
+P121: - HĐND tỉnh thẩm tra dự thảo nghị quyết:
+P122: + Các Ban của Hội đồng nhân dân thẩm tra dự thảo nghị quyết trước khi trình Hội đồng nhân dân.
+P123: + Kết quả thẩm tra gửi về đơn vị trình nghị quyết.
+P124: + Cơ quan chủ trì soạn thảo, cập nhật hoàn thiện hồ sơ dự thảo Nghị quyết. Đính kèm văn bản và hồ sơ dự thảo Nghị quyết đã hoàn thiện để trình đại biểu HĐND tỉnh trên phần mềm. Hồ sơ gồm: Tờ trình; Dự thảo Nghị quyết; Báo cáo tổng kết việc thi hành pháp luật hoặc đánh giá thực trạng quan hệ xã hội liên quan đến dự thảo văn bản;  Bản so sánh, thuyết minh nội dung dự thả; Bản đánh giá thủ tục hành chính, việc phân cấp, thực hiện nhiệm vụ, quyền hạn được phân cấp (nếu có); Báo cáo thẩm định; báo cáo tiếp thu, giải trình ý kiến thẩm định; Ý kiến của Ủy ban nhân dân; Báo cáo thẩm tra của HĐND.
+P125: + Ý kiến thảo luận của HĐND;
+P126: - HĐND tỉnh gửi ý kiến thảo luận của HĐND cho cơ quan chủ trì soạn thảo.
+P127: - Cơ quan chủ trì soạn thảo cập nhập ý kiến thảo luận của HĐND do HĐND tỉnh lên hệ thống phần mềm
+P128: + Hệ thống phần mềm: Lưu trữ hồ sơ lấy ý kiến thảo luận HĐND.
+P129: Bước 7: Nghị quyết ban hành
+P130: -	Chủ tịch Hội đồng nhân dân ký chứng thực nghị quyết
+P131: - HĐND tỉnh thông báo kết quả cho Cơ quan trình soạn thảo.
+P132: - Cơ quan chủ trì soạn thảo cập nhật Nghị quyết được phê duyệt trên hệ thống phần mềm.
+P133: - Hệ thống phần mềm: Lưu trữ Nghị quyết được ban hành.
+P134: Biểu đồ mô tả quy trình
+P136: 2.5.1.1.4. Tổ chức thi hành pháp luật
+P137: Quy trình thực hiện:
+P138: Bước 1: Tạo kế hoạch
+P139: -	Cơ quan chủ trì xã căn cứ vào Luật, nghị định,… tạo kế hoạch triển khai, phân chia nội dung thi hành pháp luật cho các đơn vị.
+P140: - Hệ thống phần mềm: Tạo kế hoạch Tổ chức thi hành pháp luật.
+P141: Bước 2: Thực hiện các nội dung được giao
+P142: -	Các đơn vị thực hiện nội dung công việc đã phân chia và cập nhập dữ liệu, trạng thái.
+P143: - Hệ thống phần mềm: Cập nhật trạng thái thực hiện của các đơn vị
+P144: Bước 3: Đánh giá kết quả
+P145: -	Sở Tư pháp căn cứ vào dữ liệu thực hiện công việc do các đơn vị thực hiện cập nhật để tiến hành đánh giá kết quả thực hiện.
+P146: - Hệ thống phần mềm: tự động đưa ra các cảnh báo trong trường hợp: chưa ban hành kế hoạch; chưa thực hiện các nội dung được giao; chưa nhập liệu; thực hiện chậm, thực hiện quá hạn.
+P147: Bước 4: Tổng hợp kết quả thực hiện
+P148: -	Sau khi đánh giá kết quả thực hiện của kế hoạch, Sở Tư pháp tiến hành tổng kết các nội dung thực hiện công việc và đưa ra tổng hợp kết quả thực hiện của kế hoạch triển khai thi hành pháp luật.
+P149: - Hệ thống phần mềm: Báo cáo Tổng hợp kết quả thực hiện.
+P150: Biểu đồ mô tả quy trình
+P152: 2.5.1.1.5 Quy trình thực hiện cuộc khảo sát tình hình thi hành pháp luật
+P153: Bước 1: Tạo cuộc khảo sát
+P154: - Sở Tư pháp tạo và thiết lập cuộc khảo sát trên hệ thống, bao gồm:
+P155: + Thông tin chung của cuộc khảo sát: tên cuộc khảo sát, mục đích, lĩnh vực/văn bản pháp luật được khảo sát, thời gian thực hiện, đơn vị chủ trì;
+P156: + Xác định đối tượng khảo sát: cơ quan, đơn vị, tổ chức, doanh nghiệp, cá nhân hoặc nhóm đối tượng có liên quan;
+P157: + Biểu mẫu khảo sát cho từng đối tượng (Tải file lên hệ thống);
+P158: - Hệ thống phần mềm:
+P159: + Tạo danh sách câu hỏi, trả lời từ file biểu mẫu khảo sát.
+P160: + Lưu trữ thông tin cuộc khảo sát.
+P161: Bước 2: Thực hiện khảo sát
+P162: - Các cơ quan, đơn vị hoặc đối tượng được khảo sát thực hiện trả lời nội dung khảo sát theo biểu mẫu đã được phát hành và cập nhật dữ liệu trên hệ thống phần mềm.
+P163: - Sở Tư pháp theo dõi tiến độ và đôn đốc các đơn vị chưa hoàn thành khảo sát.
+P164: - Hệ thống phần mềm:
+P165: + Cập nhật trạng thái thực hiện của các đơn vị
+P166: + Lưu trữ thông tin trả lời phiếu khảo sát.
+P167: Bước 3: Đánh giá kết quả khảo sát
+P168: - Sau khi các cơ quan, đơn vị và đối tượng khảo sát hoàn thành việc cung cấp thông tin, dữ liệu khảo sát được chuyển về Sở Tư pháp để thực hiện kiểm tra, tổng hợp, phân tích và đánh giá.
+P169: - Sở Tư pháp thực hiện rà soát tính đầy đủ, hợp lệ của dữ liệu khảo sát; tổng hợp các ý kiến phản hồi, kiến nghị, đề xuất của các đối tượng tham gia khảo sát. Trên cơ sở dữ liệu đã thu thập, Sở Tư pháp đưa ra nhận xét, đánh giá tình hình thi hành pháp luật và những khó khăn, vướng mắc, bất cập phát sinh trong quá trình tổ chức thi hành pháp luật.
+P170: - Hệ thống phần mềm:
+P171: + Đưa ra các cảnh báo trong trường hợp: chưa nhập liệu; chưa gửi dữ liệu khảo sát; thực hiện chậm, thực hiện quá hạn.
+P172: + Tổng hợp câu trả lời theo từng nội dung, nhóm đối tượng, cơ quan, đơn vị hoặc lĩnh vực
+P173: + Thống kê số lượng, tỷ lệ và mức độ phản hồi;
+P174: Bước 4: Tổng hợp và báo cáo kết quả khảo sát
+P175: - Sau khi hoàn thành việc phân tích, đánh giá, Sở Tư pháp thực hiện tổng hợp kết quả của cuộc khảo sát. Kết quả bao gồm:
+P176: + Tổng số đối tượng được khảo sát và số đối tượng đã tham gia;
+P177: + Kết quả tổng hợp theo từng nội dung khảo sát;
+P178: + Nhận xét, đánh giá tình hình thi hành pháp luật;
+P179: + Các tồn tại, hạn chế, khó khăn, vướng mắc;
+P180: + Nguyên nhân của các tồn tại, hạn chế;
+P181: + Kiến nghị, đề xuất giải pháp xử lý;
+P182: - Hệ thống phần mềm: Báo cáo Tổng hợp kết quả thực hiện.
+P183: Biểu đồ mô tả quy trình
+P185: 2.5.1.2. Các đối tượng tham gia vào quy trình nghiệp vụ và mối liên hệ giữa chúng:
+TABLES
+TABLE 1
+R1: TT | Tên tác nhân | Diễn giải/ Đơn vị | Phân loại tác nhân
+R2: 1 | Quản trị hệ thống | Thực hiện các công tác quản trị hệ thống, quản trị người dùng, quản trị kết nối hệ thống, quản lý quy trình… | Phức tạp
+R3: 2 | Lãnh đạo | Lãnh đạo các đơn vị có thể theo dõi tình hình thực hiện, xem Dashboard, báo cáo. | Phức tạp
+R4: 3 | Chuyên viên Cơ quan soạn thảo | Chuyên viên tại Các sở, ngành, địa phương thực hiện việc soạn dự thảo Nghị quyết, quyết định, theo dõi thực hiện thi hành pháp luật | Phức tạp
+R5: 4 | Chuyên viên Sở Tư pháp | Theo dõi, đôn đốc thực hiện, thẩm định dự thảo văn bản QPPL. Theo dõi, đôn đốc, tổng hợp tình hình thực hiện thi hành pháp luật. | Phức tạp
+R6: 5 | Chuyên viên UBND tỉnh | Thẩm tra, lấy ý kiến thành viên UBND tỉnh, phê duyệt dự thảo quyết định. | Phức tạp
+R7: 6 | Chuyên viên HĐND tỉnh | Thẩm tra, phê duyệt dự thảo Nghị quyết. | Phức tạp
