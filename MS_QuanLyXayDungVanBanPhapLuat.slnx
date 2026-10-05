@@ -4,6 +4,7 @@
     <Project Path="BE/services/DangKyXayDungVanBanService/DangKyXayDungVanBanService.csproj" />
     <Project Path="BE/services/DanhMucService/DanhMucService.csproj" />
     <Project Path="BE/services/QuanTriHeThongService/QuanTriHeThongService.csproj" />
+    <Project Path="BE/services/XayDungVanBanService/XayDungVanBanService.csproj" />
   </Folder>
   <Folder Name="/BE/shared/">
     <Project Path="BE/shared/BuildingBlocks/BuildingBlocks.csproj" />
