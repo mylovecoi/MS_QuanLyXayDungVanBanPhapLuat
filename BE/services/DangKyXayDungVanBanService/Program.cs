@@ -1,5 +1,7 @@
+using BuildingBlocks.Abstractions;
 using DangKyXayDungVanBanService.Application.Abstractions;
 using DangKyXayDungVanBanService.Application.Services;
+using DangKyXayDungVanBanService.Infrastructure.Identity;
 using DangKyXayDungVanBanService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DangKyXayDungVanBanDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddScoped<IDangKyXayDungVanBanAppService, DangKyXayDungVanBanAppService>();
 
 builder.Services.AddCors(options =>

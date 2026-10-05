@@ -28,6 +28,7 @@ Lop quyen chuc nang lay tu `QuanTriHeThongService`:
 - `GroupPermision` co cac `Permission`.
 - `Permission` gan voi `RoleAction`.
 - Cac co quyen chinh: `Index`, `Create`, `Edit`, `Delete`, `Approve`, `Public`.
+- Quy tac PM chung: moi `RoleAction` co phan loai `Detail` phai xay dung 1 Form va 1 Controller rieng de thiet lap phan quyen. Chi tiet xem `TaiLieu/QuyTacXayDungPhanMem.md`.
 
 Lop quyen du lieu nam trong `DangKyXayDungVanBanService`:
 
@@ -166,8 +167,20 @@ Da thuc hien ngay 2026-10-05:
 - Them migration `AddDangKyListIndexes`.
 - Cap nhat EF model snapshot.
 - Build thanh cong `DangKyXayDungVanBanService`.
+- Them `ICurrentUserContext` vao `DangKyXayDungVanBanService`.
+- Doc current user tu claim/header noi bo `X-User-Id`, `X-Username`, `X-Don-Vi-Id`, `X-Group-Permission-Id`, `X-Is-SSA`.
+- Ap dung data-scope cho danh sach, chi tiet, timeline, file va hanh dong kha dung.
+- Bo phu thuoc vao `nguoiXoaId`, `nguoiTaiLenId` tu query/form; audit lay theo current user server-side.
+- Kiem tra don vi soan thao/don vi phe duyet/trang thai truoc khi sua, xoa, tai file, xu ly, cap nhat ket qua va khoi tao quy trinh tiep theo.
+- Build thanh cong `DangKyXayDungVanBanService` sau khi tich hop current-user context.
+- Tach controller theo quy tac PM moi `RoleAction` phan loai `Detail` co 1 Controller rieng:
+  - `DangKyXayDungVanBanDanhSachController`
+  - `DangKyXayDungVanBanHoSoController`
+  - `DangKyXayDungVanBanKetQuaController`
+- Ra soat va bo hardcode `NguoiTaiLenId`/`Guid.Empty` gia trong upload file; lich su khoi tao quy trinh dung `DangKySeedIds.HanhDong.KhoiTaoQuyTrinhXayDung`.
+- Cap nhat script seed `RoleActions` de lay `RoleGroupId` cha theo `Role = VanBanQPPL`, khong tro cung GUID cha.
 
 Ghi chu bao mat:
 
-- Chua truyen `UserId`, `DonViId`, `IsSsa` tu query string de loc du lieu vi day la du lieu co the bi gia mao tu client.
-- Phan data-scope theo nguoi dung se thuc hien sau khi co current-user context server-side hoac client noi bo kiem tra quyen voi `QuanTriHeThongService`.
+- Khong truyen `UserId`, `DonViId`, `IsSsa` qua query string de loc du lieu vi day la du lieu co the bi gia mao tu client.
+- Data-scope hien lay tu current-user context server-side/header noi bo. Buoc tiep theo la noi client noi bo sang `QuanTriHeThongService` de kiem tra lop quyen chuc nang `Index`, `Create`, `Edit`, `Delete`, `Approve`, `Public`.

@@ -137,5 +137,4 @@ public record TaiFileDangKyXayDungVanBanRequest(
     string TenFile,
     string? MimeType,
     string? MoTa,
-    Guid NguoiTaiLenId,
     Stream NoiDung);

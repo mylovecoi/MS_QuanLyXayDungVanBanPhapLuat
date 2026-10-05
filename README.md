@@ -25,6 +25,11 @@ Backend hien dang chuyen thang tu source cu:
 
 Tat ca project da duoc doi target framework sang `net10.0`.
 
+Quy tac thiet ke chung:
+
+- Khi xay dung service/module moi, ap dung quy tac RoleAction phan loai `Detail`: moi `Detail` phai co 1 thu muc chua cac Form chinh; Form chi tiet lien quan  va 1 Controller rieng de thiet lap phan quyen.
+- Chi tiet xem `TaiLieu/QuyTacXayDungPhanMem.md`.
+
 Lenh build:
 
 ```powershell
