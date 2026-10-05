@@ -16,9 +16,11 @@ public class DangKyXayDungVanBanController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<DangKyXayDungVanBanDto>>> GetList(CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResultDto<DangKyXayDungVanBanDto>>> GetList(
+        [FromQuery] DangKyXayDungVanBanListRequest request,
+        CancellationToken cancellationToken)
     {
-        return Ok(await _appService.GetListAsync(cancellationToken));
+        return Ok(await _appService.GetListAsync(request, cancellationToken));
     }
 
     [HttpGet("{id:guid}")]
@@ -40,6 +42,13 @@ public class DangKyXayDungVanBanController : ControllerBase
     {
         var result = await _appService.UpdateAsync(id, request, cancellationToken);
         return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid nguoiXoaId, CancellationToken cancellationToken)
+    {
+        var deleted = await _appService.DeleteAsync(id, nguoiXoaId, cancellationToken);
+        return deleted ? NoContent() : NotFound();
     }
 
     [HttpGet("{id:guid}/timeline")]

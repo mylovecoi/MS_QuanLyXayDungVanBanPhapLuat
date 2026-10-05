@@ -30,7 +30,12 @@ public class DangKyXayDungVanBanDbContext : DbContext
             entity.HasIndex(x => x.BuocHienTaiId);
             entity.HasIndex(x => x.DonViSoanThaoId);
             entity.HasIndex(x => x.DonViPheDuyetId);
+            entity.HasIndex(x => x.LoaiVanBanId);
+            entity.HasIndex(x => x.NamDangKy);
             entity.HasIndex(x => x.CreatedAt);
+            entity.HasIndex(x => new { x.DonViSoanThaoId, x.TrangThaiHoSoId, x.CreatedAt });
+            entity.HasIndex(x => new { x.DonViPheDuyetId, x.TrangThaiHoSoId, x.CreatedAt });
+            entity.HasIndex(x => new { x.CreatedBy, x.CreatedAt });
 
             entity.HasMany(x => x.Files)
                 .WithOne(x => x.DangKyXayDungVanBan)

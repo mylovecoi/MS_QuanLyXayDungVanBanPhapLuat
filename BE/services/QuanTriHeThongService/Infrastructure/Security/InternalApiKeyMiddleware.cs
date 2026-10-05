@@ -64,6 +64,11 @@ public sealed class InternalApiKeyMiddleware(
             return true;
         }
 
+        if (path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
         return false;
     }
 }

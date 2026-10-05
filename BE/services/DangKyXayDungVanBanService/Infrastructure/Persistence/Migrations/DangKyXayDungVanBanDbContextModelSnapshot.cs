@@ -701,14 +701,24 @@ namespace DangKyXayDungVanBanService.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("BuocHienTaiId");
 
+                    b.HasIndex("CreatedBy", "CreatedAt");
+
                     b.HasIndex("CreatedAt");
 
                     b.HasIndex("DonViPheDuyetId");
 
+                    b.HasIndex("DonViPheDuyetId", "TrangThaiHoSoId", "CreatedAt");
+
                     b.HasIndex("DonViSoanThaoId");
+
+                    b.HasIndex("DonViSoanThaoId", "TrangThaiHoSoId", "CreatedAt");
+
+                    b.HasIndex("LoaiVanBanId");
 
                     b.HasIndex("MaHoSo")
                         .IsUnique();
+
+                    b.HasIndex("NamDangKy");
 
                     b.HasIndex("TrangThaiHoSoId");
 

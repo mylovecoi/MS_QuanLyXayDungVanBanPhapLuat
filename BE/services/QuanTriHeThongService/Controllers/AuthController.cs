@@ -106,7 +106,7 @@ public class AuthController(
                     GroupPermissionId = user.GroupPermissionId,
                     IsSSA = user.SSA,
                     FirstLogin = wasFirstLogin,
-                    MustChangePassword = string.Equals(request.Password, "Life@2012!", StringComparison.Ordinal)
+                    MustChangePassword = string.Equals(request.Password, "Cs@2012!", StringComparison.Ordinal)
                 }
             });
         }

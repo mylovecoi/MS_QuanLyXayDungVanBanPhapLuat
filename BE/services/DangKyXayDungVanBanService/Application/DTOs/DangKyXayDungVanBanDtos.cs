@@ -16,6 +16,25 @@ public record DangKyXayDungVanBanDto(
     Guid? HoSoXayDungVanBanId,
     DateTime CreatedAt);
 
+public class DangKyXayDungVanBanListRequest
+{
+    public string? Search { get; set; }
+    public Guid? LoaiVanBanId { get; set; }
+    public Guid? BuocHienTaiId { get; set; }
+    public Guid? TrangThaiHoSoId { get; set; }
+    public Guid? DonViSoanThaoId { get; set; }
+    public Guid? DonViPheDuyetId { get; set; }
+    public int? NamDangKy { get; set; }
+    public int PageSize { get; set; } = 20;
+    public int PageCurrent { get; set; } = 1;
+}
+
+public record PagedResultDto<T>(
+    IReadOnlyList<T> Items,
+    int TotalCount,
+    int PageSize,
+    int PageCurrent);
+
 public record TaoDangKyXayDungVanBanRequest(
     string TenHoSo,
     string TenVanBanDuKien,

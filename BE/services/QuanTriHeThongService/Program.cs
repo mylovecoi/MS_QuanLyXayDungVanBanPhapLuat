@@ -11,6 +11,8 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInternalApiKeyProtection(builder.Configuration);
 builder.Services.AddQuanTriHeThongModules(builder.Configuration);
@@ -20,6 +22,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 if (!app.Environment.IsDevelopment())

@@ -22,12 +22,20 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
         _environment = environment;
     }
 
-    public async Task<IReadOnlyList<DangKyXayDungVanBanDto>> GetListAsync(CancellationToken cancellationToken)
+    public async Task<PagedResultDto<DangKyXayDungVanBanDto>> GetListAsync(DangKyXayDungVanBanListRequest request, CancellationToken cancellationToken)
     {
-        return await _dbContext.DangKyXayDungVanBans
+        var pageSize = Math.Clamp(request.PageSize, 1, 200);
+        var pageCurrent = Math.Max(request.PageCurrent, 1);
+        var query = ApplyListFilters(
+            _dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted),
+            request);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
             .AsNoTracking()
-            .Where(x => !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt)
+            .Skip((pageCurrent - 1) * pageSize)
+            .Take(pageSize)
             .Select(x => new DangKyXayDungVanBanDto(
                 x.Id,
                 x.MaHoSo,
@@ -44,6 +52,12 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
                 x.HoSoXayDungVanBanId,
                 x.CreatedAt))
             .ToListAsync(cancellationToken);
+
+        return new PagedResultDto<DangKyXayDungVanBanDto>(
+            items,
+            totalCount,
+            pageSize,
+            pageCurrent);
     }
 
     public async Task<DangKyXayDungVanBanDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -135,6 +149,24 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return ToDto(entity);
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, Guid nguoiXoaId, CancellationToken cancellationToken)
+    {
+        var entity = await _dbContext.DangKyXayDungVanBans
+            .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+
+        if (entity is null)
+        {
+            return false;
+        }
+
+        entity.IsDeleted = true;
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = nguoiXoaId.ToString();
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<IReadOnlyList<DangKyXayDungVanBanTimelineDto>> GetTimelineAsync(Guid id, CancellationToken cancellationToken)
@@ -463,6 +495,52 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             .CountAsync(x => x.NamDangKy == namDangKy, cancellationToken);
 
         return $"{prefix}{count + 1:00000}";
+    }
+
+    private static IQueryable<DangKyXayDungVanBan> ApplyListFilters(
+        IQueryable<DangKyXayDungVanBan> query,
+        DangKyXayDungVanBanListRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var keyword = request.Search.Trim();
+            query = query.Where(x =>
+                x.MaHoSo.Contains(keyword)
+                || x.TenHoSo.Contains(keyword)
+                || x.TenVanBanDuKien.Contains(keyword));
+        }
+
+        if (request.LoaiVanBanId.HasValue)
+        {
+            query = query.Where(x => x.LoaiVanBanId == request.LoaiVanBanId.Value);
+        }
+
+        if (request.BuocHienTaiId.HasValue)
+        {
+            query = query.Where(x => x.BuocHienTaiId == request.BuocHienTaiId.Value);
+        }
+
+        if (request.TrangThaiHoSoId.HasValue)
+        {
+            query = query.Where(x => x.TrangThaiHoSoId == request.TrangThaiHoSoId.Value);
+        }
+
+        if (request.DonViSoanThaoId.HasValue)
+        {
+            query = query.Where(x => x.DonViSoanThaoId == request.DonViSoanThaoId.Value);
+        }
+
+        if (request.DonViPheDuyetId.HasValue)
+        {
+            query = query.Where(x => x.DonViPheDuyetId == request.DonViPheDuyetId.Value);
+        }
+
+        if (request.NamDangKy.HasValue)
+        {
+            query = query.Where(x => x.NamDangKy == request.NamDangKy.Value);
+        }
+
+        return query;
     }
 
     private static string BuildSafeFileName(string fileName)

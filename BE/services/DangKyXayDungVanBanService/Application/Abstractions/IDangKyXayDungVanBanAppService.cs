@@ -4,10 +4,11 @@ namespace DangKyXayDungVanBanService.Application.Abstractions;
 
 public interface IDangKyXayDungVanBanAppService
 {
-    Task<IReadOnlyList<DangKyXayDungVanBanDto>> GetListAsync(CancellationToken cancellationToken);
+    Task<PagedResultDto<DangKyXayDungVanBanDto>> GetListAsync(DangKyXayDungVanBanListRequest request, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto> CreateAsync(TaoDangKyXayDungVanBanRequest request, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto?> UpdateAsync(Guid id, CapNhatDangKyXayDungVanBanRequest request, CancellationToken cancellationToken);
+    Task<bool> DeleteAsync(Guid id, Guid nguoiXoaId, CancellationToken cancellationToken);
     Task<IReadOnlyList<DangKyXayDungVanBanTimelineDto>> GetTimelineAsync(Guid id, CancellationToken cancellationToken);
     Task<IReadOnlyList<HanhDongKhaDungDto>> GetHanhDongKhaDungAsync(Guid id, CancellationToken cancellationToken);
     Task<IReadOnlyList<DangKyXayDungVanBanFileDto>?> GetFilesAsync(Guid id, CancellationToken cancellationToken);
