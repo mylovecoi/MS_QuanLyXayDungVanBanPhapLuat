@@ -1,0 +1,23 @@
+[
+  {
+    "Name": "Chạy tất cả services",
+    "Projects": [
+      {
+        "Path": "BE\\services\\DangKyXayDungVanBanService\\DangKyXayDungVanBanService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BE\\services\\DanhMucService\\DanhMucService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BE\\services\\QuanTriHeThongService\\QuanTriHeThongService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BE\\services\\XayDungVanBanService\\XayDungVanBanService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

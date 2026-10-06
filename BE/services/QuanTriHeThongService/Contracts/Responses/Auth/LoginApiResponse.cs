@@ -10,5 +10,8 @@ public class LoginApiResponse
     public bool IsSSA { get; set; }
     public bool FirstLogin { get; set; }
     public bool MustChangePassword { get; set; }
+    public string AccessToken { get; set; } = string.Empty;
+    public string TokenType { get; set; } = "Bearer";
+    public DateTime ExpiresAt { get; set; }
 }
 

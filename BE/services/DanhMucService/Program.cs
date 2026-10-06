@@ -1,5 +1,8 @@
-using DanhMucService.Infrastructure.Security;
 using DanhMucService.Extensions;
+using BuildingBlocks.Abstractions;
+using BuildingBlocks.Security;
+using DanhMucService.Infrastructure.Identity;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +15,28 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddInternalApiKeyProtection(builder.Configuration);
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Nhập access token nhận được sau khi đăng nhập."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+        }] = [],
+    });
+});
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
+builder.Services.AddApplicationJwtAuthentication(builder.Configuration);
 builder.Services.AddDanhMucModules(builder.Configuration);
 
 var app = builder.Build();
@@ -29,7 +52,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseInternalApiKeyProtection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

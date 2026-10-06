@@ -3,6 +3,7 @@ namespace DanhMucService.Application.DTOs.DanhMuc;
 public class UpsertDanhMucTrangThaiRequest
 {
     public Guid? Id { get; set; }
+    public string NhomTrangThai { get; set; } = string.Empty;
     public string MaTrangThai { get; set; } = string.Empty;
     public string TenTrangThai { get; set; } = string.Empty;
     public string MaMauHex { get; set; } = string.Empty;

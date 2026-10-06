@@ -2,6 +2,7 @@ using BuildingBlocks.Abstractions;
 using QuanTriHeThongService.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuanTriHeThongService.Application.Common.Interfaces;
 using QuanTriHeThongService.Contracts.Requests.Auth;
 using QuanTriHeThongService.Contracts.Responses;
 using QuanTriHeThongService.Contracts.Responses.Auth;
@@ -12,10 +13,12 @@ namespace QuanTriHeThongService.Controllers;
 [Route("api/auth")]
 public class AuthController(
     QuanTriHeThongDbContext dbContext,
-    ICurrentUserContext currentUserContext) : ControllerBase
+    ICurrentUserContext currentUserContext,
+    IJwtTokenService jwtTokenService) : ControllerBase
 {
     private readonly QuanTriHeThongDbContext _dbContext = dbContext;
     private readonly ICurrentUserContext _currentUserContext = currentUserContext;
+    private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
 
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<LoginApiResponse>>> Login(
@@ -93,6 +96,8 @@ public class AuthController(
             user.FirstLogin = false;
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+            var (accessToken, expiresAt) = _jwtTokenService.CreateAccessToken(user);
+
             return Ok(new ApiResponse<LoginApiResponse>
             {
                 IsSuccess = true,
@@ -106,7 +111,9 @@ public class AuthController(
                     GroupPermissionId = user.GroupPermissionId,
                     IsSSA = user.SSA,
                     FirstLogin = wasFirstLogin,
-                    MustChangePassword = string.Equals(request.Password, "Cs@2012!", StringComparison.Ordinal)
+                    MustChangePassword = string.Equals(request.Password, "Cs@2012!", StringComparison.Ordinal),
+                    AccessToken = accessToken,
+                    ExpiresAt = expiresAt
                 }
             });
         }

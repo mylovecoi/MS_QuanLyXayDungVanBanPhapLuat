@@ -12,11 +12,17 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
 
     public async Task<(IReadOnlyList<DanhMucTrangThaiEntity> Items, int TotalCount)> GetPagedAsync(
         string? search,
+        string? nhomTrangThai,
         int pageSize,
         int pageCurrent,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.DanhMucTrangThais.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(nhomTrangThai))
+        {
+            query = query.Where(x => x.NhomTrangThai == nhomTrangThai);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -37,6 +43,7 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
             .Select(x => new DanhMucTrangThaiEntity
             {
                 Id = x.Id,
+                NhomTrangThai = x.NhomTrangThai,
                 MaTrangThai = x.MaTrangThai,
                 TenTrangThai = x.TenTrangThai,
                 MaMauHex = x.MaMauHex,
@@ -58,6 +65,7 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
             .Select(x => new DanhMucTrangThaiEntity
             {
                 Id = x.Id,
+                NhomTrangThai = x.NhomTrangThai,
                 MaTrangThai = x.MaTrangThai,
                 TenTrangThai = x.TenTrangThai,
                 MaMauHex = x.MaMauHex,
@@ -69,10 +77,10 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<bool> ExistsByCodeAsync(string maTrangThai, Guid? excludeId = null, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCodeAsync(string nhomTrangThai, string maTrangThai, Guid? excludeId = null, CancellationToken cancellationToken = default)
     {
         return _dbContext.DanhMucTrangThais.AnyAsync(
-            x => x.MaTrangThai == maTrangThai && (!excludeId.HasValue || x.Id != excludeId.Value),
+            x => x.NhomTrangThai == nhomTrangThai && x.MaTrangThai == maTrangThai && (!excludeId.HasValue || x.Id != excludeId.Value),
             cancellationToken);
     }
 
@@ -90,6 +98,7 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
     {
         var dbEntity = new DanhMucTrangThai
         {
+            NhomTrangThai = entity.NhomTrangThai,
             MaTrangThai = entity.MaTrangThai,
             TenTrangThai = entity.TenTrangThai,
             MaMauHex = entity.MaMauHex,
@@ -109,6 +118,7 @@ public class DanhMucTrangThaiRepository(DanhMucDbContext dbContext) : IDanhMucTr
     public async Task<DanhMucTrangThaiEntity> UpdateAsync(DanhMucTrangThaiEntity entity, CancellationToken cancellationToken = default)
     {
         var dbEntity = await _dbContext.DanhMucTrangThais.FirstAsync(x => x.Id == entity.Id, cancellationToken);
+        dbEntity.NhomTrangThai = entity.NhomTrangThai;
         dbEntity.MaTrangThai = entity.MaTrangThai;
         dbEntity.TenTrangThai = entity.TenTrangThai;
         dbEntity.MaMauHex = entity.MaMauHex;

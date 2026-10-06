@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "XayDungVanBanService": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:50047;http://localhost:50048"
+    }
+  }
+}

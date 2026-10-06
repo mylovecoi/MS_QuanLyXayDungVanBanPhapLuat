@@ -1,0 +1,16 @@
+using BuildingBlocks.Abstractions;using Microsoft.AspNetCore.Mvc;using XayDungVanBanService.Application.Abstractions;using XayDungVanBanService.Application.DTOs;using XayDungVanBanService.Infrastructure.Authorization;
+namespace XayDungVanBanService.Controllers;
+[ApiController][Route("api/xay-dung-van-ban/trinh-phe-duyet")]
+public sealed class XayDungVanBanTrinhPheDuyetController(ICurrentUserContext u,IQuanTriHeThongPermissionClient p,IXayDungVanBanTrinhPheDuyetService s):XayDungVanBanControllerBase(u,p)
+{
+ async Task<ActionResult?> A(string a,CancellationToken ct)=>await EnsurePermissionAsync("XayDungVanBanTrinhPheDuyet",a,a,ct);
+ [HttpPost]public async Task<ActionResult>Create(TaoHoSoTrinhPheDuyetRequest r,CancellationToken ct){var d=await A("Create",ct);if(d!=null)return d;try{return Ok(await s.CreateAsync(r,ct));}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}")]public async Task<ActionResult>Get(Guid id,CancellationToken ct){var d=await A("Index",ct);if(d!=null)return d;return(await s.GetAsync(id,ct))is{} x?Ok(x):NotFound();}
+ [HttpPut("{id:guid}")]public async Task<ActionResult>Update(Guid id,CapNhatHoSoTrinhPheDuyetRequest r,CancellationToken ct){var d=await A("Edit",ct);if(d!=null)return d;try{return(await s.UpdateAsync(id,r,ct))is{} x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}/tai-lieu")]public async Task<ActionResult>TaiLieu(Guid id,CancellationToken ct){var d=await A("Index",ct);if(d!=null)return d;return(await s.GetTaiLieuAsync(id,ct))is{} x?Ok(x):NotFound();}
+ [HttpPost("{id:guid}/tai-lieu")][RequestSizeLimit(100_000_000)]public async Task<ActionResult>TaiTaiLieu(Guid id,[FromForm]IFormFile file,[FromForm]Guid loaiTaiLieuId,[FromForm]string tenTaiLieu,CancellationToken ct){if(file.Length==0)return BadRequest("File tải lên không có nội dung.");var d=await A("Create",ct);if(d!=null)return d;try{await using var stream=file.OpenReadStream();return(await s.UploadTaiLieuAsync(id,new(loaiTaiLieuId,tenTaiLieu,file.FileName,file.ContentType,stream),ct))is{} x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpDelete("{id:guid}/tai-lieu/{linkId:guid}")]public async Task<ActionResult>XoaTaiLieu(Guid id,Guid linkId,CancellationToken ct){var d=await A("Delete",ct);if(d!=null)return d;try{return await s.DeleteTaiLieuAsync(id,linkId,ct)?NoContent():NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}/kiem-tra-truoc-gui")]public async Task<ActionResult>KiemTra(Guid id,CancellationToken ct){var d=await A("Index",ct);if(d!=null)return d;return(await s.KiemTraAsync(id,ct))is{} x?Ok(x):NotFound();}
+ [HttpPost("{id:guid}/gui")]public async Task<ActionResult>Gui(Guid id,GuiPheDuyetRequest r,CancellationToken ct){var d=await A("Approve",ct);if(d!=null)return d;try{return(await s.GuiAsync(id,r,ct))is{} x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpPost("{id:guid}/huy")]public async Task<ActionResult>Huy(Guid id,CancellationToken ct){var d=await A("Delete",ct);if(d!=null)return d;try{return await s.HuyAsync(id,ct)?NoContent():NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+}

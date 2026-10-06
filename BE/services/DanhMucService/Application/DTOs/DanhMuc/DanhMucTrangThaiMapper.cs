@@ -9,6 +9,7 @@ public static class DanhMucTrangThaiMapper
         return new DanhMucTrangThaiDto
         {
             Id = entity.Id,
+            NhomTrangThai = entity.NhomTrangThai,
             MaTrangThai = entity.MaTrangThai,
             TenTrangThai = entity.TenTrangThai,
             MaMauHex = entity.MaMauHex,
@@ -24,6 +25,7 @@ public static class DanhMucTrangThaiMapper
         return new DanhMucTrangThaiEntity
         {
             Id = request.Id ?? Guid.Empty,
+            NhomTrangThai = request.NhomTrangThai.Trim(),
             MaTrangThai = request.MaTrangThai.Trim(),
             TenTrangThai = request.TenTrangThai.Trim(),
             MaMauHex = request.MaMauHex.Trim(),

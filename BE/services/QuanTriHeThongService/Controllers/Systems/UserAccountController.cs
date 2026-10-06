@@ -28,7 +28,7 @@ public class UserAccountController(IUserAccountAppService appService) : Controll
     }
 
     [HttpGet("group-permissions")]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<OptionItemDto>>>> GetGroupPermissionOptions(CancellationToken cancellationToken = default)
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<OptionItemDto>>>> GetGroupPermissionOptions(CancellationToken cancellationToken = default) 
     {
         var items = await _appService.GetGroupPermissionOptionsAsync(cancellationToken);
         return Ok(new ApiResponse<IReadOnlyList<OptionItemDto>>

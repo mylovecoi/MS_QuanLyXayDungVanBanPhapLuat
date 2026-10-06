@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(connectionString));
 
         services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IPermissionChecker, DatabasePermissionChecker>();
 
         services.AddScoped<IRoleActionRepository, RoleActionRepository>();

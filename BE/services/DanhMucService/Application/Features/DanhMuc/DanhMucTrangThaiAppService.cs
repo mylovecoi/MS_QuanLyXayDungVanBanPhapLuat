@@ -11,6 +11,7 @@ public class DanhMucTrangThaiAppService(IDanhMucTrangThaiRepository repository) 
 
     public async Task<PagedResult<DanhMucTrangThaiDto>> GetPagedAsync(
         string? search,
+        string? nhomTrangThai,
         int pageSize,
         int pageCurrent,
         CancellationToken cancellationToken = default)
@@ -18,7 +19,7 @@ public class DanhMucTrangThaiAppService(IDanhMucTrangThaiRepository repository) 
         pageCurrent = pageCurrent < 1 ? 1 : pageCurrent;
         pageSize = pageSize < 5 ? 5 : pageSize > 100 ? 100 : pageSize;
 
-        var result = await _repository.GetPagedAsync(search, pageSize, pageCurrent, cancellationToken);
+        var result = await _repository.GetPagedAsync(search, nhomTrangThai, pageSize, pageCurrent, cancellationToken);
         return new PagedResult<DanhMucTrangThaiDto>
         {
             Items = result.Items.Select(x => x.ToDto()).ToList(),
@@ -47,7 +48,7 @@ public class DanhMucTrangThaiAppService(IDanhMucTrangThaiRepository repository) 
             return (false, validationMessage, null);
         }
 
-        if (await _repository.ExistsByCodeAsync(request.MaTrangThai.Trim(), null, cancellationToken))
+        if (await _repository.ExistsByCodeAsync(request.NhomTrangThai.Trim(), request.MaTrangThai.Trim(), null, cancellationToken))
         {
             return (false, "Mã trạng thái đã tồn tại.", null);
         }
@@ -73,11 +74,12 @@ public class DanhMucTrangThaiAppService(IDanhMucTrangThaiRepository repository) 
             return (false, "Không tìm thấy trạng thái.", null);
         }
 
-        if (await _repository.ExistsByCodeAsync(request.MaTrangThai.Trim(), id, cancellationToken))
+        if (await _repository.ExistsByCodeAsync(request.NhomTrangThai.Trim(), request.MaTrangThai.Trim(), id, cancellationToken))
         {
             return (false, "Mã trạng thái đã tồn tại.", null);
         }
 
+        current.NhomTrangThai = request.NhomTrangThai.Trim();
         current.MaTrangThai = request.MaTrangThai.Trim();
         current.TenTrangThai = request.TenTrangThai.Trim();
         current.MaMauHex = request.MaMauHex.Trim();
@@ -100,6 +102,11 @@ public class DanhMucTrangThaiAppService(IDanhMucTrangThaiRepository repository) 
 
     private static string? Validate(UpsertDanhMucTrangThaiRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.NhomTrangThai))
+        {
+            return "Nhóm trạng thái không được để trống.";
+        }
+
         if (string.IsNullOrWhiteSpace(request.MaTrangThai))
         {
             return "Mã trạng thái không được để trống.";
