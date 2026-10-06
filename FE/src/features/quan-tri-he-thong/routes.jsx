@@ -1,4 +1,4 @@
-import { RoleActionListPage } from './pages/RoleActionListPage';
+import {RoleActionListPage} from "../../pages/RoleActionListPage.jsx";
 
 export const quanTriHeThongRoutes = [
   {

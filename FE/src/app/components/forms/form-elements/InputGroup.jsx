@@ -1,7 +1,7 @@
 import ComponentCard from "../../common/ComponentCard.jsx";
 import Label from "../Label.jsx";
 import Input from "../input/InputField.jsx";
-import { EnvelopeIcon } from "../../../assets/icons/index.js";
+import { EnvelopeIcon } from "../../../../assets/icons/index.js";
 import PhoneInput from "../group-input/PhoneInput.jsx";
 
 export default function InputGroup() {

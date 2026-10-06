@@ -3,7 +3,7 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
 
 import Label from "./Label.jsx";
-import { CalenderIcon } from "../../assets/icons/index.js";
+import { CalenderIcon } from "../../../assets/icons/index.js";
 
 export default function DatePicker({
                                        id,

@@ -2,7 +2,7 @@ import {useEffect, useRef} from "react";
 import Chart from "react-apexcharts";
 import flatpickr from "flatpickr";
 import ChartTab from "../common/ChartTab";
-import {CalenderIcon} from "../../assets/icons/index.js";
+import {CalenderIcon} from "../../../assets/icons/index.js";
 
 export default function StatisticsChart() {
     const datePickerRef = useRef(null);

@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import tailwindcss from "@tailwindcss/vite";
 
 function readInternalApiKey() {
   if (process.env.QTHT_INTERNAL_API_KEY) {
@@ -10,7 +12,7 @@ function readInternalApiKey() {
 
   try {
     const settingsPath = resolve(
-        __dirname,
+        import.meta.dirname,
         '../BE/services/QuanTriHeThongService/appsettings.Development.json'
     );
 
@@ -27,7 +29,11 @@ function readInternalApiKey() {
 const internalApiKey = readInternalApiKey();
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    svgr(),
+  ],
 
   server: {
     port: 5173,

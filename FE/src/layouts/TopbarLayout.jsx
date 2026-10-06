@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import AppHeader from "./AppHeader.jsx";
 import AppTopbar from "./AppTopbar.jsx";
-import Footer from "../components/footer/Footer.jsx";
+import Footer from "../app/components/footer/Footer.jsx";
 
 const TopbarLayout = () => {
     return (

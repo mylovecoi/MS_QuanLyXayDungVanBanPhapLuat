@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-import MegaMenu from "../components/MegaMenu/MegaMenu.jsx";
+import MegaMenu from "../app/components/MegaMenu/MegaMenu.jsx";
 import {navItems, othersItems} from "../config/menuConfig.jsx";
 
 const AppTopbar = () => {

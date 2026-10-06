@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../assets/icons/index.js";
+import { MoreDotIcon } from "../../../assets/icons/index.js";
 // import CountryMap from "./CountryMap.jsx";
 
 export default function DemographicCard() {

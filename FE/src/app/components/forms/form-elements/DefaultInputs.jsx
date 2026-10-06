@@ -3,7 +3,7 @@ import ComponentCard from "../../common/ComponentCard.jsx";
 import Label from "../Label.jsx";
 import Input from "../input/InputField.jsx";
 import Select from "../Select.jsx";
-import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../assets/icons/index.js";
+import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../../assets/icons/index.js";
 import DatePicker from "../date-picker.jsx";
 
 export default function DefaultInputs() {
