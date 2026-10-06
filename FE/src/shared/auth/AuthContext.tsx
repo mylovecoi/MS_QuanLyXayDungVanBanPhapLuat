@@ -1,6 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
 import { loginApi } from '../api/authApi';
-import { CurrentUserHeaders } from '../api/systemApi';
 
 type AuthUser = {
   userId: string;
@@ -13,6 +12,8 @@ type AuthUser = {
 
 type AuthState = {
   user: AuthUser;
+  accessToken: string;
+  expiresAt: string;
 };
 
 type LoginInput = {
@@ -23,7 +24,6 @@ type LoginInput = {
 type AuthContextValue = {
   isAuthenticated: boolean;
   user: AuthUser | null;
-  currentUserHeaders: CurrentUserHeaders | null;
   login: (input: LoginInput) => Promise<void>;
   logout: () => void;
 };
@@ -42,7 +42,12 @@ function readStoredAuth(): AuthState | null {
   try {
     const parsedValue = JSON.parse(rawValue) as AuthState;
 
-    if (!parsedValue.user?.userId || !parsedValue.user?.username || !parsedValue.user?.groupPermissionId) {
+    if (
+      !parsedValue.user?.userId ||
+      !parsedValue.user?.username ||
+      !parsedValue.user?.groupPermissionId ||
+      !parsedValue.accessToken
+    ) {
       return null;
     }
 
@@ -60,15 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isAuthenticated: Boolean(authState?.user?.userId),
       user: authState?.user ?? null,
-      currentUserHeaders: authState?.user
-        ? {
-            userId: authState.user.userId,
-            username: authState.user.username,
-            donViId: authState.user.donViId,
-            groupPermissionId: authState.user.groupPermissionId,
-            isSSA: authState.user.isSSA
-          }
-        : null,
       async login(input) {
         const username = input.username.trim();
         const password = input.password.trim();
@@ -79,6 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const loginResult = await loginApi(username, password);
         const nextAuthState: AuthState = {
+          accessToken: loginResult.accessToken,
+          expiresAt: loginResult.expiresAt,
           user: {
             userId: loginResult.userId,
             username: loginResult.username,

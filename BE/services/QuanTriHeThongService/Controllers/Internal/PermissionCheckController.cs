@@ -1,4 +1,6 @@
 using BuildingBlocks.Abstractions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanTriHeThongService.Application.Common.Interfaces;
 using QuanTriHeThongService.Contracts.Requests.Internal;
@@ -8,6 +10,7 @@ using QuanTriHeThongService.Contracts.Responses.Internal;
 namespace QuanTriHeThongService.Controllers.Internal;
 
 [ApiController]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/internal/permissions")]
 public sealed class PermissionCheckController(
     ICurrentUserContext currentUserContext,

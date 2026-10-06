@@ -28,8 +28,7 @@ public sealed class HttpCurrentUserContext(IHttpContextAccessor httpContextAcces
 
     private string? ReadClaim(string claimType)
     {
-        return _httpContextAccessor.HttpContext?.User?.FindFirst(claimType)?.Value
-            ?? ReadHeader(MapHeaderName(claimType));
+        return _httpContextAccessor.HttpContext?.User?.FindFirst(claimType)?.Value;
     }
 
     private Guid? ReadGuidClaim(string claimType)
@@ -84,30 +83,5 @@ public sealed class HttpCurrentUserContext(IHttpContextAccessor httpContextAcces
         return bool.TryParse(ReadSessionValue(key), out var value) ? value : null;
     }
 
-    private string? ReadHeader(string? headerName)
-    {
-        if (string.IsNullOrWhiteSpace(headerName))
-        {
-            return null;
-        }
-
-        var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
-        if (headers == null || !headers.TryGetValue(headerName, out var value))
-        {
-            return null;
-        }
-
-        return value.ToString();
-    }
-
-    private static string? MapHeaderName(string claimType) => claimType switch
-    {
-        "UserId" => "X-User-Id",
-        ClaimTypes.Name => "X-Username",
-        "DonViId" => "X-Don-Vi-Id",
-        "GroupPermissionId" => "X-Group-Permission-Id",
-        "IsSSA" => "X-Is-SSA",
-        _ => null
-    };
 }
 

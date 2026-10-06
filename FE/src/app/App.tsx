@@ -50,7 +50,7 @@ function useBrowserPath() {
 }
 
 function AppRoutes() {
-  const { currentUserHeaders, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { path, navigate } = useBrowserPath();
   const [menuLayout, setMenuLayout] = useState<MenuLayout>('vertical');
   const [menuItems, setMenuItems] = useState<FrontendMenuItem[]>([homeMenuItem]);
@@ -71,7 +71,7 @@ function AppRoutes() {
     let isMounted = true;
 
     async function loadShellData() {
-      if (!isAuthenticated || !currentUserHeaders) {
+      if (!isAuthenticated) {
         setMenuItems([homeMenuItem]);
         setMenuLayout('vertical');
         return;
@@ -92,7 +92,7 @@ function AppRoutes() {
       }
 
       try {
-        const menu = await getFrontendMenu(currentUserHeaders);
+        const menu = await getFrontendMenu();
 
         if (isMounted) {
           setMenuItems([homeMenuItem, ...(menu.items ?? [])]);
@@ -110,7 +110,7 @@ function AppRoutes() {
     return () => {
       isMounted = false;
     };
-  }, [currentUserHeaders, isAuthenticated]);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (

@@ -6,6 +6,8 @@ using XayDungVanBanService.Infrastructure.DanhMuc;
 using XayDungVanBanService.Application.Abstractions;
 using XayDungVanBanService.Application.Services;
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Security;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +15,27 @@ builder.Services.AddDbContext<XayDungVanBanDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Nhập access token nhận được sau khi đăng nhập."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+        }] = []
+    });
+});
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddApplicationJwtAuthentication(builder.Configuration);
 builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
 builder.Services.AddScoped<IXayDungVanBanHoSoQueryService, XayDungVanBanHoSoQueryService>();
 builder.Services.AddScoped<IXayDungVanBanSoanThaoService, XayDungVanBanSoanThaoService>();
@@ -33,13 +54,7 @@ builder.Services.AddHttpClient<IQuanTriHeThongPermissionClient, QuanTriHeThongPe
         throw new InvalidOperationException("Thiếu cấu hình QuanTriHeThongService:BaseUrl hợp lệ.");
     }
 
-    if (string.IsNullOrWhiteSpace(options.InternalApiKey))
-    {
-        throw new InvalidOperationException("Thiếu cấu hình QuanTriHeThongService:InternalApiKey.");
-    }
-
     client.BaseAddress = baseUri;
-    client.DefaultRequestHeaders.Add("X-Internal-Api-Key", options.InternalApiKey);
 });
 builder.Services.AddHttpClient<IDanhMucTrangThaiClient, DanhMucTrangThaiClient>((_, client) =>
 {
@@ -64,5 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();

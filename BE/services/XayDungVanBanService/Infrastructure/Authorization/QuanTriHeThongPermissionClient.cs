@@ -1,11 +1,13 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using BuildingBlocks.Abstractions;
+using Microsoft.Net.Http.Headers;
 
 namespace XayDungVanBanService.Infrastructure.Authorization;
 
 public sealed class QuanTriHeThongPermissionClient(
     HttpClient httpClient,
+    IHttpContextAccessor httpContextAccessor,
     ICurrentUserContext currentUserContext) : IQuanTriHeThongPermissionClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -26,8 +28,13 @@ public sealed class QuanTriHeThongPermissionClient(
             Content = JsonContent.Create(new PermissionCheckRequest(controller, action, permissionType))
         };
 
-        // QTH resolves group membership and SSA from its database; only user identity is propagated.
-        request.Headers.Add("X-User-Id", currentUserContext.UserId.Value.ToString());
+        var authorization = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
+        if (string.IsNullOrWhiteSpace(authorization))
+        {
+            return false;
+        }
+
+        request.Headers.TryAddWithoutValidation(HeaderNames.Authorization, authorization);
 
         try
         {

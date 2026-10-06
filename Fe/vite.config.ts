@@ -1,28 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-
-function readInternalApiKey() {
-  if (process.env.QTHT_INTERNAL_API_KEY) {
-    return process.env.QTHT_INTERNAL_API_KEY;
-  }
-
-  try {
-    const settingsPath = resolve(__dirname, '../BE/services/QuanTriHeThongService/appsettings.Development.json');
-    const settings = JSON.parse(readFileSync(settingsPath, 'utf-8')) as {
-      InternalApi?: {
-        ApiKey?: string;
-      };
-    };
-
-    return settings.InternalApi?.ApiKey;
-  } catch {
-    return undefined;
-  }
-}
-
-const internalApiKey = readInternalApiKey();
 
 export default defineConfig({
   plugins: [react()],
@@ -32,13 +9,6 @@ export default defineConfig({
       '/api/qtht': {
         target: 'http://localhost:5131',
         changeOrigin: true,
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq) => {
-            if (internalApiKey) {
-              proxyReq.setHeader('X-Internal-Api-Key', internalApiKey);
-            }
-          });
-        },
         rewrite: (path) => path.replace(/^\/api\/qtht/, '/api')
       },
       '/api/quan-tri-he-thong': {
@@ -47,9 +17,16 @@ export default defineConfig({
         secure: false
       },
       '/api/danh-muc': {
-        target: 'https://localhost:7102',
-        changeOrigin: true,
-        secure: false
+        target: 'http://localhost:5132',
+        changeOrigin: true
+      },
+      '/api/xay-dung-van-ban': {
+        target: 'http://localhost:50048',
+        changeOrigin: true
+      },
+      '/api/dang-ky-xay-dung-van-ban': {
+        target: 'http://localhost:60578',
+        changeOrigin: true
       }
     }
   }

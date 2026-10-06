@@ -9,6 +9,9 @@ export type LoginApiResult = {
   isSSA: boolean;
   firstLogin: boolean;
   mustChangePassword: boolean;
+  accessToken: string;
+  tokenType: string;
+  expiresAt: string;
 };
 
 export function loginApi(username: string, password: string) {
