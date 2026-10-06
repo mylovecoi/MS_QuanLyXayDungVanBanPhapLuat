@@ -15,11 +15,12 @@ public class DanhMucTrangThaiController(IDanhMucTrangThaiAppService appService) 
     [HttpGet]
     public async Task<ActionResult<PagedApiResponse<DanhMucTrangThaiDto>>> GetPaged(
         [FromQuery] string? search,
+        [FromQuery] string? nhomTrangThai,
         [FromQuery] int pageSize = 5,
         [FromQuery] int pageCurrent = 1,
         CancellationToken cancellationToken = default)
     {
-        var result = await _appService.GetPagedAsync(search, pageSize, pageCurrent, cancellationToken);
+        var result = await _appService.GetPagedAsync(search, nhomTrangThai, pageSize, pageCurrent, cancellationToken);
         return Ok(new PagedApiResponse<DanhMucTrangThaiDto>
         {
             IsSuccess = true,
@@ -115,6 +116,7 @@ public class DanhMucTrangThaiController(IDanhMucTrangThaiAppService appService) 
     {
         return new UpsertDanhMucTrangThaiRequest
         {
+            NhomTrangThai = request.NhomTrangThai,
             MaTrangThai = request.MaTrangThai,
             TenTrangThai = request.TenTrangThai,
             MaMauHex = request.MaMauHex,

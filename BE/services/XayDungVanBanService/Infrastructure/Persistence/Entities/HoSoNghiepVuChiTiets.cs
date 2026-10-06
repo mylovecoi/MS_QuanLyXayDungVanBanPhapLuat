@@ -11,6 +11,7 @@ public sealed class HoSoXayDungVanBanSoanThao
     public DateTime? DenNgayLayYKien { get; set; }
     public int? TongSoYKien { get; set; }
     public string? NoiDungTongHopTiepThuGiaiTrinh { get; set; }
+    public Guid? LoaiTaiLieuTongHopYKienId { get; set; }
     public BoHoSoNghiepVu BoHoSoNghiepVu { get; set; } = null!;
 }
 

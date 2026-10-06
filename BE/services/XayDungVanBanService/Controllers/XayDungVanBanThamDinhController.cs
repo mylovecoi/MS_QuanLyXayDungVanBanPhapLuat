@@ -1,0 +1,25 @@
+using BuildingBlocks.Abstractions;
+using Microsoft.AspNetCore.Mvc;
+using XayDungVanBanService.Application.Abstractions;
+using XayDungVanBanService.Application.DTOs;
+using XayDungVanBanService.Infrastructure.Authorization;
+namespace XayDungVanBanService.Controllers;
+[ApiController][Route("api/xay-dung-van-ban/tham-dinh")]
+public sealed class XayDungVanBanThamDinhController(ICurrentUserContext u,IQuanTriHeThongPermissionClient p,IXayDungVanBanThamDinhService s):XayDungVanBanControllerBase(u,p)
+{
+ async Task<ActionResult?> Check(string action,CancellationToken ct)=>await EnsurePermissionAsync("XayDungVanBanThamDinh",action,action,ct);
+ [HttpPost] public async Task<ActionResult<XayDungVanBanThamDinhDto>> Create(TaoHoSoThamDinhRequest r,CancellationToken ct){var d=await Check("Create",ct);if(d!=null)return d;try{return Ok(await s.CreateAsync(r,ct));}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}")] public async Task<ActionResult> Get(Guid id,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;return (await s.GetAsync(id,ct)) is { } x?Ok(x):NotFound();}
+ [HttpPost("{id:guid}/tiep-nhan")] public async Task<ActionResult> TiepNhan(Guid id,TiepNhanThamDinhRequest r,CancellationToken ct){var d=await Check("Edit",ct);if(d!=null)return d;try{return (await s.TiepNhanAsync(id,r,ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpPut("{id:guid}/ket-qua")] public async Task<ActionResult> KetQua(Guid id,CapNhatKetQuaThamDinhRequest r,CancellationToken ct){var d=await Check("Edit",ct);if(d!=null)return d;try{return (await s.CapNhatKetQuaAsync(id,r,ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}/tai-lieu")] public async Task<ActionResult> TaiLieu(Guid id,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;return (await s.GetTaiLieuAsync(id,ct)) is { } x?Ok(x):NotFound();}
+ [HttpPost("{id:guid}/tai-lieu")][RequestSizeLimit(100_000_000)] public async Task<ActionResult> TaiTaiLieu(Guid id,[FromForm] IFormFile file,[FromForm] Guid loaiTaiLieuId,[FromForm] string tenTaiLieu,CancellationToken ct){if(file.Length==0)return BadRequest("File tải lên không có nội dung.");var d=await Check("Create",ct);if(d!=null)return d;try{await using var stream=file.OpenReadStream();return (await s.UploadTaiLieuAsync(id,new(loaiTaiLieuId,tenTaiLieu,file.FileName,file.ContentType,stream),ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpDelete("{id:guid}/tai-lieu/{linkId:guid}")] public async Task<ActionResult> XoaTaiLieu(Guid id,Guid linkId,CancellationToken ct){var d=await Check("Delete",ct);if(d!=null)return d;try{return await s.DeleteTaiLieuAsync(id,linkId,ct)?NoContent():NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}/kiem-tra-truoc-gui-ket-qua")] public async Task<ActionResult> KiemTra(Guid id,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;return (await s.KiemTraAsync(id,ct)) is { } x?Ok(x):NotFound();}
+ [HttpPost("{id:guid}/yeu-cau-bo-sung")] public async Task<ActionResult> BoSung(Guid id,YeuCauBoSungThamDinhRequest r,CancellationToken ct){var d=await Check("Approve",ct);if(d!=null)return d;try{return (await s.YeuCauBoSungAsync(id,r,ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpPost("{id:guid}/gui-ket-qua")] public async Task<ActionResult> Gui(Guid id,GuiKetQuaThamDinhRequest r,CancellationToken ct){var d=await Check("Approve",ct);if(d!=null)return d;try{return (await s.GuiKetQuaAsync(id,r,ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpPost("{id:guid}/huy-tham-dinh")] public async Task<ActionResult> Huy(Guid id,CancellationToken ct){var d=await Check("Delete",ct);if(d!=null)return d;try{return await s.HuyAsync(id,ct)?NoContent():NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpPost("{id:guid}/so-sanh-du-thao")] public async Task<ActionResult> SoSanh(Guid id,SoSanhDuThaoRequest r,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;try{return (await s.SoSanhAsync(id,r,ct)) is { } x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
+ [HttpGet("{id:guid}/so-sanh-du-thao/{soSanhId:guid}")] public async Task<ActionResult> GetSoSanh(Guid id,Guid soSanhId,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;return (await s.GetSoSanhAsync(id,soSanhId,ct)) is { } x?Ok(x):NotFound();}
+ [HttpGet("{id:guid}/so-sanh-du-thao/{soSanhId:guid}/bao-cao")] public async Task<ActionResult> BaoCao(Guid id,Guid soSanhId,CancellationToken ct){var d=await Check("Index",ct);if(d!=null)return d;var result=await s.GetSoSanhAsync(id,soSanhId,ct);return result is null?NotFound():Content(result.NoiDungSoSanhHtml,"text/html");}
+}

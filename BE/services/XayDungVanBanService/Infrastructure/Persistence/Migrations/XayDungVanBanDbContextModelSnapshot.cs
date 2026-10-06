@@ -245,6 +245,228 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.ToTable("HoSoXayDungVanBans");
                 });
 
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("HoSoXayDungVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LanCham")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayBatDauThucTe")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayCham")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayChot")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayHoanThanhThucTe")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("NguoiChamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("NguoiChotId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("SoNgayKeHoach")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoNgayThucTe")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TongDiemChinhThuc")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TongDiemDieuChinh")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TongDiemTuDong")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("TrangThaiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("TyLeThoiGianThucTe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoSoXayDungVanBanId", "LanCham")
+                        .IsUnique();
+
+                    b.HasIndex("HoSoXayDungVanBanId", "TrangThaiId");
+
+                    b.ToTable("HoSoXayDungVanBanChamDiems");
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiemChiTiet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DanhMucTieuChiDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DanhMucTieuChiDiemMucId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DiemChinhThuc")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiemDieuChinh")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiemToiDa")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DiemTuDong")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("GiaTriDauVao")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("HoSoXayDungVanBanChamDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LyDoDieuChinh")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("MaTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("NgayDieuChinh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiDieuChinhId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NhanMucDiem")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("TenTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoSoXayDungVanBanChamDiemId", "DanhMucTieuChiDiemId")
+                        .IsUnique();
+
+                    b.ToTable("HoSoXayDungVanBanChamDiemChiTiets");
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiemLichSu", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DuLieuCu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DuLieuMoi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("HoSoXayDungVanBanChamDiemChiTietId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoSoXayDungVanBanChamDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LoaiThaoTac")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("NguoiThucHienId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("ThoiGianThucHien")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoSoXayDungVanBanChamDiemId", "ThoiGianThucHien");
+
+                    b.ToTable("HoSoXayDungVanBanChamDiemLichSus");
+                });
+
             modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -446,6 +668,58 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.ToTable("HoSoXayDungVanBanLichSuXuLys");
                 });
 
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanSoSanhDuThao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FileGocId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FileSoSanhId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoSoXayDungVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("NoiDungSoSanhHtml")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SoNoiDungSua")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoNoiDungThem")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoNoiDungXoa")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FileGocId", "FileSoSanhId");
+
+                    b.HasIndex("HoSoXayDungVanBanId", "CreatedAt");
+
+                    b.ToTable("HoSoXayDungVanBanSoSanhDuThaos");
+                });
+
             modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanSoanThao", b =>
                 {
                     b.Property<Guid>("BoHoSoNghiepVuId")
@@ -459,6 +733,9 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("HinhThucLayYKien")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("LoaiTaiLieuTongHopYKienId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("NoiDungChinhSach")
                         .HasColumnType("nvarchar(max)");
@@ -621,6 +898,55 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.ToTable("HoSoXayDungVanBanTrinhThamDinhs");
                 });
 
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanYKienDonVi", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DonViGopYId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("HoSoXayDungVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("KetQua")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("NgayNhan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NoiDungYKien")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoSoXayDungVanBanId", "DonViGopYId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("HoSoXayDungVanBanId", "NgayNhan");
+
+                    b.ToTable("HoSoXayDungVanBanYKienDonVis");
+                });
+
             modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanYKienUbnd", b =>
                 {
                     b.Property<Guid>("BoHoSoNghiepVuId")
@@ -700,6 +1026,37 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.Navigation("BoHoSoTaiLieuNguon");
 
                     b.Navigation("HoSoXayDungVanBanFile");
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiem", b =>
+                {
+                    b.HasOne("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBan", null)
+                        .WithMany()
+                        .HasForeignKey("HoSoXayDungVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiemChiTiet", b =>
+                {
+                    b.HasOne("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiem", "ChamDiem")
+                        .WithMany("ChiTiets")
+                        .HasForeignKey("HoSoXayDungVanBanChamDiemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChamDiem");
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiemLichSu", b =>
+                {
+                    b.HasOne("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiem", "ChamDiem")
+                        .WithMany("LichSus")
+                        .HasForeignKey("HoSoXayDungVanBanChamDiemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChamDiem");
                 });
 
             modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanFile", b =>
@@ -797,6 +1154,17 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.Navigation("BoHoSoNghiepVu");
                 });
 
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanYKienDonVi", b =>
+                {
+                    b.HasOne("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBan", "HoSoXayDungVanBan")
+                        .WithMany("YKienDonVis")
+                        .HasForeignKey("HoSoXayDungVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HoSoXayDungVanBan");
+                });
+
             modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanYKienUbnd", b =>
                 {
                     b.HasOne("XayDungVanBanService.Infrastructure.Persistence.Entities.BoHoSoNghiepVu", "BoHoSoNghiepVu")
@@ -836,6 +1204,15 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.Navigation("Files");
 
                     b.Navigation("LichSuXuLys");
+
+                    b.Navigation("YKienDonVis");
+                });
+
+            modelBuilder.Entity("XayDungVanBanService.Infrastructure.Persistence.Entities.HoSoXayDungVanBanChamDiem", b =>
+                {
+                    b.Navigation("ChiTiets");
+
+                    b.Navigation("LichSus");
                 });
 #pragma warning restore 612, 618
         }

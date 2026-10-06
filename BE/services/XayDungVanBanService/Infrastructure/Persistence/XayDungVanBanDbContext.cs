@@ -10,6 +10,8 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
     public DbSet<HoSoXayDungVanBanFile> HoSoXayDungVanBanFiles => Set<HoSoXayDungVanBanFile>();
     public DbSet<BoHoSoNghiepVuTaiLieu> BoHoSoNghiepVuTaiLieus => Set<BoHoSoNghiepVuTaiLieu>();
     public DbSet<HoSoXayDungVanBanLichSuXuLy> HoSoXayDungVanBanLichSuXuLys => Set<HoSoXayDungVanBanLichSuXuLy>();
+    public DbSet<HoSoXayDungVanBanYKienDonVi> HoSoXayDungVanBanYKienDonVis => Set<HoSoXayDungVanBanYKienDonVi>();
+    public DbSet<HoSoXayDungVanBanSoSanhDuThao> HoSoXayDungVanBanSoSanhDuThaos => Set<HoSoXayDungVanBanSoSanhDuThao>();
     public DbSet<HoSoXayDungVanBanSoanThao> HoSoXayDungVanBanSoanThaos => Set<HoSoXayDungVanBanSoanThao>();
     public DbSet<HoSoXayDungVanBanTrinhThamDinh> HoSoXayDungVanBanTrinhThamDinhs => Set<HoSoXayDungVanBanTrinhThamDinh>();
     public DbSet<HoSoXayDungVanBanThamDinh> HoSoXayDungVanBanThamDinhs => Set<HoSoXayDungVanBanThamDinh>();
@@ -17,6 +19,9 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
     public DbSet<HoSoXayDungVanBanYKienUbnd> HoSoXayDungVanBanYKienUbnds => Set<HoSoXayDungVanBanYKienUbnd>();
     public DbSet<HoSoXayDungVanBanThamTraHdnd> HoSoXayDungVanBanThamTraHdnds => Set<HoSoXayDungVanBanThamTraHdnd>();
     public DbSet<HoSoXayDungVanBanKetQuaBanHanh> HoSoXayDungVanBanKetQuaBanHanhs => Set<HoSoXayDungVanBanKetQuaBanHanh>();
+    public DbSet<HoSoXayDungVanBanChamDiem> HoSoXayDungVanBanChamDiems => Set<HoSoXayDungVanBanChamDiem>();
+    public DbSet<HoSoXayDungVanBanChamDiemChiTiet> HoSoXayDungVanBanChamDiemChiTiets => Set<HoSoXayDungVanBanChamDiemChiTiet>();
+    public DbSet<HoSoXayDungVanBanChamDiemLichSu> HoSoXayDungVanBanChamDiemLichSus => Set<HoSoXayDungVanBanChamDiemLichSu>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +37,7 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
             entity.HasMany(x => x.BoHoSos).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.Files).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.LichSuXuLys).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.YKienDonVis).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<BoHoSoNghiepVu>(entity =>
@@ -60,6 +66,48 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
             entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.ThoiGianXuLy });
             entity.HasIndex(x => new { x.BoHoSoNghiepVuId, x.ThoiGianXuLy });
             entity.HasOne(x => x.BoHoSoNghiepVu).WithMany(x => x.LichSuXuLys).HasForeignKey(x => x.BoHoSoNghiepVuId).OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanYKienDonVi>(entity =>
+        {
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.DonViGopYId })
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.NgayNhan });
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanSoSanhDuThao>(entity =>
+        {
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.CreatedAt });
+            entity.HasIndex(x => new { x.FileGocId, x.FileSoSanhId });
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanChamDiem>(entity =>
+        {
+            entity.Property(x => x.TongDiemTuDong).HasPrecision(18, 2);
+            entity.Property(x => x.TongDiemDieuChinh).HasPrecision(18, 2);
+            entity.Property(x => x.TongDiemChinhThuc).HasPrecision(18, 2);
+            entity.Property(x => x.TyLeThoiGianThucTe).HasPrecision(18, 2);
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.LanCham }).IsUnique();
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.TrangThaiId });
+            entity.HasOne<HoSoXayDungVanBan>().WithMany().HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanChamDiemChiTiet>(entity =>
+        {
+            entity.Property(x => x.GiaTriDauVao).HasPrecision(18, 2);
+            entity.Property(x => x.DiemToiDa).HasPrecision(18, 2);
+            entity.Property(x => x.DiemTuDong).HasPrecision(18, 2);
+            entity.Property(x => x.DiemDieuChinh).HasPrecision(18, 2);
+            entity.Property(x => x.DiemChinhThuc).HasPrecision(18, 2);
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanChamDiemId, x.DanhMucTieuChiDiemId }).IsUnique();
+            entity.HasOne(x => x.ChamDiem).WithMany(x => x.ChiTiets).HasForeignKey(x => x.HoSoXayDungVanBanChamDiemId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanChamDiemLichSu>(entity =>
+        {
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanChamDiemId, x.ThoiGianThucHien });
+            entity.HasOne(x => x.ChamDiem).WithMany(x => x.LichSus).HasForeignKey(x => x.HoSoXayDungVanBanChamDiemId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<HoSoXayDungVanBanSoanThao>().HasKey(x => x.BoHoSoNghiepVuId);

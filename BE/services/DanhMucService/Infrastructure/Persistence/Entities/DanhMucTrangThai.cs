@@ -4,6 +4,9 @@ namespace DanhMucService.Infrastructure.Persistence.Entities
 {
     public class DanhMucTrangThai : BaseEntity
     {
+        [Required(ErrorMessage = "Nhom trang thai khong duoc de trong")]
+        public string NhomTrangThai { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Ma trang thai khong duoc de trong")]
         public string MaTrangThai { get; set; } = string.Empty;
 

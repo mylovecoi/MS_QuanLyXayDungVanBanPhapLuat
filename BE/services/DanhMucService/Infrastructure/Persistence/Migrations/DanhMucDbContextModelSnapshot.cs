@@ -858,6 +858,10 @@ namespace DanhMucService.Infrastructure.Persistence.Migrations
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NhomTrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TenTrangThai")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
