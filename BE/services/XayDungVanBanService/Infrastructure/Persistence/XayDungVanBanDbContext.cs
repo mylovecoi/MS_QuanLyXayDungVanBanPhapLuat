@@ -12,6 +12,7 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
     public DbSet<HoSoXayDungVanBanLichSuXuLy> HoSoXayDungVanBanLichSuXuLys => Set<HoSoXayDungVanBanLichSuXuLy>();
     public DbSet<HoSoXayDungVanBanYKienDonVi> HoSoXayDungVanBanYKienDonVis => Set<HoSoXayDungVanBanYKienDonVi>();
     public DbSet<HoSoXayDungVanBanSoSanhDuThao> HoSoXayDungVanBanSoSanhDuThaos => Set<HoSoXayDungVanBanSoSanhDuThao>();
+    public DbSet<HoSoXayDungVanBanNhacTienDo> HoSoXayDungVanBanNhacTienDos => Set<HoSoXayDungVanBanNhacTienDo>();
     public DbSet<HoSoXayDungVanBanSoanThao> HoSoXayDungVanBanSoanThaos => Set<HoSoXayDungVanBanSoanThao>();
     public DbSet<HoSoXayDungVanBanTrinhThamDinh> HoSoXayDungVanBanTrinhThamDinhs => Set<HoSoXayDungVanBanTrinhThamDinh>();
     public DbSet<HoSoXayDungVanBanThamDinh> HoSoXayDungVanBanThamDinhs => Set<HoSoXayDungVanBanThamDinh>();
@@ -38,6 +39,7 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
             entity.HasMany(x => x.Files).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.LichSuXuLys).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
             entity.HasMany(x => x.YKienDonVis).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(x => x.NhacTienDos).WithOne(x => x.HoSoXayDungVanBan).HasForeignKey(x => x.HoSoXayDungVanBanId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<BoHoSoNghiepVu>(entity =>
@@ -80,6 +82,14 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
         {
             entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.CreatedAt });
             entity.HasIndex(x => new { x.FileGocId, x.FileSoSanhId });
+        });
+
+        modelBuilder.Entity<HoSoXayDungVanBanNhacTienDo>(entity =>
+        {
+            entity.HasIndex(x => new { x.HoSoXayDungVanBanId, x.NgayGui });
+            entity.HasIndex(x => new { x.DonViNhanId, x.TrangThaiXuLy, x.NgayGui });
+            entity.HasIndex(x => new { x.NguoiNhanId, x.TrangThaiXuLy, x.NgayGui });
+            entity.HasIndex(x => new { x.TrangThaiXuLy, x.NgayGui });
         });
 
         modelBuilder.Entity<HoSoXayDungVanBanChamDiem>(entity =>

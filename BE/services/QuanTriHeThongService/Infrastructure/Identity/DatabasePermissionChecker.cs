@@ -43,9 +43,9 @@ public sealed class DatabasePermissionChecker(
         var mappedPermission = MapPermissionName(permissionType);
 
         var permission = await BuildPermissionQuery(contextInfo.GroupPermissionId.Value)
-            .FirstOrDefaultAsync(
-                x => x.Controller == controller && x.Action == mappedAction,
-                cancellationToken);
+            .Where(x => x.Controller == controller && (x.Action == mappedAction || x.Action == "Index"))
+            .OrderByDescending(x => x.Action == mappedAction)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (permission is null)
         {

@@ -3,6 +3,7 @@
   <Folder Name="/BE/services/">
     <Project Path="BE/services/DangKyXayDungVanBanService/DangKyXayDungVanBanService.csproj" />
     <Project Path="BE/services/DanhMucService/DanhMucService.csproj" />
+    <Project Path="BE/services/KhaiThacDuLieuService/KhaiThacDuLieuService.csproj" />
     <Project Path="BE/services/KhaoSatThiHanhPhapLuatService/KhaoSatThiHanhPhapLuatService.csproj" />
     <Project Path="BE/services/QuanTriHeThongService/QuanTriHeThongService.csproj" />
     <Project Path="BE/services/ThiHanhPhapLuatService/ThiHanhPhapLuatService.csproj" />

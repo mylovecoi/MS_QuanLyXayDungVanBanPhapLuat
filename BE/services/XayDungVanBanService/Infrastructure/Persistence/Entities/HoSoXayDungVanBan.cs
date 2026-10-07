@@ -24,4 +24,5 @@ public sealed class HoSoXayDungVanBan : BaseEntity
     public ICollection<HoSoXayDungVanBanFile> Files { get; set; } = [];
     public ICollection<HoSoXayDungVanBanLichSuXuLy> LichSuXuLys { get; set; } = [];
     public ICollection<HoSoXayDungVanBanYKienDonVi> YKienDonVis { get; set; } = [];
+    public ICollection<HoSoXayDungVanBanNhacTienDo> NhacTienDos { get; set; } = [];
 }

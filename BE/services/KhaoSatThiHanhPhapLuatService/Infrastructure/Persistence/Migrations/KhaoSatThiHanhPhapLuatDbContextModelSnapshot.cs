@@ -23,14 +23,92 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.BaoCaoKhaoSat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CuocKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DuongDanFileXuat")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HanChe")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("KienNghi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("NgayBaoCao")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("NgayChot")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayXuat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SoKyHieu")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TenBaoCao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TenFileXuat")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UuDiem")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuocKhaoSatId", "TrangThai");
+
+                    b.ToTable("BaoCaoKhaoSats", "kspl");
+                });
+
             modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.CauHoiMauPhieu", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("BatBuoc")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("CauHoiThongKeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("ChoPhepNhieuLuaChon")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CoYKienTuDo")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -51,6 +129,13 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("MauPhieuKhaoSatId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MauSoTyLe")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("PHIEU_HOP_LE");
 
                     b.Property<string>("NoiDung")
                         .IsRequired()
@@ -73,11 +158,76 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                     b.ToTable("CauHoiMauPhieus", "kspl");
                 });
 
+            modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.CauHoiNhapMauPhieuKhaoSat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("BatBuoc")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ChoPhepNhieuLuaChon")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CoYKienTuDo")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LoaiCauHoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaCauHoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaLuaChon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDungLuaChon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PhienDocMauPhieuKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ThuTu")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CauHoiNhapMauPhieuKhaoSats", "kspl");
+                });
+
             modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.CauHoiThongKe", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("ChoPhepNhieuLuaChon")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CoYKienTuDo")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -98,6 +248,13 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                     b.Property<string>("MaCauHoiThongKe")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("MauSoTyLe")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("PHIEU_HOP_LE");
 
                     b.Property<string>("NoiDung")
                         .IsRequired()
@@ -168,6 +325,69 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CauTraLoiKhaoSats", "kspl");
+                });
+
+            modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.ChiTietBaoCaoKhaoSat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BaoCaoKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CauHoiThongKeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MaCauHoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaLuaChon")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("MauSoTyLe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NoiDungCauHoi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDungLuaChon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SoLuong")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TyLe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("YKienTuDo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BaoCaoKhaoSatId", "CauHoiThongKeId", "MaLuaChon");
+
+                    b.ToTable("ChiTietBaoCaoKhaoSats", "kspl");
                 });
 
             modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.CuocKhaoSat", b =>
@@ -443,15 +663,29 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<DateTime?>("NgayHetHieuLuc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayHieuLuc")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("NhomDoiTuongKhaoSatId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PhienBan")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("PhienDocMauPhieuKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("TenFile")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThaiMauPhieu")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -460,6 +694,10 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("NhomDoiTuongKhaoSatId")
+                        .IsUnique()
+                        .HasFilter("[TrangThaiMauPhieu] = N'DANG_SU_DUNG'");
 
                     b.HasIndex("NhomDoiTuongKhaoSatId", "PhienBan")
                         .IsUnique();
@@ -510,6 +748,56 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                     b.ToTable("NhomDoiTuongKhaoSats", "kspl");
                 });
 
+            modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.PhienDocMauPhieuKhaoSat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CuocKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DuongDanFile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DuongDanFileChuyenDoi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LoiChuyenDoi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("NhomDoiTuongKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TenFile")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PhienDocMauPhieuKhaoSats", "kspl");
+                });
+
             modelBuilder.Entity("KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Entities.PhieuNopKhaoSat", b =>
                 {
                     b.Property<Guid>("Id")
@@ -521,6 +809,9 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CuocKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DoiTuongKhaoSatId")
                         .HasColumnType("uniqueidentifier");
@@ -541,6 +832,9 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("NgayImport")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NhomDoiTuongKhaoSatId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TenFile")
                         .IsRequired()

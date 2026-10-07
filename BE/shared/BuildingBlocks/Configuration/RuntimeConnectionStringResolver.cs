@@ -60,6 +60,7 @@ public static class RuntimeConnectionStringResolver
             "DanhMucService",
             "QuanTriHeThongService",
             "DangKyVanBanService",
+            "KhaiThacDuLieuService",
             "XayDungVanBanService"
         };
 
