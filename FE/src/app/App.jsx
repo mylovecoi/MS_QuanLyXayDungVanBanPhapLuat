@@ -1,8 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import {BrowserRouter as Router, Routes, Route} from "react-router";
 
-import { ScrollToTop } from "./components/common/ScrollToTop.jsx";
-import AppLayout from '../layouts/AppLayout.jsx';
-import SignIn from '../pages/AuthPage/SignIn.jsx';
+import {ScrollToTop} from "./components/common/ScrollToTop.jsx";
+import AppLayout from "../layouts/AppLayout.jsx";
+import SignIn from "../pages/AuthPage/SignIn.jsx";
 import SignUp from "../pages/AuthPage/SignUp";
 import NotFound from "../pages/OtherPage/NotFound.jsx";
 import TrangChu from "../pages/Dashboard/TrangChu/TrangChu.jsx";
@@ -22,63 +22,66 @@ import LineChart from "../pages/Charts/LineChart.jsx";
 import BarChart from "../pages/Charts/BarChart.jsx";
 import LayoutSettings from "../pages/Settings/LayoutSettings.jsx";
 import {appFeatureRoutes} from "./routes.jsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 
 export function App() {
   return (
       <Router>
-        <ScrollToTop />
+        <ScrollToTop/>
 
         <Routes>
           {/* Auth */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn/>}/>
+          <Route path="/signup" element={<SignUp/>}/>
 
-          {/* Application */}
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<TrangChu />} />
-            <Route path="/ecommerce" element={<Home />} />
+          {/* Require authentication */}
+          <Route element={<ProtectedRoute/>}>
+            <Route element={<AppLayout/>}>
+              <Route path="/" element={<TrangChu/>}/>
+              <Route path="/ecommerce" element={<Home/>}/>
 
-            <Route
-                path="/settings/layout"
-                element={<LayoutSettings />}
-            />
+              <Route
+                  path="/settings/layout"
+                  element={<LayoutSettings/>}
+              />
 
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+              <Route path="/profile" element={<UserProfiles/>}/>
+              <Route path="/calendar" element={<Calendar/>}/>
+              <Route path="/blank" element={<Blank/>}/>
 
-            <Route
-                path="/form-elements"
-                element={<FormElements />}
-            />
+              <Route
+                  path="/form-elements"
+                  element={<FormElements/>}
+              />
 
-            <Route
-                path="/basic-tables"
-                element={<BasicTables />}
-            />
+              <Route
+                  path="/basic-tables"
+                  element={<BasicTables/>}
+              />
 
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+              <Route path="/alerts" element={<Alerts/>}/>
+              <Route path="/avatars" element={<Avatars/>}/>
+              <Route path="/badge" element={<Badges/>}/>
+              <Route path="/buttons" element={<Buttons/>}/>
+              <Route path="/images" element={<Images/>}/>
+              <Route path="/videos" element={<Videos/>}/>
 
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+              <Route path="/line-chart" element={<LineChart/>}/>
+              <Route path="/bar-chart" element={<BarChart/>}/>
 
-            {/* Project feature routes */}
-            {appFeatureRoutes.map((route) => (
-                <Route
-                    key={route.path}
-                    path={route.path}
-                    element={route.element}
-                />
-            ))}
+              {/* Project feature routes */}
+              {appFeatureRoutes.map((route) => (
+                  <Route
+                      key={route.path}
+                      path={route.path}
+                      element={route.element}
+                  />
+              ))}
+            </Route>
           </Route>
 
           {/* 404 */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFound/>}/>
         </Routes>
       </Router>
   );

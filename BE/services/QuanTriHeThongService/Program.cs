@@ -32,6 +32,18 @@ builder.Services.AddSwaggerGen(options =>
         }] = [],
     });
 });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5174")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplicationJwtAuthentication(builder.Configuration);
 builder.Services.AddQuanTriHeThongModules(builder.Configuration);
@@ -49,6 +61,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
