@@ -1,726 +1,273 @@
-import { useEffect, useState } from "react";
-import {
-    deleteRoleAction,
-    getRoleActions,
-    updateRoleAction,
-} from "../features/quan-tri-he-thong/api/roleActionApi";
-const formatValue = (value) => {
-    if (!value) {
-        return "-";
-    }
+import Badge from "../app/components/ui/badge/Badge";
+import BasicTableTwo from "../app/components/tables/BasicTables/BasicTableTwo.jsx";
+import {useEffect, useMemo, useState} from "react";
+import {getRoleActionList} from "../shared/api/systemApi.js";
 
-    return value;
-};
 
-function StatusBadge({ item }) {
-    return (
-        <span
-            className={
-                item.status === "Kích hoạt"
-                    ? "status-badge active"
-                    : "status-badge"
-            }
-        >
-            {item.status}
-        </span>
-    );
-}
+export default function RoleActionListPage() {
+    const [roleActionData, setRoleActionData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-const toInputValue = (value) => value ?? "";
-
-export function RoleActionListPage() {
-    const [items, setItems] = useState([]);
     const [search, setSearch] = useState("");
-    const [pageSize, setPageSize] = useState("10");
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
+    const [pageSize, setPageSize] = useState(10);
+    const [pageCurrent, setPageCurrent] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
-    const [modal, setModal] = useState(null);
-    const [editForm, setEditForm] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
-        let isMounted = true;
-
-        async function loadData() {
-            setIsLoading(true);
-            setErrorMessage("");
-
+        const fetchRoleActions = async () => {
             try {
-                const result = await getRoleActions(
+                setLoading(true);
+
+                const response = await getRoleActionList({
                     search,
-                    pageSize === "all" ? 1000 : Number(pageSize),
-                    1
-                );
+                    pageSize,
+                    pageCurrent,
+                });
 
-                if (!isMounted) {
-                    return;
-                }
-
-                setItems(result.data);
-                setTotalCount(result.totalCount);
+                setRoleActionData(response?.data ?? []);
+                setTotalCount(response?.totalCount ?? 0);
             } catch (error) {
-                if (!isMounted) {
-                    return;
-                }
-
-                setItems([]);
-                setTotalCount(0);
-
-                setErrorMessage(
-                    error instanceof Error
-                        ? error.message
-                        : "Không tải được danh sách chức năng."
-                );
+                console.error("Lỗi lấy danh sách chức năng:", error);
             } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
+                setLoading(false);
             }
-        }
-
-        const timeoutId = window.setTimeout(loadData, 250);
-
-        return () => {
-            isMounted = false;
-            window.clearTimeout(timeoutId);
         };
-    }, [pageSize, reloadKey, search]);
 
-    const visibleMenuCount = items.filter(
-        (item) => item.isVisibleInMenu
-    ).length;
+        void fetchRoleActions();
+    }, [search, pageSize, pageCurrent]);
 
-    const frontendCount = items.filter(
-        (item) => item.frontendPath
-    ).length;
+    const columns = useMemo(
+        () => [
+            {
+                key: "sttSapXep",
+                header: "#",
+                headerClassName:
+                    "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
+                cellClassName:
+                    "px-5 py-4 text-center text-sm text-gray-500 dark:text-gray-400",
+            },
 
-    const openEditModal = (item) => {
-        setSuccessMessage("");
-        setErrorMessage("");
+            {
+                key: "phanLoai",
+                header: "Phân loại",
+                render: (item) => (
+                    <div
+                        style={{
+                            paddingLeft: `${item.level * 16}px`,
+                        }}
+                    >
+                        <Badge
+                            size="sm"
+                            color={
+                                item.phanLoai === "Group"
+                                    ? "primary"
+                                    : "success"
+                            }
+                        >
+                            {item.phanLoai}
 
-        setEditForm({
-            id: item.id,
-            sttSapXep: item.sttSapXep,
-            phanLoai: item.phanLoai,
-            role: item.role,
-            parentId: item.parentId,
-            title: item.title,
-            controller: item.controller,
-            action: item.action,
-            parameter: item.parameter,
-            table: item.table,
-            status: item.status,
-            useGroup: item.useGroup,
-            frontendPath: item.frontendPath,
-            isVisibleInMenu: item.isVisibleInMenu,
-            clientApp: item.clientApp,
-            menuTitle: item.menuTitle,
-            menuIcon: item.menuIcon,
-            icon: item.icon,
-        });
+                            {item.phanLoai === "Group" &&
+                                item.level > 0 &&
+                                ` ${item.level}`}
+                        </Badge>
+                    </div>
+                ),
+            },
 
-        setModal({
-            type: "edit",
-            item,
-        });
-    };
+            {
+                key: "title",
+                header: "Mô tả chức năng",
+                render: (item) => (
+                    <div
+                        style={{
+                            paddingLeft: `${item.level * 16}px`,
+                        }}
+                        className="font-medium text-gray-800 dark:text-white/90"
+                    >
+                        {item.title}
+                    </div>
+                ),
+            },
 
-    const openDeleteModal = (item) => {
-        setSuccessMessage("");
-        setErrorMessage("");
+            {
+                key: "role",
+                header: "Tương tác",
+                render: (item) => (
+                    <div className="space-y-1 text-sm">
+                        <div>
+                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                                Role:
+                            </span>{" "}
+                            {item.role}
+                        </div>
 
-        setModal({
-            type: "delete",
-            item,
-        });
-    };
+                        {item.phanLoai !== "Group" && (
+                            <>
+                                <div>
+                                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                                        Controller:
+                                    </span>{" "}
+                                    {item.controller}
+                                </div>
 
-    const closeModal = () => {
-        setModal(null);
-        setEditForm(null);
-        setIsSubmitting(false);
-    };
+                                <div>
+                                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                                        Action:
+                                    </span>{" "}
+                                    {item.action}
+                                </div>
 
-    const handleEditSubmit = async (event) => {
-        event.preventDefault();
+                                <div>
+                                    <span className="font-medium text-gray-700 dark:text-gray-300">
+                                        Table:
+                                    </span>{" "}
+                                    {item.table}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                ),
+            },
 
-        if (!editForm) {
-            return;
-        }
+            {
+                key: "useGroup",
+                header: "Use",
+            },
 
-        setIsSubmitting(true);
-        setErrorMessage("");
-        setSuccessMessage("");
+            {
+                key: "status",
+                header: "Trạng thái",
+                headerClassName:
+                    "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
+                cellClassName:
+                    "px-5 py-4 text-center",
+                render: (item) => (
+                    <Badge
+                        size="sm"
+                        color={
+                            item.status === "Kích hoạt"
+                                ? "success"
+                                : "error"
+                        }
+                    >
+                        {item.status}
+                    </Badge>
+                ),
+            },
 
-        try {
-            await updateRoleAction(editForm);
+            {
+                key: "actions",
+                header: "Thao tác",
+                headerClassName:
+                    "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
+                cellClassName:
+                    "px-5 py-4 text-center",
+                render: (item) => (
+                    <div className="flex items-center justify-center gap-2">
+                        {/* Thêm chức năng con */}
+                        {item.phanLoai !== "Detail" && (
+                            <button
+                                type="button"
+                                title="Thêm chức năng con"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
+                            >
+                                +
+                            </button>
+                        )}
 
-            setSuccessMessage(
-                "Cập nhật chức năng thành công."
-            );
+                        {/* Edit */}
+                        <button
+                            type="button"
+                            title="Chỉnh sửa"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                            </svg>
+                        </button>
 
-            setReloadKey((current) => current + 1);
-
-            closeModal();
-        } catch (error) {
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Không cập nhật được chức năng."
-            );
-
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (modal?.type !== "delete") {
-            return;
-        }
-
-        setIsSubmitting(true);
-        setErrorMessage("");
-        setSuccessMessage("");
-
-        try {
-            await deleteRoleAction(modal.item.id);
-
-            setSuccessMessage(
-                "Xóa chức năng thành công."
-            );
-
-            setReloadKey((current) => current + 1);
-
-            closeModal();
-        } catch (error) {
-            setErrorMessage(
-                error instanceof Error
-                    ? error.message
-                    : "Không xóa được chức năng."
-            );
-
-            setIsSubmitting(false);
-        }
-    };
+                        {/* Delete */}
+                        <button
+                            type="button"
+                            title="Xóa"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-error-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M3 6h18"/>
+                                <path d="M8 6V4h8v2"/>
+                                <path d="M19 6v14H5V6"/>
+                                <path d="M10 11v5"/>
+                                <path d="M14 11v5"/>
+                            </svg>
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        []
+    );
 
     return (
-        <section className="role-page">
-            <div className="page-heading">
+        <div>
+            {/* Page header */}
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <p className="eyebrow">
-                        Quản trị hệ thống
-                    </p>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
+                        Danh sách chức năng
+                    </h3>
 
-                    <h2>Danh sách chức năng</h2>
-
-                    <p>
-                        Quản lý chức năng, đường dẫn frontend và
-                        cách hiển thị trên menu hệ thống.
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Quản lý Danh sách chức năng
                     </p>
                 </div>
 
-                <div className="page-actions">
-                    <button
-                        className="secondary-button"
-                        type="button"
-                    >
-                        Nhập mới
-                    </button>
-
-                    <button
-                        className="primary-button compact"
-                        type="button"
-                    >
-                        Thêm chức năng
-                    </button>
-                </div>
-            </div>
-
-            <div className="metric-grid">
-                <article>
-                    <span>Tổng số</span>
-                    <strong>{totalCount}</strong>
-                </article>
-
-                <article>
-                    <span>Hiển thị menu</span>
-                    <strong>{visibleMenuCount}</strong>
-                </article>
-
-                <article>
-                    <span>Có đường dẫn FE</span>
-                    <strong>{frontendCount}</strong>
-                </article>
-            </div>
-
-            <div className="role-list-panel">
-                <div className="toolbar">
-                    <input
-                        aria-label="Tìm kiếm chức năng"
-                        onChange={(event) =>
-                            setSearch(event.target.value)
-                        }
-                        placeholder="Tìm theo tên, mã role, controller..."
-                        type="search"
-                        value={search}
-                    />
-
-                    <label className="page-size-control">
-                        <span>Hiển thị</span>
-
-                        <select
-                            onChange={(event) =>
-                                setPageSize(event.target.value)
-                            }
-                            value={pageSize}
-                        >
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="all">
-                                Tất cả
-                            </option>
-                        </select>
-                    </label>
-                </div>
-
-                {successMessage ? (
-                    <p className="success-message">
-                        {successMessage}
-                    </p>
-                ) : null}
-
-                {errorMessage ? (
-                    <p className="menu-error">
-                        {errorMessage}
-                    </p>
-                ) : null}
-
-                <div className="table-wrap">
-                    <table className="data-table">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Chức năng</th>
-                            <th>Role</th>
-                            <th>Loại</th>
-                            <th>Menu</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={7}>
-                                    Đang tải dữ liệu...
-                                </td>
-                            </tr>
-                        ) : null}
-
-                        {!isLoading &&
-                        items.length === 0 ? (
-                            <tr>
-                                <td colSpan={7}>
-                                    Không có dữ liệu phù hợp.
-                                </td>
-                            </tr>
-                        ) : null}
-
-                        {!isLoading
-                            ? items.map((item) => (
-                                <tr key={item.id}>
-                                    <td>
-                                        {item.sttSapXep}
-                                    </td>
-
-                                    <td>
-                                        <strong>
-                                            {item.title ||
-                                                item.menuTitle ||
-                                                item.role}
-                                        </strong>
-
-                                        <small>
-                                            {formatValue(
-                                                item.frontendPath
-                                            )}
-                                        </small>
-                                    </td>
-
-                                    <td>{item.role}</td>
-
-                                    <td>
-                                        {item.phanLoai}
-                                    </td>
-
-                                    <td>
-                                        {item.isVisibleInMenu
-                                            ? "Có"
-                                            : "Không"}
-                                    </td>
-
-                                    <td>
-                                        <StatusBadge
-                                            item={item}
-                                        />
-                                    </td>
-
-                                    <td>
-                                        <div className="row-actions">
-                                            <button
-                                                className="table-action edit"
-                                                onClick={() =>
-                                                    openEditModal(
-                                                        item
-                                                    )
-                                                }
-                                                type="button"
-                                            >
-                                                Chỉnh sửa
-                                            </button>
-
-                                            <button
-                                                className="table-action delete"
-                                                onClick={() =>
-                                                    openDeleteModal(
-                                                        item
-                                                    )
-                                                }
-                                                type="button"
-                                            >
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                            : null}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {modal?.type === "edit" &&
-            editForm ? (
-                <div
-                    className="modal-backdrop"
-                    role="presentation"
+                <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600"
                 >
-                    <form
-                        className="modal-card edit-modal"
-                        onSubmit={handleEditSubmit}
-                    >
-                        <div className="modal-header">
-                            <div>
-                                <p className="eyebrow">
-                                    Chỉnh sửa
-                                </p>
+                    <span className="text-lg leading-none">
+                        +
+                    </span>
 
-                                <h3>
-                                    {modal.item.title ||
-                                        modal.item.role}
-                                </h3>
-                            </div>
+                    Thêm mới
+                </button>
+            </div>
 
-                            <button
-                                className="icon-button"
-                                onClick={closeModal}
-                                type="button"
-                                aria-label="Đóng"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <div className="form-grid">
-                            <label>
-                                <span>
-                                    Tên chức năng
-                                </span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            title: event.target.value,
-                                        })
-                                    }
-                                    value={toInputValue(
-                                        editForm.title
-                                    )}
-                                />
-                            </label>
-
-                            <label>
-                                <span>
-                                    Menu title
-                                </span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            menuTitle:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={toInputValue(
-                                        editForm.menuTitle
-                                    )}
-                                />
-                            </label>
-
-                            <label>
-                                <span>Role</span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            role: event.target.value,
-                                        })
-                                    }
-                                    value={editForm.role}
-                                />
-                            </label>
-
-                            <label>
-                                <span>
-                                    Đường dẫn FE
-                                </span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            frontendPath:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={toInputValue(
-                                        editForm.frontendPath
-                                    )}
-                                />
-                            </label>
-
-                            <label>
-                                <span>
-                                    Controller
-                                </span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            controller:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={toInputValue(
-                                        editForm.controller
-                                    )}
-                                />
-                            </label>
-
-                            <label>
-                                <span>Action</span>
-
-                                <input
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            action:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={toInputValue(
-                                        editForm.action
-                                    )}
-                                />
-                            </label>
-
-                            <label>
-                                <span>Loại</span>
-
-                                <select
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            phanLoai:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={
-                                        editForm.phanLoai
-                                    }
-                                >
-                                    <option value="Group">
-                                        Group
-                                    </option>
-
-                                    <option value="Detail">
-                                        Detail
-                                    </option>
-                                </select>
-                            </label>
-
-                            <label>
-                                <span>
-                                    Trạng thái
-                                </span>
-
-                                <select
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            status:
-                                            event.target.value,
-                                        })
-                                    }
-                                    value={
-                                        editForm.status
-                                    }
-                                >
-                                    <option value="Kích hoạt">
-                                        Kích hoạt
-                                    </option>
-
-                                    <option value="Không kích hoạt">
-                                        Không kích hoạt
-                                    </option>
-                                </select>
-                            </label>
-
-                            <label>
-                                <span>Thứ tự</span>
-
-                                <input
-                                    min="0"
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            sttSapXep:
-                                                Number(
-                                                    event.target.value
-                                                ),
-                                        })
-                                    }
-                                    type="number"
-                                    value={
-                                        editForm.sttSapXep
-                                    }
-                                />
-                            </label>
-
-                            <label className="checkbox-field">
-                                <input
-                                    checked={
-                                        editForm.isVisibleInMenu
-                                    }
-                                    onChange={(event) =>
-                                        setEditForm({
-                                            ...editForm,
-                                            isVisibleInMenu:
-                                            event.target
-                                                .checked,
-                                        })
-                                    }
-                                    type="checkbox"
-                                />
-
-                                <span>
-                                    Hiển thị trên menu
-                                </span>
-                            </label>
-                        </div>
-
-                        <div className="modal-actions">
-                            <button
-                                className="secondary-button"
-                                onClick={closeModal}
-                                type="button"
-                            >
-                                Hủy
-                            </button>
-
-                            <button
-                                className="primary-button compact"
-                                disabled={isSubmitting}
-                                type="submit"
-                            >
-                                {isSubmitting
-                                    ? "Đang lưu..."
-                                    : "Lưu thay đổi"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            ) : null}
-
-            {modal?.type === "delete" ? (
-                <div
-                    className="modal-backdrop"
-                    role="presentation"
-                >
-                    <div className="modal-card confirm-modal">
-                        <div className="modal-header">
-                            <div>
-                                <p className="eyebrow">
-                                    Xóa chức năng
-                                </p>
-
-                                <h3>
-                                    {modal.item.title ||
-                                        modal.item.role}
-                                </h3>
-                            </div>
-
-                            <button
-                                className="icon-button"
-                                onClick={closeModal}
-                                type="button"
-                                aria-label="Đóng"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <p>
-                            Bạn có chắc chắn muốn xóa chức
-                            năng này? Thao tác này có thể ảnh
-                            hưởng đến phân quyền và menu
-                            người dùng.
-                        </p>
-
-                        <div className="modal-actions">
-                            <button
-                                className="secondary-button"
-                                onClick={closeModal}
-                                type="button"
-                            >
-                                Hủy
-                            </button>
-
-                            <button
-                                className="danger-button"
-                                disabled={isSubmitting}
-                                onClick={
-                                    handleDeleteConfirm
-                                }
-                                type="button"
-                            >
-                                {isSubmitting
-                                    ? "Đang xóa..."
-                                    : "Xóa chức năng"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            ) : null}
-        </section>
+            {/* Reusable table */}
+            <BasicTableTwo
+                data={roleActionData}
+                columns={columns}
+                searchPlaceholder="Tìm kiếm chức năng..."
+                searchFields={[
+                    (item) => item.title,
+                    (item) => item.phanLoai,
+                    (item) => item.role,
+                    (item) => item.controller,
+                    (item) => item.action,
+                    (item) => item.table,
+                    (item) => item.useGroup,
+                    (item) => item.status,
+                ]}
+            />
+        </div>
     );
 }

@@ -5,7 +5,6 @@ import {
 } from "react";
 import {Link, useLocation} from "react-router";
 import {ChevronDownIcon, HorizontaLDots} from "../assets/icons/index.js";
-// import {navItems, othersItems} from "../config/menuConfig.jsx";
 import {useSidebar} from "../context/SidebarContext";
 import {getFrontendMenu} from "../shared/api/systemApi.js";
 import {MenuIcon} from "../assets/icons/index.js";
@@ -36,12 +35,8 @@ const AppSidebar = () => {
                 setMenuLoading(true);
 
                 const data = await getFrontendMenu();
-
-                console.log("FRONTEND MENU:", data);
-
                 setMenuItems(data?.items || []);
             } catch (error) {
-                console.error("Load frontend menu error:", error);
                 setMenuItems([]);
             } finally {
                 setMenuLoading(false);
@@ -50,33 +45,6 @@ const AppSidebar = () => {
 
         void loadMenu();
     }, []);
-
-    // useEffect(() => {
-    //     let submenuMatched = false;
-    //
-    //     ["main", "others"].forEach((menuType) => {
-    //         const items = menuType === "main" ? navItems : othersItems;
-    //
-    //         items.forEach((nav, index) => {
-    //             if (nav.subItems) {
-    //                 nav.subItems.forEach((subItem) => {
-    //                     if (isActive(subItem.path)) {
-    //                         setOpenSubmenu({
-    //                             type: menuType,
-    //                             index,
-    //                         });
-    //
-    //                         submenuMatched = true;
-    //                     }
-    //                 });
-    //             }
-    //         });
-    //     });
-    //
-    //     if (!submenuMatched) {
-    //         setOpenSubmenu(null);
-    //     }
-    // }, [location.pathname, isActive]);
 
     const findActiveParent = useCallback(
         (items, parentKey = "") => {
@@ -125,60 +93,32 @@ const AppSidebar = () => {
     }, [menuItems, location.pathname, findActiveParent]);
 
 
-    // const handleSubmenuToggle = (index, menuType) => {
-    //     setOpenSubmenu((prevOpenSubmenu) => {
-    //         if (
-    //             prevOpenSubmenu &&
-    //             prevOpenSubmenu.type === menuType &&
-    //             prevOpenSubmenu.index === index
-    //         ) {
-    //             return null;
-    //         }
-    //
-    //         return {
-    //             type: menuType,
-    //             index,
-    //         };
-    //     });
-    // };
-
-
     const handleSubmenuToggle = (key) => {
         setOpenSubmenu((prev) => ({
             ...prev,
             [key]: !prev[key],
         }));
     };
-    /*
-    const renderMenuItems = (items, menuType) => (
-        <ul className="flex flex-col gap-4">
-            {items.map((nav, index) => (
-                ...
-            ))}
-        </ul>
-    );
-    */
+
 
     const renderMenuItems = (items, parentKey = "") => (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-4 w-full">
             {items.map((item, index) => {
                 const key = parentKey
                     ? `${parentKey}-${index}`
                     : `${index}`;
 
-                const hasChildren =
-                    item.children?.length > 0;
-
+                const hasChildren = item.children?.length > 0;
                 const isOpen = !!openSubmenu[key];
 
                 return (
-                    <li key={item.title || key}>
+                    <li key={item.title || key} className="w-full">
                         {hasChildren ? (
                             <button
                                 onClick={() =>
                                     handleSubmenuToggle(key)
                                 }
-                                className={`menu-item group ${
+                                className={`menu-item group w-full ${
                                     isOpen
                                         ? "menu-item-active"
                                         : "menu-item-inactive"
@@ -188,29 +128,29 @@ const AppSidebar = () => {
                                         : "lg:justify-start"
                                 }`}
                             >
-                                <span
-                                    className={`menu-item-icon-size ${
-                                        isOpen
-                                            ? "menu-item-icon-active"
-                                            : "menu-item-icon-inactive"
-                                    }`}
-                                >
-                                    <MenuIcon/>
-                                </span>
+                            <span
+                                className={`menu-item-icon-size ${
+                                    isOpen
+                                        ? "menu-item-icon-active"
+                                        : "menu-item-icon-inactive"
+                                }`}
+                            >
+                                <MenuIcon />
+                            </span>
 
                                 {(isExpanded ||
                                     isHovered ||
                                     isMobileOpen) && (
-                                    <span className="menu-item-text">
-                                        {item.title}
-                                    </span>
+                                    <span className="menu-item-text !text-left flex-1 min-w-0">
+                                    {item.title}
+                                </span>
                                 )}
 
                                 {(isExpanded ||
                                     isHovered ||
                                     isMobileOpen) && (
                                     <ChevronDownIcon
-                                        className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                                        className={`ml-auto shrink-0 w-5 h-5 transition-transform duration-200 ${
                                             isOpen
                                                 ? "rotate-180 text-brand-500"
                                                 : ""
@@ -222,28 +162,28 @@ const AppSidebar = () => {
                             item.url && (
                                 <Link
                                     to={item.url}
-                                    className={`menu-item group ${
+                                    className={`menu-item group w-full ${
                                         isActive(item.url)
                                             ? "menu-item-active"
                                             : "menu-item-inactive"
                                     }`}
                                 >
-                                    <span
-                                        className={`menu-item-icon-size ${
-                                            isActive(item.url)
-                                                ? "menu-item-icon-active"
-                                                : "menu-item-icon-inactive"
-                                        }`}
-                                    >
-                                        {/* Menu con không có icon */}
-                                    </span>
+                                <span
+                                    className={`menu-item-icon-size ${
+                                        isActive(item.url)
+                                            ? "menu-item-icon-active"
+                                            : "menu-item-icon-inactive"
+                                    }`}
+                                >
+                                    {/* Menu con không có icon */}
+                                </span>
 
                                     {(isExpanded ||
                                         isHovered ||
                                         isMobileOpen) && (
-                                        <span className="menu-item-text">
-                                            {item.title}
-                                        </span>
+                                        <span className="menu-item-text !text-left">
+                                        {item.title}
+                                    </span>
                                     )}
                                 </Link>
                             )
@@ -261,7 +201,7 @@ const AppSidebar = () => {
                                     }`}
                                 >
                                     <div className="min-h-0">
-                                        <ul className="mt-2 space-y-1 ml-9">
+                                        <ul className="mt-2 space-y-1 ml-3 w-[calc(100%-0.75rem)]">
                                             {item.children.map(
                                                 (child, childIndex) => {
                                                     const childKey = `${key}-${childIndex}`;
@@ -272,6 +212,7 @@ const AppSidebar = () => {
                                                                 child.title ||
                                                                 childKey
                                                             }
+                                                            className="w-full"
                                                         >
                                                             {child.children?.length ? (
                                                                 renderMenuItems(
@@ -284,7 +225,7 @@ const AppSidebar = () => {
                                                                         to={
                                                                             child.url
                                                                         }
-                                                                        className={`menu-dropdown-item ${
+                                                                        className={`menu-dropdown-item !justify-start text-left w-full ${
                                                                             isActive(
                                                                                 child.url
                                                                             )
@@ -292,9 +233,15 @@ const AppSidebar = () => {
                                                                                 : "menu-dropdown-item-inactive"
                                                                         }`}
                                                                     >
+                                                                    <span className="mr-2 w-3 shrink-0">
+                                                                        -
+                                                                    </span>
+
+                                                                        <span className="text-left">
                                                                         {
                                                                             child.title
                                                                         }
+                                                                    </span>
                                                                     </Link>
                                                                 )
                                                             )}
@@ -395,26 +342,6 @@ const AppSidebar = () => {
                                 renderMenuItems(menuItems)
                             )}
                         </div>
-
-                        {/*
-                        <div>
-                            <h2
-                                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                                    !isExpanded && !isHovered
-                                        ? "lg:justify-center"
-                                        : "justify-start"
-                                }`}
-                            >
-                                {isExpanded || isHovered || isMobileOpen ? (
-                                    "Others"
-                                ) : (
-                                    <HorizontaLDots/>
-                                )}
-                            </h2>
-
-                            {renderMenuItems(othersItems, "others")}
-                        </div>
-                        */}
                     </div>
                 </nav>
             </div>

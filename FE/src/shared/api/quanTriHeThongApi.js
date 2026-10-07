@@ -49,6 +49,7 @@ export async function quanTriHeThongPagedRequest(
       url: path,
       method: options.method ?? 'GET',
       headers: options.headers,
+      params: options.params,
       data: options.body,
     });
 

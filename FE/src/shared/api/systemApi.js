@@ -1,23 +1,20 @@
-import { quanTriHeThongRequest } from './quanTriHeThongApi';
-
-// function toCurrentUserHeaders(user) {
-//   const headers = {
-//     'X-User-Id': user.userId,
-//     'X-Username': user.username,
-//     'X-Group-Permission-Id': user.groupPermissionId,
-//     'X-Is-SSA': String(user.isSSA),
-//   };
-//
-//   if (user.donViId) {
-//     headers['X-Don-Vi-Id'] = user.donViId;
-//   }
-//
-//   return headers;
-// }
+import {
+  quanTriHeThongRequest,
+  quanTriHeThongPagedRequest,
+} from './quanTriHeThongApi';
 
 export function getSystemInfo() {
   return quanTriHeThongRequest(
       '/he-thong/cau-hinh-he-thong'
+  );
+}
+
+export function getRoleActionList(params) {
+  return quanTriHeThongPagedRequest(
+      '/he-thong/danh-sach-chuc-nang',
+      {
+        params,
+      }
   );
 }
 

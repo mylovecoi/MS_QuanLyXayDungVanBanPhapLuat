@@ -17,11 +17,7 @@ const SidebarLayout = () => {
         const loadMenu = async () => {
             try {
                 const data = await getFrontendMenu();
-
-                console.log("FRONTEND MENU:", data);
-                console.log("MENU ITEMS:", data?.items);
             } catch (error) {
-                console.error("Lỗi lấy frontend menu:", error);
             }
         };
 
@@ -38,7 +34,7 @@ const SidebarLayout = () => {
             <div
                 className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ease-in-out ${
                     isExpanded || isHovered
-                        ? "lg:ml-[290px]"
+                        ? "lg:ml-[300px]"
                         : "lg:ml-[90px]"
                 } ${
                     isMobileOpen ? "ml-0" : ""
