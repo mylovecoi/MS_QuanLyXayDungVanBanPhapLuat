@@ -67,6 +67,11 @@ export default defineConfig({
       '/api/danh-muc': {
         target: 'http://localhost:5132',
         changeOrigin: true,
+      },
+
+      '/api/khai-thac-du-lieu': {
+        target: 'http://localhost:5138',
+        changeOrigin: true,
       }
     }
   }

@@ -1,6 +1,8 @@
 import DiaDanhPage from "./pages/DiaDanhPage.jsx";
 import DonViPage from "./pages/DonViPage.jsx";
 import TrangThaiPage from "./pages/TrangThaiPage.jsx";
+import QuyTrinhSoanThaoPage from "./pages/QuyTrinhSoanThaoPage.jsx";
+import TieuChiDiemPage from "./pages/TieuChiDiemPage.jsx";
 import VanBanPage from "./pages/VanBanPage.jsx";
 
 export const danhMucRoutes = [
@@ -19,5 +21,13 @@ export const danhMucRoutes = [
   {
     path: "/admin/danh-muc/trang-thai",
     element: <TrangThaiPage />,
+  },
+  {
+    path: "/admin/danh-muc/quy-trinh-soan-thao",
+    element: <QuyTrinhSoanThaoPage />,
+  },
+  {
+    path: "/admin/danh-muc/tieu-chi-diem",
+    element: <TieuChiDiemPage />,
   },
 ];
