@@ -18,8 +18,8 @@ public sealed class KhaoSatThiHanhPhapLuatRaSoatController(KhaoSatThiHanhPhapLua
         if (item is null) return NotFound();
         if (await db.LoiImportKhaoSats.AnyAsync(x => x.PhieuNopKhaoSatId == item.Id && !x.IsDeleted, ct)) return BadRequest("Phiếu còn lỗi import, không thể xác nhận.");
         item.TrangThaiId = trangThaiXacNhanId; item.UpdatedAt = DateTime.UtcNow;
-        var subject = await db.DoiTuongKhaoSats.SingleAsync(x => x.Id == item.DoiTuongKhaoSatId, ct);
-        db.LichSuXuLyKhaoSats.Add(new LichSuXuLyKhaoSat { CuocKhaoSatId = subject.CuocKhaoSatId, DoiTuongKhaoSatId = subject.Id, PhieuNopKhaoSatId = item.Id, HanhDong = "XAC_NHAN_PHIEU", NoiDung = "Xác nhận phiếu khảo sát hợp lệ.", NguoiXuLyId = Guid.Empty });
+        var cuocKhaoSatId = item.CuocKhaoSatId ?? (await db.DoiTuongKhaoSats.SingleAsync(x => x.Id == item.DoiTuongKhaoSatId, ct)).CuocKhaoSatId;
+        db.LichSuXuLyKhaoSats.Add(new LichSuXuLyKhaoSat { CuocKhaoSatId = cuocKhaoSatId, PhieuNopKhaoSatId = item.Id, HanhDong = "XAC_NHAN_KET_QUA_TONG_HOP", NoiDung = "Xác nhận file kết quả tổng hợp hợp lệ.", NguoiXuLyId = Guid.Empty });
         await db.SaveChangesAsync(ct); return NoContent();
     }
     [HttpPost("{phieuNopId:guid}/yeu-cau-bo-sung")]
@@ -28,8 +28,8 @@ public sealed class KhaoSatThiHanhPhapLuatRaSoatController(KhaoSatThiHanhPhapLua
         var item = await db.PhieuNopKhaoSats.SingleOrDefaultAsync(x => x.Id == phieuNopId && !x.IsDeleted, ct);
         if (item is null) return NotFound();
         item.TrangThaiId = trangThaiCanBoSungId; item.UpdatedAt = DateTime.UtcNow;
-        var subject = await db.DoiTuongKhaoSats.SingleAsync(x => x.Id == item.DoiTuongKhaoSatId, ct);
-        db.LichSuXuLyKhaoSats.Add(new LichSuXuLyKhaoSat { CuocKhaoSatId = subject.CuocKhaoSatId, DoiTuongKhaoSatId = subject.Id, PhieuNopKhaoSatId = item.Id, HanhDong = "YEU_CAU_BO_SUNG", NoiDung = noiDung, NguoiXuLyId = Guid.Empty });
+        var cuocKhaoSatId = item.CuocKhaoSatId ?? (await db.DoiTuongKhaoSats.SingleAsync(x => x.Id == item.DoiTuongKhaoSatId, ct)).CuocKhaoSatId;
+        db.LichSuXuLyKhaoSats.Add(new LichSuXuLyKhaoSat { CuocKhaoSatId = cuocKhaoSatId, PhieuNopKhaoSatId = item.Id, HanhDong = "YEU_CAU_BO_SUNG_KET_QUA_TONG_HOP", NoiDung = noiDung, NguoiXuLyId = Guid.Empty });
         await db.SaveChangesAsync(ct); return NoContent();
     }
 }

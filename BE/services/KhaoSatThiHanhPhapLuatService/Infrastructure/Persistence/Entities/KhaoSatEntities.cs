@@ -43,6 +43,10 @@ public sealed class MauPhieuKhaoSat : BaseEntity
     public string DuongDanFile { get; set; } = null!;
     public string MaHash { get; set; } = null!;
     public bool DaPhatHanh { get; set; }
+    public string TrangThaiMauPhieu { get; set; } = "NHAP";
+    public DateTime? NgayHieuLuc { get; set; }
+    public DateTime? NgayHetHieuLuc { get; set; }
+    public Guid? PhienDocMauPhieuKhaoSatId { get; set; }
 }
 
 public sealed class CauHoiThongKe : BaseEntity
@@ -51,6 +55,33 @@ public sealed class CauHoiThongKe : BaseEntity
     public string MaCauHoiThongKe { get; set; } = null!;
     public string NoiDung { get; set; } = null!;
     public string LoaiCauHoi { get; set; } = null!;
+    public bool ChoPhepNhieuLuaChon { get; set; }
+    public string MauSoTyLe { get; set; } = "PHIEU_HOP_LE";
+    public bool CoYKienTuDo { get; set; }
+}
+
+public sealed class PhienDocMauPhieuKhaoSat : BaseEntity
+{
+    public Guid CuocKhaoSatId { get; set; }
+    public Guid NhomDoiTuongKhaoSatId { get; set; }
+    public string TenFile { get; set; } = null!;
+    public string DuongDanFile { get; set; } = null!;
+    public string? DuongDanFileChuyenDoi { get; set; }
+    public string? LoiChuyenDoi { get; set; }
+    public string TrangThai { get; set; } = "CHO_RA_SOAT";
+}
+public sealed class CauHoiNhapMauPhieuKhaoSat : BaseEntity
+{
+    public Guid PhienDocMauPhieuKhaoSatId { get; set; }
+    public string MaCauHoi { get; set; } = null!;
+    public string NoiDung { get; set; } = null!;
+    public string LoaiCauHoi { get; set; } = null!;
+    public string? MaLuaChon { get; set; }
+    public string? NoiDungLuaChon { get; set; }
+    public bool BatBuoc { get; set; }
+    public bool ChoPhepNhieuLuaChon { get; set; }
+    public bool CoYKienTuDo { get; set; }
+    public int ThuTu { get; set; }
 }
 
 public sealed class CauHoiMauPhieu : BaseEntity
@@ -60,6 +91,10 @@ public sealed class CauHoiMauPhieu : BaseEntity
     public string MaCauHoi { get; set; } = null!;
     public string NoiDung { get; set; } = null!;
     public string LoaiCauHoi { get; set; } = null!;
+    public bool BatBuoc { get; set; }
+    public bool ChoPhepNhieuLuaChon { get; set; }
+    public string MauSoTyLe { get; set; } = "PHIEU_HOP_LE";
+    public bool CoYKienTuDo { get; set; }
     public int ThuTu { get; set; }
 }
 
@@ -84,6 +119,8 @@ public sealed class DoiTuongKhaoSat : BaseEntity
 
 public sealed class PhieuNopKhaoSat : BaseEntity
 {
+    public Guid? CuocKhaoSatId { get; set; }
+    public Guid? NhomDoiTuongKhaoSatId { get; set; }
     public Guid DoiTuongKhaoSatId { get; set; }
     public Guid MauPhieuKhaoSatId { get; set; }
     public string TenFile { get; set; } = null!;
@@ -111,6 +148,36 @@ public sealed class LoiImportKhaoSat : BaseEntity
     public string ViTri { get; set; } = null!;
     public string MaCauHoi { get; set; } = null!;
     public string NoiDungLoi { get; set; } = null!;
+}
+
+public sealed class BaoCaoKhaoSat : BaseEntity
+{
+    public Guid CuocKhaoSatId { get; set; }
+    public string TenBaoCao { get; set; } = null!;
+    public string? SoKyHieu { get; set; }
+    public DateOnly NgayBaoCao { get; set; }
+    public string TrangThai { get; set; } = "NHAP";
+    public DateTime? NgayChot { get; set; }
+    public string? UuDiem { get; set; }
+    public string? HanChe { get; set; }
+    public string? KienNghi { get; set; }
+    public string? DuongDanFileXuat { get; set; }
+    public string? TenFileXuat { get; set; }
+    public DateTime? NgayXuat { get; set; }
+}
+
+public sealed class ChiTietBaoCaoKhaoSat : BaseEntity
+{
+    public Guid BaoCaoKhaoSatId { get; set; }
+    public Guid CauHoiThongKeId { get; set; }
+    public string MaCauHoi { get; set; } = null!;
+    public string NoiDungCauHoi { get; set; } = null!;
+    public string? MaLuaChon { get; set; }
+    public string? NoiDungLuaChon { get; set; }
+    public decimal SoLuong { get; set; }
+    public decimal MauSoTyLe { get; set; }
+    public decimal TyLe { get; set; }
+    public string? YKienTuDo { get; set; }
 }
 
 public sealed class LichSuXuLyKhaoSat

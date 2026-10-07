@@ -44,6 +44,7 @@ builder.Services.AddScoped<IXayDungVanBanThamDinhService, XayDungVanBanThamDinhS
 builder.Services.AddScoped<IXayDungVanBanTrinhPheDuyetService, XayDungVanBanTrinhPheDuyetService>();
 builder.Services.AddScoped<IXayDungVanBanYKienUbndService, XayDungVanBanYKienUbndService>();
 builder.Services.AddScoped<IXayDungVanBanChamDiemService, XayDungVanBanChamDiemService>();
+builder.Services.AddScoped<IXayDungVanBanTienDoService, XayDungVanBanTienDoService>();
 builder.Services.Configure<QuanTriHeThongPermissionOptions>(
     builder.Configuration.GetSection(QuanTriHeThongPermissionOptions.SectionName));
 builder.Services.AddHttpClient<IQuanTriHeThongPermissionClient, QuanTriHeThongPermissionClient>((serviceProvider, client) =>

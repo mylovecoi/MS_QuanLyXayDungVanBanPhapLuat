@@ -53,7 +53,9 @@ VALUES
 (N'91000000-0000-0000-0000-000000000008', 207, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.ThamTraHdnd', @XayDungVanBanGroupId,
  N'Thẩm tra HĐND dự thảo Nghị quyết', N'XayDungVanBanThamTraHdnd', N'Index', N'HoSoXayDungVanBanThamTraHdnds', N'/xay-dung-van-ban/tham-tra-hdnd', N'Thẩm tra HĐND', N'landmark'),
 (N'91000000-0000-0000-0000-000000000009', 208, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.BanHanh', @XayDungVanBanGroupId,
- N'Ban hành hoặc thông qua văn bản', N'XayDungVanBanBanHanh', N'Index', N'HoSoXayDungVanBanKetQuaBanHanhs', N'/xay-dung-van-ban/ban-hanh', N'Ban hành', N'badge-check');
+ N'Ban hành hoặc thông qua văn bản', N'XayDungVanBanBanHanh', N'Index', N'HoSoXayDungVanBanKetQuaBanHanhs', N'/xay-dung-van-ban/ban-hanh', N'Ban hành', N'badge-check'),
+(N'91000000-0000-0000-0000-000000000010', 209, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.TienDo', @XayDungVanBanGroupId,
+ N'Nhắc nhở tiến độ thực hiện soạn thảo', N'XayDungVanBanTienDo', N'Index', N'HoSoXayDungVanBanNhacTienDos', N'/xay-dung-van-ban/tien-do', N'Nhắc tiến độ', N'clock-alert');
 
 /* Them moi neu RoleAction chua ton tai. */
 INSERT INTO [qtht].[RoleActions]
