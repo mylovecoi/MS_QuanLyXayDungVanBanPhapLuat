@@ -65,9 +65,8 @@ export default defineConfig({
       },
 
       '/api/danh-muc': {
-        target: 'https://localhost:7102',
+        target: 'http://localhost:5132',
         changeOrigin: true,
-        secure: false
       }
     }
   }
