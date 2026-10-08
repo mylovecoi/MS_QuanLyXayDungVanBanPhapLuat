@@ -230,13 +230,127 @@ public sealed class CanhBaoKhaiThacDuLieuService(
     private sealed record CurrentActor(Guid UserId);
 }
 
-public sealed class TraCuuKhaiThacDuLieuService : ITraCuuKhaiThacDuLieuService
+public sealed class TraCuuKhaiThacDuLieuService(
+    KhaiThacDuLieuDbContext dbContext,
+    ICurrentUserContext currentUser) : ITraCuuKhaiThacDuLieuService
 {
-    public Task<PagedResultDto<TraCuuTongHopItemDto>> SearchAsync(string nguonDuLieu, TraCuuRequest request, CancellationToken cancellationToken = default)
+    private const string NguonDangKyXayDungVanBan = "DANG_KY_XAY_DUNG_VAN_BAN";
+    private const string NguonTongHop = "TONG_HOP";
+
+    public async Task<PagedResultDto<TraCuuTongHopItemDto>> SearchAsync(string nguonDuLieu, TraCuuRequest request, CancellationToken cancellationToken = default)
     {
         var pageSize = Math.Clamp(request.PageSize, 1, 200);
         var pageCurrent = Math.Max(request.PageCurrent, 1);
-        return Task.FromResult(new PagedResultDto<TraCuuTongHopItemDto>([], 0, pageSize, pageCurrent));
+
+        if (nguonDuLieu is not NguonDangKyXayDungVanBan and not NguonTongHop)
+        {
+            return new PagedResultDto<TraCuuTongHopItemDto>([], 0, pageSize, pageCurrent);
+        }
+
+        var query =
+            from hoSo in ApplyDangKyDataScope(dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted))
+            join trangThai in dbContext.DangKyTrangThaiHoSos.AsNoTracking()
+                on hoSo.TrangThaiHoSoId equals trangThai.Id into trangThaiJoin
+            from trangThai in trangThaiJoin.DefaultIfEmpty()
+            select new
+            {
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenVanBanDuKien,
+                hoSo.LoaiVanBanId,
+                hoSo.TrangThaiHoSoId,
+                hoSo.DonViSoanThaoId,
+                hoSo.DonViPheDuyetId,
+                hoSo.NamDangKy,
+                hoSo.CreatedAt,
+                hoSo.DuKienThoiGianTrinh,
+                TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
+                MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null
+            };
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var keyword = request.Search.Trim();
+            query = query.Where(x =>
+                x.MaHoSo.Contains(keyword)
+                || x.TenHoSo.Contains(keyword)
+                || x.TenVanBanDuKien.Contains(keyword));
+        }
+
+        if (request.DonViId is Guid donViId)
+        {
+            query = query.Where(x => x.DonViSoanThaoId == donViId || x.DonViPheDuyetId == donViId);
+        }
+
+        if (request.LoaiVanBanId is Guid loaiVanBanId)
+        {
+            query = query.Where(x => x.LoaiVanBanId == loaiVanBanId);
+        }
+
+        if (request.TrangThaiId is Guid trangThaiId)
+        {
+            query = query.Where(x => x.TrangThaiHoSoId == trangThaiId);
+        }
+
+        if (request.Nam is int nam)
+        {
+            query = query.Where(x => x.NamDangKy == nam);
+        }
+
+        if (request.TuNgay is DateTime tuNgay)
+        {
+            query = query.Where(x => x.CreatedAt >= tuNgay);
+        }
+
+        if (request.DenNgay is DateTime denNgay)
+        {
+            var denNgayExclusive = denNgay.Date.AddDays(1);
+            query = query.Where(x => x.CreatedAt < denNgayExclusive);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((pageCurrent - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new TraCuuTongHopItemDto(
+                NguonDangKyXayDungVanBan,
+                x.Id,
+                x.MaHoSo,
+                x.TenHoSo,
+                x.DonViSoanThaoId,
+                x.TrangThaiHoSoId,
+                x.CreatedAt,
+                x.DuKienThoiGianTrinh,
+                x.TenTrangThai ?? x.MaTrangThai))
+            .ToListAsync(cancellationToken);
+
+        return new PagedResultDto<TraCuuTongHopItemDto>(items, totalCount, pageSize, pageCurrent);
+    }
+
+    private IQueryable<DangKyXayDungVanBanTraCuu> ApplyDangKyDataScope(IQueryable<DangKyXayDungVanBanTraCuu> query)
+    {
+        if (currentUser.IsSSA)
+        {
+            return query;
+        }
+
+        if (!currentUser.IsAuthenticated || currentUser.UserId is null)
+        {
+            return query.Where(_ => false);
+        }
+
+        var userIdText = currentUser.UserId.Value.ToString();
+        if (currentUser.DonViId is not Guid donViId)
+        {
+            return query.Where(x => x.CreatedBy == userIdText);
+        }
+
+        return query.Where(x =>
+            x.DonViSoanThaoId == donViId
+            || x.DonViPheDuyetId == donViId
+            || x.CreatedBy == userIdText);
     }
 }
 

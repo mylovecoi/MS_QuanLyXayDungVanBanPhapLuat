@@ -11,6 +11,10 @@ public interface IDanhMucQuyTrinhSoanThaoAppService
     Task<IReadOnlyList<DanhMucLookupDto>> GetDanhMucDonViOptionsAsync(CancellationToken cancellationToken = default);
     Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> CreateAsync(UpsertDanhMucQuyTrinhSoanThaoRequest request, CancellationToken cancellationToken = default);
     Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> UpdateAsync(Guid id, UpsertDanhMucQuyTrinhSoanThaoRequest request, CancellationToken cancellationToken = default);
+    Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> UpdateStepAsync(Guid workflowId, Guid stepId, UpsertDanhMucBuocQuyTrinhRequest request, CancellationToken cancellationToken = default);
+    Task<(bool IsSuccess, string Message)> DeleteStepAsync(Guid workflowId, Guid stepId, CancellationToken cancellationToken = default);
+    Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> UpdateTransitionAsync(Guid workflowId, Guid transitionId, UpsertDanhMucChuyenBuocQuyTrinhRequest request, CancellationToken cancellationToken = default);
+    Task<(bool IsSuccess, string Message)> DeleteTransitionAsync(Guid workflowId, Guid transitionId, CancellationToken cancellationToken = default);
     Task<(bool IsSuccess, string Message)> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 

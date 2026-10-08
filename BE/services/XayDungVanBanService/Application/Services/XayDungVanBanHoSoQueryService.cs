@@ -34,7 +34,8 @@ public sealed class XayDungVanBanHoSoQueryService(
                 x.DonViChuTriSoanThaoId,
                 x.NguoiPhuTrachId,
                 x.NamXayDung,
-                x.CreatedAt))
+                x.CreatedAt,
+                dbContext.HoSoXayDungVanBanYKienDonVis.Count(y => y.HoSoXayDungVanBanId == x.Id && !y.IsDeleted)))
             .ToListAsync(cancellationToken);
 
         return new PagedResultDto<XayDungVanBanHoSoListItemDto>(items, totalCount, pageSize, pageCurrent);

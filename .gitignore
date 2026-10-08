@@ -4,6 +4,7 @@ obj/
 .vscode/
 node_modules/
 dist/
+.tmp-build/
 .env
 .env.local
 *.user

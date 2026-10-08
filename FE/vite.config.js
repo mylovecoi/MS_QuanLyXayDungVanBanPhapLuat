@@ -72,6 +72,11 @@ export default defineConfig({
       '/api/khai-thac-du-lieu': {
         target: 'http://localhost:5138',
         changeOrigin: true,
+      },
+
+      '/api/xay-dung-van-ban': {
+        target: process.env.XDVB_SERVICE_URL || 'http://localhost:50048',
+        changeOrigin: true,
       }
     }
   }

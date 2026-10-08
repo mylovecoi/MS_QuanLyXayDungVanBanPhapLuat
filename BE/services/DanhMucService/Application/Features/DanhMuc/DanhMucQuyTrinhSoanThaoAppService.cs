@@ -89,6 +89,137 @@ public class DanhMucQuyTrinhSoanThaoAppService(IDanhMucQuyTrinhSoanThaoRepositor
         return (true, "Cập nhật quy trình soạn thảo thành công.", updated?.ToDto());
     }
 
+    public async Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> UpdateStepAsync(Guid workflowId, Guid stepId, UpsertDanhMucBuocQuyTrinhRequest request, CancellationToken cancellationToken = default)
+    {
+        var existing = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        if (existing == null)
+        {
+            return (false, "Không tìm thấy quy trình soạn thảo.", null);
+        }
+
+        var step = existing.BuocQuyTrinhs.FirstOrDefault(x => x.Id == stepId);
+        if (step == null)
+        {
+            return (false, "Không tìm thấy bước quy trình.", null);
+        }
+
+        request.Id = stepId;
+        var updateRequest = existing.ToUpsertRequest();
+        var stepIndex = updateRequest.BuocQuyTrinhs.FindIndex(x => x.Id == stepId);
+        updateRequest.BuocQuyTrinhs[stepIndex] = request;
+
+        NormalizeRequest(updateRequest);
+        var validation = await ValidateAsync(updateRequest, workflowId, cancellationToken);
+        if (!validation.IsSuccess)
+        {
+            return (false, validation.Message, null);
+        }
+
+        await _repository.UpdateAsync(updateRequest.ToEntity(), cancellationToken);
+        var updated = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        return (true, "Cập nhật bước quy trình thành công.", updated?.ToDto());
+    }
+
+    public async Task<(bool IsSuccess, string Message)> DeleteStepAsync(Guid workflowId, Guid stepId, CancellationToken cancellationToken = default)
+    {
+        var existing = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        if (existing == null)
+        {
+            return (false, "Không tìm thấy quy trình soạn thảo.");
+        }
+
+        var step = existing.BuocQuyTrinhs.FirstOrDefault(x => x.Id == stepId);
+        if (step == null)
+        {
+            return (false, "Không tìm thấy bước quy trình.");
+        }
+
+        if (existing.BuocQuyTrinhs.Count <= 1)
+        {
+            return (false, "Quy trình phải có ít nhất 1 bước.");
+        }
+
+        if (await _repository.IsAnyStepInUseAsync(new[] { stepId }, cancellationToken))
+        {
+            return (false, "Không thể xóa bước đã được sử dụng trong hồ sơ văn bản.");
+        }
+
+        var updateRequest = existing.ToUpsertRequest();
+        updateRequest.BuocQuyTrinhs = updateRequest.BuocQuyTrinhs.Where(x => x.Id != stepId).ToList();
+        updateRequest.ChuyenBuocs = updateRequest.ChuyenBuocs
+            .Where(x => !x.TuBuocMa.Equals(step.MaBuoc, StringComparison.OrdinalIgnoreCase)
+                        && !x.DenBuocMa.Equals(step.MaBuoc, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        NormalizeRequest(updateRequest);
+        var validation = await ValidateAsync(updateRequest, workflowId, cancellationToken);
+        if (!validation.IsSuccess)
+        {
+            return (false, validation.Message);
+        }
+
+        await _repository.UpdateAsync(updateRequest.ToEntity(), cancellationToken);
+        return (true, "Xóa bước quy trình thành công.");
+    }
+
+    public async Task<(bool IsSuccess, string Message, DanhMucQuyTrinhSoanThaoDto? Data)> UpdateTransitionAsync(Guid workflowId, Guid transitionId, UpsertDanhMucChuyenBuocQuyTrinhRequest request, CancellationToken cancellationToken = default)
+    {
+        var existing = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        if (existing == null)
+        {
+            return (false, "Không tìm thấy quy trình soạn thảo.", null);
+        }
+
+        var transition = existing.ChuyenBuocs.FirstOrDefault(x => x.Id == transitionId);
+        if (transition == null)
+        {
+            return (false, "Không tìm thấy nhánh chuyển bước.", null);
+        }
+
+        request.Id = transitionId;
+        var updateRequest = existing.ToUpsertRequest();
+        var transitionIndex = updateRequest.ChuyenBuocs.FindIndex(x => x.Id == transitionId);
+        updateRequest.ChuyenBuocs[transitionIndex] = request;
+
+        NormalizeRequest(updateRequest);
+        var validation = await ValidateAsync(updateRequest, workflowId, cancellationToken);
+        if (!validation.IsSuccess)
+        {
+            return (false, validation.Message, null);
+        }
+
+        await _repository.UpdateAsync(updateRequest.ToEntity(), cancellationToken);
+        var updated = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        return (true, "Cập nhật nhánh chuyển bước thành công.", updated?.ToDto());
+    }
+
+    public async Task<(bool IsSuccess, string Message)> DeleteTransitionAsync(Guid workflowId, Guid transitionId, CancellationToken cancellationToken = default)
+    {
+        var existing = await _repository.GetByIdAsync(workflowId, cancellationToken);
+        if (existing == null)
+        {
+            return (false, "Không tìm thấy quy trình soạn thảo.");
+        }
+
+        if (existing.ChuyenBuocs.All(x => x.Id != transitionId))
+        {
+            return (false, "Không tìm thấy nhánh chuyển bước.");
+        }
+
+        var updateRequest = existing.ToUpsertRequest();
+        updateRequest.ChuyenBuocs = updateRequest.ChuyenBuocs.Where(x => x.Id != transitionId).ToList();
+
+        NormalizeRequest(updateRequest);
+        var validation = await ValidateAsync(updateRequest, workflowId, cancellationToken);
+        if (!validation.IsSuccess)
+        {
+            return (false, validation.Message);
+        }
+
+        await _repository.UpdateAsync(updateRequest.ToEntity(), cancellationToken);
+        return (true, "Xóa nhánh chuyển bước thành công.");
+    }
+
     public async Task<(bool IsSuccess, string Message)> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var existing = await _repository.GetByIdAsync(id, cancellationToken);
@@ -190,7 +321,7 @@ public class DanhMucQuyTrinhSoanThaoAppService(IDanhMucQuyTrinhSoanThaoRepositor
             .Where(x => x != Guid.Empty)
             .Distinct()
             .ToList();
-        request.DanhMucVanBanId = request.DanhMucVanBanIds.FirstOrDefault();
+        request.DanhMucVanBanId = request.DanhMucVanBanIds.Count > 0 ? request.DanhMucVanBanIds[0] : null;
         request.BuocQuyTrinhs = request.BuocQuyTrinhs
             .Where(x => !string.IsNullOrWhiteSpace(x.MaBuoc) || !string.IsNullOrWhiteSpace(x.TenBuoc) || !string.IsNullOrWhiteSpace(x.LoaiBuoc))
             .Select((x, index) =>

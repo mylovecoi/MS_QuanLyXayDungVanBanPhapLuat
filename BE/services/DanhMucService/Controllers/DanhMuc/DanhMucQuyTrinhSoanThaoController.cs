@@ -104,6 +104,54 @@ public class DanhMucQuyTrinhSoanThaoController(IDanhMucQuyTrinhSoanThaoAppServic
         return Ok(new ApiResponse { IsSuccess = true, Message = result.Message });
     }
 
+    [HttpPut("{id:guid}/buoc/{stepId:guid}")]
+    public async Task<ActionResult<ApiResponse<DanhMucQuyTrinhSoanThaoDto>>> UpdateStep(Guid id, Guid stepId, [FromBody] DanhMucBuocQuyTrinhUpsertApiRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await _appService.UpdateStepAsync(id, stepId, ToApplicationRequest(request), cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse<DanhMucQuyTrinhSoanThaoDto> { IsSuccess = false, Message = result.Message });
+        }
+
+        return Ok(new ApiResponse<DanhMucQuyTrinhSoanThaoDto> { IsSuccess = true, Message = result.Message, Data = result.Data });
+    }
+
+    [HttpDelete("{id:guid}/buoc/{stepId:guid}")]
+    public async Task<ActionResult<ApiResponse>> DeleteStep(Guid id, Guid stepId, CancellationToken cancellationToken = default)
+    {
+        var result = await _appService.DeleteStepAsync(id, stepId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse { IsSuccess = false, Message = result.Message });
+        }
+
+        return Ok(new ApiResponse { IsSuccess = true, Message = result.Message });
+    }
+
+    [HttpPut("{id:guid}/chuyen-buoc/{transitionId:guid}")]
+    public async Task<ActionResult<ApiResponse<DanhMucQuyTrinhSoanThaoDto>>> UpdateTransition(Guid id, Guid transitionId, [FromBody] DanhMucChuyenBuocQuyTrinhUpsertApiRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await _appService.UpdateTransitionAsync(id, transitionId, ToApplicationRequest(request), cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse<DanhMucQuyTrinhSoanThaoDto> { IsSuccess = false, Message = result.Message });
+        }
+
+        return Ok(new ApiResponse<DanhMucQuyTrinhSoanThaoDto> { IsSuccess = true, Message = result.Message, Data = result.Data });
+    }
+
+    [HttpDelete("{id:guid}/chuyen-buoc/{transitionId:guid}")]
+    public async Task<ActionResult<ApiResponse>> DeleteTransition(Guid id, Guid transitionId, CancellationToken cancellationToken = default)
+    {
+        var result = await _appService.DeleteTransitionAsync(id, transitionId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse { IsSuccess = false, Message = result.Message });
+        }
+
+        return Ok(new ApiResponse { IsSuccess = true, Message = result.Message });
+    }
+
     private static UpsertDanhMucQuyTrinhSoanThaoRequest ToApplicationRequest(DanhMucQuyTrinhSoanThaoUpsertApiRequest request)
     {
         return new UpsertDanhMucQuyTrinhSoanThaoRequest
@@ -153,6 +201,47 @@ public class DanhMucQuyTrinhSoanThaoController(IDanhMucQuyTrinhSoanThaoAppServic
                 MoTa = x.MoTa,
                 GhiChu = x.GhiChu
             }).ToList()
+        };
+    }
+
+    private static UpsertDanhMucBuocQuyTrinhRequest ToApplicationRequest(DanhMucBuocQuyTrinhUpsertApiRequest request)
+    {
+        return new UpsertDanhMucBuocQuyTrinhRequest
+        {
+            Id = request.Id,
+            MaBuoc = request.MaBuoc,
+            TenBuoc = request.TenBuoc,
+            ThuTuSapXep = request.ThuTuSapXep,
+            LoaiBuoc = request.LoaiBuoc,
+            BatBuoc = request.BatBuoc,
+            ChoPhepBoQua = request.ChoPhepBoQua,
+            ChoPhepQuayLui = request.ChoPhepQuayLui,
+            CachHoanThanh = request.CachHoanThanh,
+            SoLuongPhanHoiToiThieu = request.SoLuongPhanHoiToiThieu,
+            YeuCauFileDinhKem = request.YeuCauFileDinhKem,
+            SoLanTraLaiToiDa = request.SoLanTraLaiToiDa,
+            SoNgayXuLyTieuChuan = request.SoNgayXuLyTieuChuan,
+            SoNgayCanhBaoSapHan = request.SoNgayCanhBaoSapHan,
+            DonViTiepNhanMacDinhId = request.DonViTiepNhanMacDinhId,
+            MoTa = request.MoTa,
+            GhiChu = request.GhiChu
+        };
+    }
+
+    private static UpsertDanhMucChuyenBuocQuyTrinhRequest ToApplicationRequest(DanhMucChuyenBuocQuyTrinhUpsertApiRequest request)
+    {
+        return new UpsertDanhMucChuyenBuocQuyTrinhRequest
+        {
+            Id = request.Id,
+            TuBuocMa = request.TuBuocMa,
+            DenBuocMa = request.DenBuocMa,
+            DieuKienKetQua = request.DieuKienKetQua,
+            LoaiChuyenBuoc = request.LoaiChuyenBuoc,
+            LaNhanhMacDinh = request.LaNhanhMacDinh,
+            YeuCauNhapLyDo = request.YeuCauNhapLyDo,
+            IsKetThuc = request.IsKetThuc,
+            MoTa = request.MoTa,
+            GhiChu = request.GhiChu
         };
     }
 }

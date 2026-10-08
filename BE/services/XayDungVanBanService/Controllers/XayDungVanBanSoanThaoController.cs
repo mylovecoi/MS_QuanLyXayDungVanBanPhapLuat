@@ -323,4 +323,24 @@ public sealed class XayDungVanBanSoanThaoController(
         return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpPost("{hoSoId:guid}/trinh-tham-dinh")]
+    public async Task<ActionResult<TrinhThamDinhDto>> TrinhThamDinh(
+        Guid hoSoId,
+        [FromBody] TrinhThamDinhRequest request,
+        CancellationToken cancellationToken)
+    {
+        var accessResult = await EnsurePermissionAsync("XayDungVanBanSoanThao", "Approve", "Approve", cancellationToken);
+        if (accessResult is not null) return accessResult;
+
+        try
+        {
+            var result = await soanThaoService.TrinhThamDinhAsync(hoSoId, request, cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
+    }
+
 }
