@@ -188,17 +188,6 @@ export default function DanhSachDangKyPage() {
                         Quản lý danh sách đăng ký xây dựng văn bản
                     </p>
                 </div>
-
-                <button
-                    type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600"
-                >
-                    <span className="text-lg leading-none">
-                        +
-                    </span>
-
-                    Thêm mới
-                </button>
             </div>
 
             {/* Table */}

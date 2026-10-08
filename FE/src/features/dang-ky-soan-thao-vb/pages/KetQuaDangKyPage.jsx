@@ -1,4 +1,4 @@
-import Badge from "../../../app/components/ui/badge/Badge";
+import Badge from "../../../app/components/ui/badge/Badge.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
 import {useMemo, useState} from "react";
 

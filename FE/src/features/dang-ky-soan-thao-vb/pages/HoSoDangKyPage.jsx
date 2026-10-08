@@ -1,8 +1,10 @@
-import Badge from "../../../app/components/ui/badge/Badge";
+import Badge from "../../../app/components/ui/badge/Badge.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
 import {useMemo, useState} from "react";
+import {useNavigate} from "react-router";
 
 export default function HoSoDangKyPage() {
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
 
     const columns = useMemo(
@@ -102,15 +104,24 @@ export default function HoSoDangKyPage() {
 
     return (
         <div>
-            <div className="mb-5">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-                    Hồ sơ đăng ký
-                </h3>
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
+                        Hồ sơ đăng ký
+                    </h3>
 
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Quản lý hồ sơ đăng ký xây dựng văn bản
-                </p>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Quản lý hồ sơ đăng ký xây dựng văn bản
+                    </p>
+                </div>
+
+                <button type="button" onClick={() => navigate("/dang-ky-xay-dung-van-ban/ho-so/them-moi")}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600">
+                    <span className="text-lg leading-none"> + </span>
+                    Thêm mới
+                </button>
             </div>
+
 
             <BasicTableTwo
                 data={data}
