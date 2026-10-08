@@ -2,6 +2,10 @@ import HoSoDetailPage from "./pages/HoSoDetailPage.jsx";
 import HoSoFormPage from "./pages/HoSoFormPage.jsx";
 import HoSoListPage from "./pages/HoSoListPage.jsx";
 import HoSoYKienDongGopPage from "./pages/HoSoYKienDongGopPage.jsx";
+import HoSoTrinhThamDinhPage from "./pages/HoSoTrinhThamDinhPage.jsx";
+import HoSoTrinhThamDinhListPage from "./pages/HoSoTrinhThamDinhListPage.jsx";
+import HoSoThamDinhListPage from "./pages/HoSoThamDinhListPage.jsx";
+import HoSoThamDinhPage from "./pages/HoSoThamDinhPage.jsx";
 
 export const xayDungVanBanRoutes = [
   {
@@ -59,5 +63,25 @@ export const xayDungVanBanRoutes = [
   {
     path: "/admin/xay-dung-van-ban/ho-so/:id/chinh-sua",
     element: <HoSoFormPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-tham-dinh",
+    element: <HoSoTrinhThamDinhListPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-tham-dinh/:id",
+    element: <HoSoTrinhThamDinhPage />,
+  },
+  {
+    path: "/admin/xay-dung-van-ban/ho-so/:id/trinh-tham-dinh",
+    element: <HoSoTrinhThamDinhPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/tham-dinh",
+    element: <HoSoThamDinhListPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/tham-dinh/:id",
+    element: <HoSoThamDinhPage />,
   },
 ];

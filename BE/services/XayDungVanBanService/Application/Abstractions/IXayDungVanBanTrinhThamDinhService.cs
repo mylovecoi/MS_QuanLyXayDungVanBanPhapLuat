@@ -4,6 +4,8 @@ namespace XayDungVanBanService.Application.Abstractions;
 
 public interface IXayDungVanBanTrinhThamDinhService
 {
+    Task<IReadOnlyList<HoSoTrinhThamDinhListItemDto>> GetListAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<HoSoNguonTrinhThamDinhDto>> GetNguonKeThuaAsync(CancellationToken cancellationToken = default);
     Task<XayDungVanBanTrinhThamDinhDto> CreateAsync(TaoHoSoTrinhThamDinhRequest request, CancellationToken cancellationToken = default);
     Task<XayDungVanBanTrinhThamDinhDto?> GetByHoSoIdAsync(Guid hoSoId, CancellationToken cancellationToken = default);
     Task<XayDungVanBanTrinhThamDinhDto?> UpdateAsync(Guid hoSoId, CapNhatHoSoTrinhThamDinhRequest request, CancellationToken cancellationToken = default);

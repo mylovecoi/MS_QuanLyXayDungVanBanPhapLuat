@@ -18,6 +18,7 @@ public sealed class HoSoXayDungVanBanSoanThao
 public sealed class HoSoXayDungVanBanTrinhThamDinh
 {
     public Guid BoHoSoNghiepVuId { get; set; }
+    public Guid? FileDuThaoId { get; set; }
     public string? SoToTrinh { get; set; }
     public DateTime? NgayToTrinh { get; set; }
     public DateTime? NgayGuiThamDinh { get; set; }

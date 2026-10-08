@@ -5,6 +5,8 @@ obj/
 node_modules/
 dist/
 .tmp-build/
+.codex-build/
+.codex/
 .env
 .env.local
 *.user

@@ -24,6 +24,8 @@ public sealed record XayDungVanBanTrinhThamDinhDto(
     Guid HoSoId,
     Guid BoHoSoId,
     Guid BoHoSoNguonId,
+    Guid? FileDuThaoId,
+    Guid BuocQuyTrinhId,
     string TrangThai,
     string? SoToTrinh,
     DateTime? NgayToTrinh,
@@ -33,10 +35,33 @@ public sealed record XayDungVanBanTrinhThamDinhDto(
     DateTime? HanDeNghiTraKetQua,
     string? NoiDungGhiChu);
 
+public sealed record HoSoTrinhThamDinhListItemDto(
+    Guid HoSoId,
+    Guid BoHoSoId,
+    string MaHoSo,
+    string TenHoSo,
+    string TenDuThaoVanBan,
+    int NamXayDung,
+    string TrangThai,
+    Guid DonViNhanThamDinhId,
+    DateTime NgayTao,
+    DateTime? NgayGuiThamDinh);
+
+public sealed record HoSoNguonTrinhThamDinhDto(
+    Guid HoSoId,
+    string MaHoSo,
+    string TenHoSo,
+    string TenDuThaoVanBan,
+    int NamXayDung,
+    Guid QuyTrinhSoanThaoId,
+    Guid BuocHienTaiId,
+    Guid TrangThaiHoSoId);
+
 public sealed record DieuKienGuiThamDinhDto(bool Dat, IReadOnlyList<string> DieuKienChuaDat);
 
 public sealed class GuiThamDinhRequest
 {
+    public Guid FileDuThaoId { get; init; }
     public Guid BuocQuyTrinhTiepTheoId { get; init; }
     public Guid TrangThaiHoSoTiepTheoId { get; init; }
 }
@@ -46,4 +71,5 @@ public sealed record TaiTaiLieuTrinhThamDinhRequest(
     string TenTaiLieu,
     string TenFile,
     string? MimeType,
-    Stream NoiDung);
+    Stream NoiDung,
+    string? LoaiDinhKem);

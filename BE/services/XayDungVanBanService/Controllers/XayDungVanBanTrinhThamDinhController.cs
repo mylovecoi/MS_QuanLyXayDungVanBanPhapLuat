@@ -8,8 +8,22 @@ namespace XayDungVanBanService.Controllers;
 
 [ApiController]
 [Route("api/xay-dung-van-ban/trinh-tham-dinh")]
-public sealed class XayDungVanBanTrinhThamDinhController(ICurrentUserContext user, IQuanTriHeThongPermissionClient permissionClient, IXayDungVanBanTrinhThamDinhService service) : XayDungVanBanControllerBase(user, permissionClient)
+public sealed class XayDungVanBanTrinhThamDinhController(ICurrentUserContext user, IQuanTriHeThongPermissionClient permissionClient, IXayDungVanBanTrinhThamDinhService service, IWebHostEnvironment environment) : XayDungVanBanControllerBase(user, permissionClient)
 {
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<HoSoTrinhThamDinhListItemDto>>> GetList(CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("XayDungVanBanTrinhThamDinh", "Index", "Index", cancellationToken);
+        return denied is not null ? denied : Ok(await service.GetListAsync(cancellationToken));
+    }
+
+    [HttpGet("ho-so-nguon")]
+    public async Task<ActionResult<IReadOnlyList<HoSoNguonTrinhThamDinhDto>>> GetNguonKeThua(CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("XayDungVanBanTrinhThamDinh", "Create", "Create", cancellationToken);
+        return denied is not null ? denied : Ok(await service.GetNguonKeThuaAsync(cancellationToken));
+    }
+
     [HttpPost]
     public async Task<ActionResult<XayDungVanBanTrinhThamDinhDto>> Create([FromBody] TaoHoSoTrinhThamDinhRequest request, CancellationToken cancellationToken)
     {
@@ -48,13 +62,26 @@ public sealed class XayDungVanBanTrinhThamDinhController(ICurrentUserContext use
 
     [HttpPost("{hoSoId:guid}/tai-lieu")]
     [RequestSizeLimit(100_000_000)]
-    public async Task<ActionResult<XayDungVanBanTaiLieuDto>> UploadTaiLieu(Guid hoSoId, [FromForm] IFormFile file, [FromForm] Guid loaiTaiLieuId, [FromForm] string tenTaiLieu, CancellationToken cancellationToken)
+    public async Task<ActionResult<XayDungVanBanTaiLieuDto>> UploadTaiLieu(Guid hoSoId, [FromForm] IFormFile file, [FromForm] Guid loaiTaiLieuId, [FromForm] string tenTaiLieu, [FromForm] string? loaiDinhKem, CancellationToken cancellationToken)
     {
         if (file.Length == 0) return BadRequest("File tải lên không có nội dung.");
         var denied = await EnsurePermissionAsync("XayDungVanBanTrinhThamDinh", "Create", "Create", cancellationToken);
         if (denied is not null) return denied;
-        try { await using var stream = file.OpenReadStream(); var result = await service.UploadTaiLieuAsync(hoSoId, new TaiTaiLieuTrinhThamDinhRequest(loaiTaiLieuId, tenTaiLieu, file.FileName, file.ContentType, stream), cancellationToken); return result is null ? NotFound() : Ok(result); }
+        try { await using var stream = file.OpenReadStream(); var result = await service.UploadTaiLieuAsync(hoSoId, new TaiTaiLieuTrinhThamDinhRequest(loaiTaiLieuId, tenTaiLieu, file.FileName, file.ContentType, stream, loaiDinhKem), cancellationToken); return result is null ? NotFound() : Ok(result); }
         catch (InvalidOperationException exception) { return BadRequest(exception.Message); }
+    }
+
+    [HttpGet("{hoSoId:guid}/tai-lieu/{fileId:guid}/tai-xuong")]
+    public async Task<IActionResult> TaiXuongTaiLieu(Guid hoSoId, Guid fileId, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("XayDungVanBanTrinhThamDinh", "Index", "Index", cancellationToken);
+        if (denied is not null) return denied;
+        var file = (await service.GetTaiLieuAsync(hoSoId, cancellationToken))?.FirstOrDefault(x => x.Id == fileId);
+        if (file is null) return NotFound();
+        var uploadsRoot = Path.GetFullPath(Path.Combine(environment.ContentRootPath, "uploads")) + Path.DirectorySeparatorChar;
+        var physicalPath = Path.GetFullPath(Path.Combine(environment.ContentRootPath, file.DuongDanFile.Replace('/', Path.DirectorySeparatorChar)));
+        if (!physicalPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase) || !System.IO.File.Exists(physicalPath)) return NotFound();
+        return PhysicalFile(physicalPath, file.MimeType ?? "application/octet-stream", file.TenFile);
     }
 
     [HttpDelete("{hoSoId:guid}/tai-lieu/{boHoSoTaiLieuId:guid}")]

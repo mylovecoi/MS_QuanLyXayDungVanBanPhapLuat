@@ -192,3 +192,30 @@ export async function trinhThamDinh(hoSoId, input) {
 
   return response.data;
 }
+
+const TRINH_THAM_DINH_PATH = "/api/xay-dung-van-ban/trinh-tham-dinh";
+export async function getDanhSachHoSoTrinhThamDinh() { return (await axiosClient.get(TRINH_THAM_DINH_PATH, { baseURL: "" })).data; }
+export async function getHoSoNguonTrinhThamDinh() { return (await axiosClient.get(`${TRINH_THAM_DINH_PATH}/ho-so-nguon`, { baseURL: "" })).data; }
+export async function getHoSoTrinhThamDinh(hoSoId) { return (await axiosClient.get(`${TRINH_THAM_DINH_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function createHoSoTrinhThamDinh(input) { return (await axiosClient.post(TRINH_THAM_DINH_PATH, input, { baseURL: "" })).data; }
+export async function updateHoSoTrinhThamDinh(hoSoId, input) { return (await axiosClient.put(`${TRINH_THAM_DINH_PATH}/${hoSoId}`, input, { baseURL: "" })).data; }
+export async function getTaiLieuTrinhThamDinh(hoSoId) { return (await axiosClient.get(`${TRINH_THAM_DINH_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuTrinhThamDinh(hoSoId, { file, loaiTaiLieuId, tenTaiLieu, loaiDinhKem }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); form.append("loaiDinhKem", loaiDinhKem); return (await axiosClient.post(`${TRINH_THAM_DINH_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function taiXuongTaiLieuTrinhThamDinh(hoSoId, fileId, fileName) { const response = await axiosClient.get(`${TRINH_THAM_DINH_PATH}/${hoSoId}/tai-lieu/${fileId}/tai-xuong`, { baseURL: "", responseType: "blob" }); const url = URL.createObjectURL(response.data); const link = document.createElement("a"); link.href = url; link.download = fileName || "tai-lieu"; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url); }
+export async function kiemTraGuiThamDinh(hoSoId) { return (await axiosClient.get(`${TRINH_THAM_DINH_PATH}/${hoSoId}/kiem-tra-truoc-gui-tham-dinh`, { baseURL: "" })).data; }
+export async function guiThamDinh(hoSoId, input) { return (await axiosClient.post(`${TRINH_THAM_DINH_PATH}/${hoSoId}/gui-tham-dinh`, input, { baseURL: "" })).data; }
+
+const THAM_DINH_PATH = "/api/xay-dung-van-ban/tham-dinh";
+export async function getDanhSachHoSoThamDinh() { return (await axiosClient.get(THAM_DINH_PATH, { baseURL: "" })).data; }
+export async function getHoSoThamDinh(hoSoId) { return (await axiosClient.get(`${THAM_DINH_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function createHoSoThamDinh(hoSoId) { return (await axiosClient.post(THAM_DINH_PATH, { hoSoId }, { baseURL: "" })).data; }
+export async function tiepNhanThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/tiep-nhan`, input, { baseURL: "" })).data; }
+export async function capNhatKetQuaThamDinh(hoSoId, input) { return (await axiosClient.put(`${THAM_DINH_PATH}/${hoSoId}/ket-qua`, input, { baseURL: "" })).data; }
+export async function getTaiLieuThamDinh(hoSoId) { return (await axiosClient.get(`${THAM_DINH_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuThamDinh(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function taiXuongTaiLieuThamDinh(hoSoId, fileId, fileName) { const response = await axiosClient.get(`${THAM_DINH_PATH}/${hoSoId}/tai-lieu/${fileId}/tai-xuong`, { baseURL: "", responseType: "blob" }); const url = URL.createObjectURL(response.data); const link = document.createElement("a"); link.href = url; link.download = fileName || "tai-lieu"; document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url); }
+export async function kiemTraGuiKetQuaThamDinh(hoSoId) { return (await axiosClient.get(`${THAM_DINH_PATH}/${hoSoId}/kiem-tra-truoc-gui-ket-qua`, { baseURL: "" })).data; }
+export async function yeuCauBoSungThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/yeu-cau-bo-sung`, input, { baseURL: "" })).data; }
+export async function traLaiTrinhThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/tra-lai-trinh-tham-dinh`, input, { baseURL: "" })).data; }
+export async function guiKetQuaThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/gui-ket-qua`, input, { baseURL: "" })).data; }
+export async function soSanhDuThaoThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/so-sanh-du-thao`, input, { baseURL: "" })).data; }

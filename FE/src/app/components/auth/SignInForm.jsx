@@ -10,12 +10,16 @@ import Input from "../forms/input/InputField";
 import Button from "../ui/button/Button.jsx";
 import {loginApi} from "../../../shared/api/authApi.js";
 
+const DEV_CREDENTIALS = import.meta.env.DEV
+    ? {username: "sa", password: "Cs@2012!"}
+    : {username: "", password: ""};
+
 export default function SignInForm() {
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState(DEV_CREDENTIALS.username);
+    const [password, setPassword] = useState(DEV_CREDENTIALS.password);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 

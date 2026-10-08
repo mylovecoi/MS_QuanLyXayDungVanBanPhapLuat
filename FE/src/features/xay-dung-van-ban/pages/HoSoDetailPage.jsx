@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import Alert from "../../../app/components/ui/alert/Alert";
 import Badge from "../../../app/components/ui/badge/Badge";
 import { getDonViOptions } from "../../danh-muc/api/donViApi";
@@ -77,7 +77,6 @@ function getStepStatusMeta(status) {
 
 export default function HoSoDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [vanBans, setVanBans] = useState([]);
@@ -150,9 +149,6 @@ export default function HoSoDetailPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <button type="button" onClick={() => navigate("/admin/xay-dung-van-ban/ho-so")} className="mb-3 text-sm font-medium text-brand-500 hover:text-brand-600">
-            Quay lại danh sách
-          </button>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Chi tiết hồ sơ xây dựng văn bản</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Thông tin hồ sơ, tiến độ xử lý và lịch sử chuyển bước.</p>
         </div>

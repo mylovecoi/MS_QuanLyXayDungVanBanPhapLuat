@@ -384,9 +384,12 @@ export default function HoSoListPage() {
                     <td className="px-5 py-4 text-center text-sm text-gray-500">{formatDate(item.createdAt)}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap justify-center gap-1">
-                        <button type="button" onClick={() => navigate(`/admin/xay-dung-van-ban/ho-so/chi-tiet/${item.id}`)} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-brand-500">Xem chi tiết</button>
+                        <button type="button" onClick={() => window.open(`/admin/xay-dung-van-ban/ho-so/chi-tiet/${item.id}`, "_blank", "noopener,noreferrer")} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-brand-500">Xem chi tiết</button>
                         {canModify && canNhapYKien(item) && (
                           <button type="button" onClick={() => navigate(`/admin/xay-dung-van-ban/ho-so/${item.id}/y-kien-dong-gop`)} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-brand-500">Nhập ý kiến</button>
+                        )}
+                        {canModify && hasYKien(item) && (
+                          <button type="button" onClick={() => navigate(`/admin/xay-dung-van-ban/ho-so/${item.id}/trinh-tham-dinh`)} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-brand-500">Trình thẩm định</button>
                         )}
                         {canModify && hasYKien(item) && (
                           <button type="button" onClick={() => openTransferModal(item)} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-brand-500">Chuyển bước</button>
