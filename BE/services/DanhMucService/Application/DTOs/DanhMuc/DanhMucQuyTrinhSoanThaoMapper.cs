@@ -106,6 +106,27 @@ public static class DanhMucQuyTrinhSoanThaoMapper
         };
     }
 
+    public static UpsertDanhMucQuyTrinhSoanThaoRequest ToUpsertRequest(this DanhMucQuyTrinhSoanThaoEntity entity)
+    {
+        return new UpsertDanhMucQuyTrinhSoanThaoRequest
+        {
+            Id = entity.Id,
+            MaQuyTrinh = entity.MaQuyTrinh,
+            TenQuyTrinh = entity.TenQuyTrinh,
+            LoaiQuyTrinh = entity.LoaiQuyTrinh,
+            DanhMucVanBanId = entity.DanhMucVanBanId,
+            DanhMucVanBanIds = entity.DanhMucVanBanIds.ToList(),
+            CapApDung = entity.CapApDung,
+            CapApDungs = entity.CapApDungs.ToList(),
+            PhienBan = entity.PhienBan,
+            TrangThai = entity.TrangThai,
+            MoTa = entity.MoTa,
+            GhiChu = entity.GhiChu,
+            BuocQuyTrinhs = entity.BuocQuyTrinhs.Select(x => x.ToUpsertRequest()).ToList(),
+            ChuyenBuocs = entity.ChuyenBuocs.Select(x => x.ToUpsertRequest()).ToList()
+        };
+    }
+
     public static DanhMucBuocQuyTrinhEntity ToEntity(this UpsertDanhMucBuocQuyTrinhRequest request)
     {
         return new DanhMucBuocQuyTrinhEntity
@@ -130,6 +151,30 @@ public static class DanhMucQuyTrinhSoanThaoMapper
         };
     }
 
+    public static UpsertDanhMucBuocQuyTrinhRequest ToUpsertRequest(this DanhMucBuocQuyTrinhEntity entity)
+    {
+        return new UpsertDanhMucBuocQuyTrinhRequest
+        {
+            Id = entity.Id,
+            MaBuoc = entity.MaBuoc,
+            TenBuoc = entity.TenBuoc,
+            ThuTuSapXep = entity.ThuTuSapXep,
+            LoaiBuoc = entity.LoaiBuoc,
+            BatBuoc = entity.BatBuoc,
+            ChoPhepBoQua = entity.ChoPhepBoQua,
+            ChoPhepQuayLui = entity.ChoPhepQuayLui,
+            CachHoanThanh = entity.CachHoanThanh,
+            SoLuongPhanHoiToiThieu = entity.SoLuongPhanHoiToiThieu,
+            YeuCauFileDinhKem = entity.YeuCauFileDinhKem,
+            SoLanTraLaiToiDa = entity.SoLanTraLaiToiDa,
+            SoNgayXuLyTieuChuan = entity.SoNgayXuLyTieuChuan,
+            SoNgayCanhBaoSapHan = entity.SoNgayCanhBaoSapHan,
+            DonViTiepNhanMacDinhId = entity.DonViTiepNhanMacDinhId,
+            MoTa = entity.MoTa,
+            GhiChu = entity.GhiChu
+        };
+    }
+
     public static DanhMucChuyenBuocQuyTrinhEntity ToEntity(this UpsertDanhMucChuyenBuocQuyTrinhRequest request)
     {
         return new DanhMucChuyenBuocQuyTrinhEntity
@@ -144,6 +189,23 @@ public static class DanhMucQuyTrinhSoanThaoMapper
             IsKetThuc = request.IsKetThuc,
             MoTa = request.MoTa,
             GhiChu = request.GhiChu
+        };
+    }
+
+    public static UpsertDanhMucChuyenBuocQuyTrinhRequest ToUpsertRequest(this DanhMucChuyenBuocQuyTrinhEntity entity)
+    {
+        return new UpsertDanhMucChuyenBuocQuyTrinhRequest
+        {
+            Id = entity.Id,
+            TuBuocMa = entity.TuBuocMa,
+            DenBuocMa = entity.DenBuocMa,
+            DieuKienKetQua = entity.DieuKienKetQua,
+            LoaiChuyenBuoc = entity.LoaiChuyenBuoc,
+            LaNhanhMacDinh = entity.LaNhanhMacDinh,
+            YeuCauNhapLyDo = entity.YeuCauNhapLyDo,
+            IsKetThuc = entity.IsKetThuc,
+            MoTa = entity.MoTa,
+            GhiChu = entity.GhiChu
         };
     }
 }

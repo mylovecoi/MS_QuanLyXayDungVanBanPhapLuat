@@ -32,7 +32,8 @@ public sealed record XayDungVanBanHoSoListItemDto(
     Guid DonViChuTriSoanThaoId,
     Guid? NguoiPhuTrachId,
     int NamXayDung,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    int SoYKienDonVi);
 
 public sealed record XayDungVanBanHoSoDetailDto(
     Guid Id,

@@ -78,3 +78,42 @@ public sealed class DongBoKhaiThacDuLieuLog : BaseEntity
     public int SoBanGhi { get; set; }
     public string? Loi { get; set; }
 }
+
+public sealed class DangKyXayDungVanBanTraCuu : BaseEntity
+{
+    [Required, MaxLength(50)]
+    public string MaHoSo { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenHoSo { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenVanBanDuKien { get; set; } = string.Empty;
+
+    public Guid LoaiVanBanId { get; set; }
+    public Guid QuyTrinhSoanThaoId { get; set; }
+    public Guid BuocHienTaiId { get; set; }
+    public Guid TrangThaiHoSoId { get; set; }
+    public Guid DonViSoanThaoId { get; set; }
+    public Guid DonViPheDuyetId { get; set; }
+    public int NamDangKy { get; set; }
+    public DateTime? DuKienThoiGianTrinh { get; set; }
+    public bool DaKhoiTaoQuyTrinhXayDung { get; set; }
+    public Guid? HoSoXayDungVanBanId { get; set; }
+}
+
+public sealed class DangKyTrangThaiHoSoTraCuu : BaseEntity
+{
+    [Required, MaxLength(100)]
+    public string MaTrangThai { get; set; } = string.Empty;
+
+    [Required, MaxLength(255)]
+    public string TenTrangThai { get; set; } = string.Empty;
+
+    [MaxLength(50)]
+    public string? MauHienThi { get; set; }
+
+    public int ThuTuSapXep { get; set; }
+    public bool LaTrangThaiKetThuc { get; set; }
+    public bool TrangThai { get; set; } = true;
+}

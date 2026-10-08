@@ -26,11 +26,17 @@ public sealed class CapNhatHoSoSoanThaoRequest
 {
     [Required, MaxLength(500)] public string TenHoSo { get; init; } = string.Empty;
     [Required, MaxLength(500)] public string TenDuThaoVanBan { get; init; } = string.Empty;
+    public Guid? DanhMucVanBanId { get; init; }
+    public Guid? QuyTrinhSoanThaoId { get; init; }
+    public Guid? BuocHienTaiId { get; init; }
+    public Guid? TrangThaiHoSoId { get; init; }
+    public Guid? DonViChuTriSoanThaoId { get; init; }
     public Guid? NguoiPhuTrachId { get; init; }
     [Range(2000, 9999)] public int NamXayDung { get; init; }
     public DateTime? ThoiGianDuKienBatDau { get; init; }
     public DateTime? ThoiGianDuKienHoanThanh { get; init; }
     public string? MoTa { get; init; }
+    public Guid? HoSoDangKyXayDungVanBanId { get; init; }
     public string? CanCuXayDung { get; init; }
     public string? PhamViDieuChinh { get; init; }
     public string? NoiDungChinhSach { get; init; }
@@ -129,6 +135,8 @@ public sealed class TrinhThamDinhRequest
     public Guid BuocQuyTrinhTiepTheoId { get; init; }
     public Guid TrangThaiHoSoTiepTheoId { get; init; }
     public Guid DonViNhanThamDinhId { get; init; }
+    public DateTime? NgayChuyen { get; init; }
+    public DateTime? HanDeNghiTraKetQua { get; init; }
     public string? NoiDungGhiChu { get; init; }
 }
 

@@ -8,6 +8,8 @@ public sealed class KhaiThacDuLieuDbContext(DbContextOptions<KhaiThacDuLieuDbCon
     public DbSet<CauHinhCanhBaoKhaiThacDuLieu> CauHinhCanhBaoKhaiThacDuLieus => Set<CauHinhCanhBaoKhaiThacDuLieu>();
     public DbSet<CanhBaoKhaiThacDuLieu> CanhBaoKhaiThacDuLieus => Set<CanhBaoKhaiThacDuLieu>();
     public DbSet<DongBoKhaiThacDuLieuLog> DongBoKhaiThacDuLieuLogs => Set<DongBoKhaiThacDuLieuLog>();
+    public DbSet<DangKyXayDungVanBanTraCuu> DangKyXayDungVanBans => Set<DangKyXayDungVanBanTraCuu>();
+    public DbSet<DangKyTrangThaiHoSoTraCuu> DangKyTrangThaiHoSos => Set<DangKyTrangThaiHoSoTraCuu>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +30,23 @@ public sealed class KhaiThacDuLieuDbContext(DbContextOptions<KhaiThacDuLieuDbCon
         modelBuilder.Entity<DongBoKhaiThacDuLieuLog>(entity =>
         {
             entity.HasIndex(x => new { x.NguonDuLieu, x.LoaiDongBo, x.BatDauLuc });
+        });
+
+        modelBuilder.Entity<DangKyXayDungVanBanTraCuu>(entity =>
+        {
+            entity.ToTable("DangKyXayDungVanBans");
+            entity.HasIndex(x => x.MaHoSo);
+            entity.HasIndex(x => x.TrangThaiHoSoId);
+            entity.HasIndex(x => x.LoaiVanBanId);
+            entity.HasIndex(x => x.NamDangKy);
+            entity.HasIndex(x => new { x.DonViSoanThaoId, x.TrangThaiHoSoId, x.CreatedAt });
+            entity.HasIndex(x => new { x.DonViPheDuyetId, x.TrangThaiHoSoId, x.CreatedAt });
+        });
+
+        modelBuilder.Entity<DangKyTrangThaiHoSoTraCuu>(entity =>
+        {
+            entity.ToTable("DangKyTrangThaiHoSos");
+            entity.HasIndex(x => x.MaTrangThai);
         });
     }
 }

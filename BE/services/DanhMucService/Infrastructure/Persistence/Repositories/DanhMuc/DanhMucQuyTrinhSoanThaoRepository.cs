@@ -237,7 +237,7 @@ public class DanhMucQuyTrinhSoanThaoRepository(DanhMucDbContext dbContext) : IDa
             MaQuyTrinh = entity.MaQuyTrinh,
             TenQuyTrinh = entity.TenQuyTrinh,
             LoaiQuyTrinh = entity.LoaiQuyTrinh,
-            DanhMucVanBanId = entity.DanhMucVanBanIds.FirstOrDefault(),
+            DanhMucVanBanId = entity.DanhMucVanBanIds.Count > 0 ? entity.DanhMucVanBanIds[0] : null,
             DanhMucVanBanIds = ConvertGuidListToString(entity.DanhMucVanBanIds),
             CapApDung = string.Join(",", entity.CapApDungs),
             PhienBan = entity.PhienBan > 0 ? entity.PhienBan : 1,
@@ -258,7 +258,7 @@ public class DanhMucQuyTrinhSoanThaoRepository(DanhMucDbContext dbContext) : IDa
         workflow.MaQuyTrinh = entity.MaQuyTrinh;
         workflow.TenQuyTrinh = entity.TenQuyTrinh;
         workflow.LoaiQuyTrinh = entity.LoaiQuyTrinh;
-        workflow.DanhMucVanBanId = entity.DanhMucVanBanIds.FirstOrDefault();
+        workflow.DanhMucVanBanId = entity.DanhMucVanBanIds.Count > 0 ? entity.DanhMucVanBanIds[0] : null;
         workflow.DanhMucVanBanIds = ConvertGuidListToString(entity.DanhMucVanBanIds);
         workflow.CapApDung = string.Join(",", entity.CapApDungs);
         workflow.PhienBan = entity.PhienBan > 0 ? entity.PhienBan : 1;

@@ -16,8 +16,8 @@ public sealed class XayDungVanBanSoanThaoService(
         TaoHoSoSoanThaoRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         EnsureRequiredIds(request);
+        var actor = RequireActor(request.DonViChuTriSoanThaoId);
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         var hoSo = new HoSoXayDungVanBan
@@ -84,14 +84,40 @@ public sealed class XayDungVanBanSoanThaoService(
         CapNhatHoSoSoanThaoRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return null;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
+        if (request.DanhMucVanBanId is { } danhMucVanBanId && danhMucVanBanId != Guid.Empty)
+        {
+            data.HoSo.DanhMucVanBanId = danhMucVanBanId;
+        }
+
+        if (request.QuyTrinhSoanThaoId is { } quyTrinhSoanThaoId && quyTrinhSoanThaoId != Guid.Empty)
+        {
+            data.HoSo.QuyTrinhSoanThaoId = quyTrinhSoanThaoId;
+        }
+
+        if (request.BuocHienTaiId is { } buocHienTaiId && buocHienTaiId != Guid.Empty)
+        {
+            data.HoSo.BuocHienTaiId = buocHienTaiId;
+            data.BoHoSo.BuocQuyTrinhId = buocHienTaiId;
+        }
+
+        if (request.TrangThaiHoSoId is { } trangThaiHoSoId && trangThaiHoSoId != Guid.Empty)
+        {
+            data.HoSo.TrangThaiHoSoId = trangThaiHoSoId;
+        }
+
+        if (request.DonViChuTriSoanThaoId is { } donViChuTriSoanThaoId && donViChuTriSoanThaoId != Guid.Empty)
+        {
+            data.HoSo.DonViChuTriSoanThaoId = donViChuTriSoanThaoId;
+        }
+
         data.HoSo.TenHoSo = request.TenHoSo.Trim();
         data.HoSo.TenDuThaoVanBan = request.TenDuThaoVanBan.Trim();
         data.HoSo.NguoiPhuTrachId = request.NguoiPhuTrachId;
@@ -99,6 +125,7 @@ public sealed class XayDungVanBanSoanThaoService(
         data.HoSo.ThoiGianDuKienBatDau = request.ThoiGianDuKienBatDau;
         data.HoSo.ThoiGianDuKienHoanThanh = request.ThoiGianDuKienHoanThanh;
         data.HoSo.MoTa = request.MoTa;
+        data.HoSo.HoSoDangKyXayDungVanBanId = request.HoSoDangKyXayDungVanBanId;
         data.HoSo.UpdatedAt = DateTime.UtcNow;
         data.HoSo.UpdatedBy = actor.UserId.ToString();
         data.SoanThao.CanCuXayDung = request.CanCuXayDung;
@@ -117,13 +144,13 @@ public sealed class XayDungVanBanSoanThaoService(
 
     public async Task<bool> DeleteAsync(Guid hoSoId, CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return false;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         data.HoSo.IsDeleted = true;
         data.HoSo.UpdatedAt = DateTime.UtcNow;
@@ -166,13 +193,13 @@ public sealed class XayDungVanBanSoanThaoService(
         TaoYKienDonViRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return null;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         EnsureYKienRequest(request.DonViGopYId, request.KetQua);
         var exists = await dbContext.HoSoXayDungVanBanYKienDonVis
@@ -211,13 +238,13 @@ public sealed class XayDungVanBanSoanThaoService(
         CapNhatYKienDonViRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return null;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         EnsureYKienKetQua(request.KetQua);
         var entity = await dbContext.HoSoXayDungVanBanYKienDonVis
@@ -248,13 +275,13 @@ public sealed class XayDungVanBanSoanThaoService(
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return false;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         var entity = await dbContext.HoSoXayDungVanBanYKienDonVis
             .FirstOrDefaultAsync(x => x.Id == id && x.HoSoXayDungVanBanId == hoSoId && !x.IsDeleted, cancellationToken);
@@ -303,13 +330,13 @@ public sealed class XayDungVanBanSoanThaoService(
         CapNhatTongHopYKienRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null)
         {
             return null;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         data.SoanThao.NoiDungTongHopTiepThuGiaiTrinh = request.NoiDungTongHopTiepThuGiaiTrinh;
         var counts = await GetYKienCountsAsync(hoSoId, cancellationToken);
@@ -362,7 +389,6 @@ public sealed class XayDungVanBanSoanThaoService(
         TaiFileTongHopYKienRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         if (request.LoaiTaiLieuId == Guid.Empty || request.NoiDung.Length == 0)
         {
             throw new InvalidOperationException("Thiếu loại tài liệu hoặc file tổng hợp ý kiến.");
@@ -374,6 +400,7 @@ public sealed class XayDungVanBanSoanThaoService(
             return null;
         }
 
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         var safeFileName = Path.GetFileName(request.TenFile);
         if (string.IsNullOrWhiteSpace(safeFileName))
@@ -482,7 +509,6 @@ public sealed class XayDungVanBanSoanThaoService(
         TaiTaiLieuSoanThaoRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         if (request.LoaiTaiLieuId == Guid.Empty || request.NoiDung.Length == 0
             || string.IsNullOrWhiteSpace(request.TenTaiLieu))
         {
@@ -491,6 +517,7 @@ public sealed class XayDungVanBanSoanThaoService(
 
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null) return null;
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         if (data.SoanThao.LoaiTaiLieuTongHopYKienId == request.LoaiTaiLieuId)
         {
@@ -563,9 +590,9 @@ public sealed class XayDungVanBanSoanThaoService(
 
     public async Task<bool> DeleteTaiLieuAsync(Guid hoSoId, Guid fileId, CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null) return false;
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
 
         var file = await dbContext.HoSoXayDungVanBanFiles.FirstOrDefaultAsync(x =>
@@ -601,7 +628,6 @@ public sealed class XayDungVanBanSoanThaoService(
         TrinhThamDinhRequest request,
         CancellationToken cancellationToken = default)
     {
-        var actor = RequireActor();
         if (request.BuocQuyTrinhTiepTheoId == Guid.Empty || request.TrangThaiHoSoTiepTheoId == Guid.Empty
             || request.DonViNhanThamDinhId == Guid.Empty)
         {
@@ -610,12 +636,13 @@ public sealed class XayDungVanBanSoanThaoService(
 
         var data = await GetDraftAsync(hoSoId, tracking: true, cancellationToken);
         if (data is null) return null;
+        var actor = RequireActor(data.HoSo.DonViChuTriSoanThaoId);
         EnsureCanModify(data.HoSo, data.BoHoSo);
         var dieuKienChuaDat = await GetDieuKienChuaDatAsync(data, cancellationToken);
         if (dieuKienChuaDat.Count > 0) throw new InvalidOperationException(string.Join(" ", dieuKienChuaDat));
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-        var now = DateTime.UtcNow;
+        var now = request.NgayChuyen ?? DateTime.UtcNow;
         var newBoHoSo = new BoHoSoNghiepVu
         {
             HoSoXayDungVanBanId = hoSoId,
@@ -635,7 +662,8 @@ public sealed class XayDungVanBanSoanThaoService(
             BoHoSoNghiepVuId = newBoHoSo.Id,
             NgayGuiThamDinh = now,
             DonViNhanThamDinhId = request.DonViNhanThamDinhId,
-            NoiDungDeNghiThamDinh = request.NoiDungGhiChu
+            NoiDungDeNghiThamDinh = request.NoiDungGhiChu,
+            HanDeNghiTraKetQua = request.HanDeNghiTraKetQua
         });
 
         var sourceLinks = await (
@@ -694,21 +722,8 @@ public sealed class XayDungVanBanSoanThaoService(
     private async Task<IReadOnlyList<string>> GetDieuKienChuaDatAsync(DraftData data, CancellationToken cancellationToken)
     {
         var conditions = new List<string>();
-        if (string.IsNullOrWhiteSpace(data.SoanThao.CanCuXayDung)) conditions.Add("Chưa cập nhật căn cứ xây dựng.");
-        if (string.IsNullOrWhiteSpace(data.SoanThao.PhamViDieuChinh)) conditions.Add("Chưa cập nhật phạm vi điều chỉnh.");
-        if (string.IsNullOrWhiteSpace(data.SoanThao.NoiDungChinhSach)) conditions.Add("Chưa cập nhật nội dung chính sách.");
         if (string.IsNullOrWhiteSpace(data.SoanThao.NoiDungTongHopTiepThuGiaiTrinh)) conditions.Add("Chưa cập nhật nội dung tổng hợp, tiếp thu và giải trình ý kiến.");
 
-        var hasCurrentDraftFile = await dbContext.HoSoXayDungVanBanFiles.AnyAsync(x =>
-            x.HoSoXayDungVanBanId == data.HoSo.Id && !x.IsDeleted && x.IsCurrent
-            && (!data.SoanThao.LoaiTaiLieuTongHopYKienId.HasValue || x.LoaiTaiLieuId != data.SoanThao.LoaiTaiLieuTongHopYKienId.Value), cancellationToken);
-        if (!hasCurrentDraftFile) conditions.Add("Chưa có tài liệu dự thảo hiện hành.");
-
-        var hasCurrentSummaryFile = data.SoanThao.LoaiTaiLieuTongHopYKienId.HasValue
-            && await dbContext.HoSoXayDungVanBanFiles.AnyAsync(x => x.HoSoXayDungVanBanId == data.HoSo.Id
-                && x.LoaiTaiLieuId == data.SoanThao.LoaiTaiLieuTongHopYKienId.Value
-                && !x.IsDeleted && x.IsCurrent, cancellationToken);
-        if (!hasCurrentSummaryFile) conditions.Add("Chưa có file tổng hợp ý kiến hiện hành.");
         return conditions;
     }
 
@@ -769,17 +784,23 @@ public sealed class XayDungVanBanSoanThaoService(
         }
     }
 
-    private CurrentActor RequireActor()
+    private CurrentActor RequireActor(Guid? fallbackDonViId = null)
     {
         if (!currentUserContext.IsAuthenticated
-            || currentUserContext.UserId is null
-            || currentUserContext.DonViId is null
-            || currentUserContext.DonViId == Guid.Empty)
+            || currentUserContext.UserId is null)
         {
             throw new UnauthorizedAccessException("Người dùng chưa có thông tin đơn vị xử lý.");
         }
 
-        return new CurrentActor(currentUserContext.UserId.Value, currentUserContext.DonViId.Value);
+        var donViId = currentUserContext.DonViId is { } currentDonViId && currentDonViId != Guid.Empty
+            ? currentDonViId
+            : fallbackDonViId;
+        if (donViId is null || donViId == Guid.Empty)
+        {
+            throw new UnauthorizedAccessException("Người dùng chưa có thông tin đơn vị xử lý.");
+        }
+
+        return new CurrentActor(currentUserContext.UserId.Value, donViId.Value);
     }
 
     private async Task<YKienCounts> GetYKienCountsAsync(Guid hoSoId, CancellationToken cancellationToken)
