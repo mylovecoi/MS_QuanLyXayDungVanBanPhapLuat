@@ -4,10 +4,13 @@ import {
     useState,
 } from "react";
 import {Link, useLocation} from "react-router";
-import {ChevronDownIcon, HorizontaLDots} from "../assets/icons/index.js";
+import {
+    ChevronDownIcon,
+    HorizontaLDots,
+    MenuIcon,
+} from "../assets/icons/index.js";
 import {useSidebar} from "../context/SidebarContext";
 import {getFrontendMenu} from "../shared/api/systemApi.js";
-import {MenuIcon} from "../assets/icons/index.js";
 
 const AppSidebar = () => {
     const {
@@ -76,7 +79,6 @@ const AppSidebar = () => {
         [isActive]
     );
 
-
     useEffect(() => {
         if (!menuItems.length) {
             return;
@@ -92,14 +94,12 @@ const AppSidebar = () => {
         }
     }, [menuItems, location.pathname, findActiveParent]);
 
-
     const handleSubmenuToggle = (key) => {
         setOpenSubmenu((prev) => ({
             ...prev,
             [key]: !prev[key],
         }));
     };
-
 
     const renderMenuItems = (items, parentKey = "") => (
         <ul className="flex flex-col gap-4 w-full">
@@ -112,7 +112,10 @@ const AppSidebar = () => {
                 const isOpen = !!openSubmenu[key];
 
                 return (
-                    <li key={item.title || key} className="w-full">
+                    <li
+                        key={item.roleActionId || item.title || key}
+                        className="w-full"
+                    >
                         {hasChildren ? (
                             <button
                                 onClick={() =>
@@ -128,22 +131,22 @@ const AppSidebar = () => {
                                         : "lg:justify-start"
                                 }`}
                             >
-                            <span
-                                className={`menu-item-icon-size ${
-                                    isOpen
-                                        ? "menu-item-icon-active"
-                                        : "menu-item-icon-inactive"
-                                }`}
-                            >
-                                <MenuIcon />
-                            </span>
+                                <span
+                                    className={`menu-item-icon-size ${
+                                        isOpen
+                                            ? "menu-item-icon-active"
+                                            : "menu-item-icon-inactive"
+                                    }`}
+                                >
+                                    <MenuIcon/>
+                                </span>
 
                                 {(isExpanded ||
                                     isHovered ||
                                     isMobileOpen) && (
                                     <span className="menu-item-text !text-left flex-1 min-w-0">
-                                    {item.title}
-                                </span>
+                                        {item.title}
+                                    </span>
                                 )}
 
                                 {(isExpanded ||
@@ -168,22 +171,22 @@ const AppSidebar = () => {
                                             : "menu-item-inactive"
                                     }`}
                                 >
-                                <span
-                                    className={`menu-item-icon-size ${
-                                        isActive(item.url)
-                                            ? "menu-item-icon-active"
-                                            : "menu-item-icon-inactive"
-                                    }`}
-                                >
-                                    {/* Menu con không có icon */}
-                                </span>
+                                    <span
+                                        className={`menu-item-icon-size ${
+                                            isActive(item.url)
+                                                ? "menu-item-icon-active"
+                                                : "menu-item-icon-inactive"
+                                        }`}
+                                    >
+                                        {/* Menu con không có icon */}
+                                    </span>
 
                                     {(isExpanded ||
                                         isHovered ||
                                         isMobileOpen) && (
                                         <span className="menu-item-text !text-left">
-                                        {item.title}
-                                    </span>
+                                            {item.title}
+                                        </span>
                                     )}
                                 </Link>
                             )
@@ -204,46 +207,63 @@ const AppSidebar = () => {
                                         <ul className="mt-2 space-y-1 ml-3 w-[calc(100%-0.75rem)]">
                                             {item.children.map(
                                                 (child, childIndex) => {
-                                                    const childKey = `${key}-${childIndex}`;
+                                                    const childKey =
+                                                        `${key}-${childIndex}`;
+
+                                                    const childHasChildren =
+                                                        child.children?.length > 0;
 
                                                     return (
                                                         <li
                                                             key={
+                                                                child.roleActionId ||
                                                                 child.title ||
                                                                 childKey
                                                             }
                                                             className="w-full"
                                                         >
-                                                            {child.children?.length ? (
+                                                            {childHasChildren ? (
                                                                 renderMenuItems(
                                                                     [child],
                                                                     childKey
                                                                 )
-                                                            ) : (
-                                                                child.url && (
-                                                                    <Link
-                                                                        to={
+                                                            ) : child.url ? (
+                                                                <Link
+                                                                    to={
+                                                                        child.url
+                                                                    }
+                                                                    className={`menu-dropdown-item !justify-start text-left w-full ${
+                                                                        isActive(
                                                                             child.url
-                                                                        }
-                                                                        className={`menu-dropdown-item !justify-start text-left w-full ${
-                                                                            isActive(
-                                                                                child.url
-                                                                            )
-                                                                                ? "menu-dropdown-item-active"
-                                                                                : "menu-dropdown-item-inactive"
-                                                                        }`}
-                                                                    >
+                                                                        )
+                                                                            ? "menu-dropdown-item-active"
+                                                                            : "menu-dropdown-item-inactive"
+                                                                    }`}
+                                                                >
                                                                     <span className="mr-2 w-3 shrink-0">
                                                                         -
                                                                     </span>
 
-                                                                        <span className="text-left">
+                                                                    <span className="text-left">
                                                                         {
                                                                             child.title
                                                                         }
                                                                     </span>
-                                                                    </Link>
-                                                                )
+                                                                </Link>
+                                                            ) : (
+                                                                <div
+                                                                    className="menu-dropdown-item !justify-start text-left w-full"
+                                                                >
+                                                                    <span className="mr-2 w-3 shrink-0">
+                                                                        -
+                                                                    </span>
+
+                                                                    <span className="text-left">
+                                                                        {
+                                                                            child.title
+                                                                        }
+                                                                    </span>
+                                                                </div>
                                                             )}
                                                         </li>
                                                     );
@@ -276,7 +296,7 @@ const AppSidebar = () => {
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
-                className={`py-4  flex ${
+                className={`py-4 flex ${
                     !isExpanded && !isHovered
                         ? "lg:justify-center"
                         : "justify-center"

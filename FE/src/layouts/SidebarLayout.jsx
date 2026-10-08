@@ -3,8 +3,6 @@ import {Outlet} from "react-router";
 import AppHeader from "./AppHeader.jsx";
 import BackDrop from "./BackDrop";
 import AppSidebar from "./AppSidebar";
-import {getFrontendMenu} from "../shared/api/systemApi.js";
-import {useEffect} from "react";
 
 const SidebarLayout = () => {
     const {
@@ -12,17 +10,6 @@ const SidebarLayout = () => {
         isHovered,
         isMobileOpen,
     } = useSidebar();
-
-    useEffect(() => {
-        const loadMenu = async () => {
-            try {
-                const data = await getFrontendMenu();
-            } catch (error) {
-            }
-        };
-
-        void loadMenu();
-    }, []);
 
     return (
         <div className="min-h-screen xl:flex">

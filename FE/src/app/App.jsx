@@ -23,6 +23,9 @@ import BarChart from "../pages/Charts/BarChart.jsx";
 import LayoutSettings from "../pages/Settings/LayoutSettings.jsx";
 import {appFeatureRoutes} from "./routes.jsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import DanhSachDangKyPage from "../features/quan-tri-he-thong/pages/DanhSachDangKyPage.jsx";
+import HoSoDangKyPage from "../features/quan-tri-he-thong/pages/HoSoDangKyPage.jsx";
+import KetQuaDangKyPage from "../features/quan-tri-he-thong/pages/KetQuaDangKyPage.jsx";
 
 export function App() {
   return (
@@ -39,6 +42,9 @@ export function App() {
             <Route element={<AppLayout/>}>
               <Route path="/" element={<TrangChu/>}/>
               <Route path="/ecommerce" element={<Home/>}/>
+              <Route path="/dang-ky-xay-dung-van-ban/danh-sach" element={<DanhSachDangKyPage/>}/>
+              <Route path="/dang-ky-xay-dung-van-ban/ho-so" element={<HoSoDangKyPage/>}/>
+              <Route path="/dang-ky-xay-dung-van-ban/ket-qua" element={<KetQuaDangKyPage/>}/>
 
               <Route
                   path="/settings/layout"
