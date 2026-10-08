@@ -17,7 +17,7 @@ export default function BasicTableTwo({
                                           searchPlaceholder = "Search...",
                                           searchFields = [],
                                           pageSizeOptions = [5, 10, 20, 100],
-                                          emptyText = "No data found.",
+                                          emptyText = "Không tìm thấy dữ liệu",
                                       }) {
     const [search, setSearch] = useState("");
     const [pageCurrent, setPageCurrent] = useState(1);
