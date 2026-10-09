@@ -10,7 +10,7 @@ using QuanTriHeThongService.Contracts.Responses.Auth;
 namespace QuanTriHeThongService.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/he-thong/auth")]
 public class AuthController(
     QuanTriHeThongDbContext dbContext,
     ICurrentUserContext currentUserContext,

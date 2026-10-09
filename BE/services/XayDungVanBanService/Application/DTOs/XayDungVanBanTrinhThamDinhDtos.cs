@@ -33,7 +33,9 @@ public sealed record XayDungVanBanTrinhThamDinhDto(
     Guid DonViNhanThamDinhId,
     string? NoiDungDeNghiThamDinh,
     DateTime? HanDeNghiTraKetQua,
-    string? NoiDungGhiChu);
+    string? NoiDungGhiChu,
+    int SoLanTraLai,
+    string? LyDoTraLai);
 
 public sealed record HoSoTrinhThamDinhListItemDto(
     Guid HoSoId,
@@ -45,7 +47,9 @@ public sealed record HoSoTrinhThamDinhListItemDto(
     string TrangThai,
     Guid DonViNhanThamDinhId,
     DateTime NgayTao,
-    DateTime? NgayGuiThamDinh);
+    DateTime? NgayGuiThamDinh,
+    int SoLanTraLai,
+    string? LyDoTraLai);
 
 public sealed record HoSoNguonTrinhThamDinhDto(
     Guid HoSoId,

@@ -6,6 +6,10 @@ import HoSoTrinhThamDinhPage from "./pages/HoSoTrinhThamDinhPage.jsx";
 import HoSoTrinhThamDinhListPage from "./pages/HoSoTrinhThamDinhListPage.jsx";
 import HoSoThamDinhListPage from "./pages/HoSoThamDinhListPage.jsx";
 import HoSoThamDinhPage from "./pages/HoSoThamDinhPage.jsx";
+import HoSoTrinhYKienUBNDListPage from "./pages/HoSoTrinhYKienUBNDListPage.jsx";
+import HoSoTrinhYKienUBNDPage from "./pages/HoSoTrinhYKienUBNDPage.jsx";
+import HoSoYKienUBNDListPage from "./pages/HoSoYKienUBNDListPage.jsx";
+import HoSoYKienUBNDPage from "./pages/HoSoYKienUBNDPage.jsx";
 
 export const xayDungVanBanRoutes = [
   {
@@ -83,5 +87,29 @@ export const xayDungVanBanRoutes = [
   {
     path: "/xay-dung-van-ban/tham-dinh/:id",
     element: <HoSoThamDinhPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-phe-duyet",
+    element: <HoSoTrinhYKienUBNDListPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-phe-duyet/:id",
+    element: <HoSoTrinhYKienUBNDPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-y-kien-ubnd",
+    element: <HoSoTrinhYKienUBNDListPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/trinh-y-kien-ubnd/:id",
+    element: <HoSoTrinhYKienUBNDPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/y-kien-ubnd",
+    element: <HoSoYKienUBNDListPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/y-kien-ubnd/:id",
+    element: <HoSoYKienUBNDPage />,
   },
 ];

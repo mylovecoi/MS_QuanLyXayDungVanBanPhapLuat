@@ -219,3 +219,32 @@ export async function yeuCauBoSungThamDinh(hoSoId, input) { return (await axiosC
 export async function traLaiTrinhThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/tra-lai-trinh-tham-dinh`, input, { baseURL: "" })).data; }
 export async function guiKetQuaThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/gui-ket-qua`, input, { baseURL: "" })).data; }
 export async function soSanhDuThaoThamDinh(hoSoId, input) { return (await axiosClient.post(`${THAM_DINH_PATH}/${hoSoId}/so-sanh-du-thao`, input, { baseURL: "" })).data; }
+
+const TRINH_PHE_DUYET_PATH = "/api/xay-dung-van-ban/trinh-phe-duyet";
+export async function getDanhSachHoSoTrinhPheDuyet() { return (await axiosClient.get(TRINH_PHE_DUYET_PATH, { baseURL: "" })).data; }
+export async function getHoSoTrinhPheDuyet(hoSoId) { return (await axiosClient.get(`${TRINH_PHE_DUYET_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function createHoSoTrinhPheDuyet(input) { return (await axiosClient.post(TRINH_PHE_DUYET_PATH, input, { baseURL: "" })).data; }
+export async function updateHoSoTrinhPheDuyet(hoSoId, input) { return (await axiosClient.put(`${TRINH_PHE_DUYET_PATH}/${hoSoId}`, input, { baseURL: "" })).data; }
+export async function getTaiLieuTrinhPheDuyet(hoSoId) { return (await axiosClient.get(`${TRINH_PHE_DUYET_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuTrinhPheDuyet(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${TRINH_PHE_DUYET_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function kiemTraGuiPheDuyet(hoSoId) { return (await axiosClient.get(`${TRINH_PHE_DUYET_PATH}/${hoSoId}/kiem-tra-truoc-gui`, { baseURL: "" })).data; }
+export async function guiPheDuyet(hoSoId, input) { return (await axiosClient.post(`${TRINH_PHE_DUYET_PATH}/${hoSoId}/gui`, input, { baseURL: "" })).data; }
+
+export const getDanhSachHoSoTrinhYKienUBND = getDanhSachHoSoTrinhPheDuyet;
+export const getHoSoTrinhYKienUBND = getHoSoTrinhPheDuyet;
+export const createHoSoTrinhYKienUBND = createHoSoTrinhPheDuyet;
+export const updateHoSoTrinhYKienUBND = updateHoSoTrinhPheDuyet;
+export const getTaiLieuTrinhYKienUBND = getTaiLieuTrinhPheDuyet;
+export const uploadTaiLieuTrinhYKienUBND = uploadTaiLieuTrinhPheDuyet;
+export const kiemTraGuiYKienUBND = kiemTraGuiPheDuyet;
+export const guiYKienUBND = guiPheDuyet;
+
+const Y_KIEN_UBND_PATH = "/api/xay-dung-van-ban/y-kien-ubnd";
+export async function getDanhSachHoSoYKienUBND() { return (await axiosClient.get(Y_KIEN_UBND_PATH, { baseURL: "" })).data; }
+export async function getHoSoYKienUBND(hoSoId) { return (await axiosClient.get(`${Y_KIEN_UBND_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function createHoSoYKienUBND(input) { return (await axiosClient.post(Y_KIEN_UBND_PATH, input, { baseURL: "" })).data; }
+export async function updateHoSoYKienUBND(hoSoId, input) { return (await axiosClient.put(`${Y_KIEN_UBND_PATH}/${hoSoId}`, input, { baseURL: "" })).data; }
+export async function getTaiLieuYKienUBND(hoSoId) { return (await axiosClient.get(`${Y_KIEN_UBND_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuYKienUBND(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${Y_KIEN_UBND_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function kiemTraGuiKetQuaYKienUBND(hoSoId) { return (await axiosClient.get(`${Y_KIEN_UBND_PATH}/${hoSoId}/kiem-tra-truoc-gui`, { baseURL: "" })).data; }
+export async function guiKetQuaYKienUBND(hoSoId, input) { return (await axiosClient.post(`${Y_KIEN_UBND_PATH}/${hoSoId}/gui`, input, { baseURL: "" })).data; }

@@ -28,7 +28,7 @@ public sealed class QuanTriHeThongPermissionClient(
             return false;
         }
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/internal/permissions/check")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/he-thong/internal/permissions/check")
         {
             Content = JsonContent.Create(new PermissionCheckRequest(controller, action, permissionType))
         };

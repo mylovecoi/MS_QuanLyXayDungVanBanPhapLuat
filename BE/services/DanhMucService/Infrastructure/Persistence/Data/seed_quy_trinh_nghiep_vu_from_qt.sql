@@ -263,7 +263,7 @@ INSERT INTO @ChuyenBuoc VALUES
 ('44444444-4444-4444-4444-444444444133', N'XD_QD_UBND_TINH', N'THAM_DINH', N'SOAN_THAO_LAY_Y_KIEN', N'YEU_CAU_BO_SUNG', N'Return', 0, 1, 0, N'Yêu cầu cơ quan chủ trì bổ sung hồ sơ.'),
 ('44444444-4444-4444-4444-444444444134', N'XD_QD_UBND_TINH', N'THAM_DINH', N'TRINH_UBND', N'DA_THAM_DINH', N'Forward', 1, 0, 0, N'Hồ sơ đã có báo cáo thẩm định, chuyển trình UBND.'),
 ('44444444-4444-4444-4444-444444444135', N'XD_QD_UBND_TINH', N'TRINH_UBND', N'LAY_Y_KIEN_UBND', N'LAY_Y_KIEN_UBND', N'Forward', 1, 0, 0, N'Cập nhật hồ sơ lấy ý kiến thành viên UBND tỉnh.'),
-('44444444-4444-4444-4444-444444444136', N'XD_QD_UBND_TINH', N'LAY_Y_KIEN_UBND', N'SOAN_THAO_LAY_Y_KIEN', N'CO_Y_KIEN_KHAC_NHAU', N'Return', 0, 1, 0, N'Có ý kiến khác nhau, cần giải trình/bổ sung.'),
+('44444444-4444-4444-4444-444444444136', N'XD_QD_UBND_TINH', N'LAY_Y_KIEN_UBND', N'TRINH_UBND', N'KHONG_DONG_Y_TRA_LAI', N'Return', 0, 1, 0, N'Không đồng ý, trả lại bước trình UBND để bổ sung/giải trình.'),
 ('44444444-4444-4444-4444-444444444137', N'XD_QD_UBND_TINH', N'LAY_Y_KIEN_UBND', N'BAN_HANH', N'DONG_Y_BAN_HANH', N'Approve', 1, 0, 1, N'Không có ý kiến khác nhau, cập nhật Quyết định ban hành.'),
 
 -- Xây dựng Nghị quyết HĐND
@@ -272,7 +272,7 @@ INSERT INTO @ChuyenBuoc VALUES
 ('44444444-4444-4444-4444-444444444233', N'XD_NQ_HDND_TINH', N'THAM_DINH', N'SOAN_THAO_LAY_Y_KIEN', N'YEU_CAU_BO_SUNG', N'Return', 0, 1, 0, N'Yêu cầu cơ quan chủ trì bổ sung hồ sơ.'),
 ('44444444-4444-4444-4444-444444444234', N'XD_NQ_HDND_TINH', N'THAM_DINH', N'TRINH_UBND_CHO_Y_KIEN', N'DA_THAM_DINH', N'Forward', 1, 0, 0, N'Hồ sơ đã có báo cáo thẩm định, chuyển trình UBND cho ý kiến.'),
 ('44444444-4444-4444-4444-444444444235', N'XD_NQ_HDND_TINH', N'TRINH_UBND_CHO_Y_KIEN', N'LAY_Y_KIEN_UBND', N'LAY_Y_KIEN_UBND', N'Forward', 1, 0, 0, N'Cập nhật hồ sơ lấy ý kiến thành viên UBND tỉnh.'),
-('44444444-4444-4444-4444-444444444236', N'XD_NQ_HDND_TINH', N'LAY_Y_KIEN_UBND', N'SOAN_THAO_LAY_Y_KIEN', N'CO_Y_KIEN_KHAC_NHAU', N'Return', 0, 1, 0, N'Có ý kiến khác nhau, cần giải trình/bổ sung.'),
+('44444444-4444-4444-4444-444444444236', N'XD_NQ_HDND_TINH', N'LAY_Y_KIEN_UBND', N'TRINH_UBND_CHO_Y_KIEN', N'KHONG_DONG_Y_TRA_LAI', N'Return', 0, 1, 0, N'Không đồng ý, trả lại bước trình UBND cho ý kiến để bổ sung/giải trình.'),
 ('44444444-4444-4444-4444-444444444237', N'XD_NQ_HDND_TINH', N'LAY_Y_KIEN_UBND', N'TRINH_HDND_THAM_TRA', N'DONG_Y_TRINH_HDND', N'Forward', 1, 0, 0, N'Hoàn thiện hồ sơ trình HĐND tỉnh thẩm tra.'),
 ('44444444-4444-4444-4444-444444444238', N'XD_NQ_HDND_TINH', N'TRINH_HDND_THAM_TRA', N'SOAN_THAO_LAY_Y_KIEN', N'YEU_CAU_HOAN_THIEN', N'Return', 0, 1, 0, N'HĐND yêu cầu hoàn thiện hồ sơ sau thẩm tra/thảo luận.'),
 ('44444444-4444-4444-4444-444444444239', N'XD_NQ_HDND_TINH', N'TRINH_HDND_THAM_TRA', N'THONG_QUA_BAN_HANH', N'THONG_QUA_BAN_HANH', N'Approve', 1, 0, 1, N'HĐND thông qua, cập nhật Nghị quyết ban hành.'),

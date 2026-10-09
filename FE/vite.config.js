@@ -58,12 +58,6 @@ export default defineConfig({
             path.replace(/^\/api\/qtht/, '/api')
       },
 
-      '/api/quan-tri-he-thong': {
-        target: 'https://localhost:7101',
-        changeOrigin: true,
-        secure: false
-      },
-
       '/api/danh-muc': {
         target: 'http://localhost:5132',
         changeOrigin: true,

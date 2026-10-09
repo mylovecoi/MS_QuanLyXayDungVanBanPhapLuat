@@ -6,23 +6,23 @@ import UserAccountPage from "./pages/UserAccountPage.jsx";
 
 export const quanTriHeThongRoutes = [
   {
-    path: "/admin/he-thong/danh-sach-chuc-nang",
+    path: "/he-thong/danh-sach-chuc-nang",
     element: <RoleActionListPage />,
   },
   {
-    path: "/admin/he-thong/cau-hinh-he-thong",
+    path: "/he-thong/cau-hinh-he-thong",
     element: <SystemInfoPage />,
   },
   {
-    path: "/admin/he-thong/tai-khoan-truy-cap",
+    path: "/he-thong/tai-khoan-truy-cap",
     element: <UserAccountPage />,
   },
   {
-    path: "/admin/he-thong/nhom-quyen-truy-cap",
+    path: "/he-thong/nhom-quyen-truy-cap",
     element: <GroupPermissionPage />,
   },
   {
-    path: "/admin/he-thong/nhat-ky-he-thong",
+    path: "/he-thong/nhat-ky-he-thong",
     element: <LogEntryPage />,
   },
 ];

@@ -12,14 +12,53 @@ public sealed class XayDungVanBanTrinhThamDinhService(
     ICurrentUserContext currentUserContext,
     IWebHostEnvironment environment) : IXayDungVanBanTrinhThamDinhService
 {
-    public async Task<IReadOnlyList<HoSoTrinhThamDinhListItemDto>> GetListAsync(CancellationToken cancellationToken = default) =>
-        await (from bo in dbContext.BoHoSoNghiepVus.AsNoTracking()
-               join detail in dbContext.HoSoXayDungVanBanTrinhThamDinhs.AsNoTracking() on bo.Id equals detail.BoHoSoNghiepVuId
-               join hoSo in dbContext.HoSoXayDungVanBans.AsNoTracking() on bo.HoSoXayDungVanBanId equals hoSo.Id
-               where bo.LoaiBoHoSo == LoaiBoHoSo.TrinhThamDinh && !bo.IsDeleted && !hoSo.IsDeleted
-               orderby bo.CreatedAt descending
-               select new HoSoTrinhThamDinhListItemDto(hoSo.Id, bo.Id, hoSo.MaHoSo, hoSo.TenHoSo, hoSo.TenDuThaoVanBan, hoSo.NamXayDung, bo.TrangThai.ToString(), detail.DonViNhanThamDinhId, bo.NgayTao, detail.NgayGuiThamDinh))
-            .ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<HoSoTrinhThamDinhListItemDto>> GetListAsync(CancellationToken cancellationToken = default)
+    {
+        var items = await (from bo in dbContext.BoHoSoNghiepVus.AsNoTracking()
+                           join detail in dbContext.HoSoXayDungVanBanTrinhThamDinhs.AsNoTracking() on bo.Id equals detail.BoHoSoNghiepVuId
+                           join hoSo in dbContext.HoSoXayDungVanBans.AsNoTracking() on bo.HoSoXayDungVanBanId equals hoSo.Id
+                           where bo.LoaiBoHoSo == LoaiBoHoSo.TrinhThamDinh && !bo.IsDeleted && !hoSo.IsDeleted
+                           orderby bo.CreatedAt descending
+                           select new
+                           {
+                               HoSoId = hoSo.Id,
+                               BoHoSoId = bo.Id,
+                               hoSo.MaHoSo,
+                               hoSo.TenHoSo,
+                               hoSo.TenDuThaoVanBan,
+                               hoSo.NamXayDung,
+                               TrangThai = bo.TrangThai == TrangThaiBoHoSo.Nhap && bo.LyDoTraLai != null && bo.LyDoTraLai != "" ? "BiTraLai" : bo.TrangThai.ToString(),
+                               detail.DonViNhanThamDinhId,
+                               bo.NgayTao,
+                               detail.NgayGuiThamDinh,
+                               bo.LyDoTraLai
+                           }).ToListAsync(cancellationToken);
+
+        var hoSoIds = items.Select(item => item.HoSoId).Distinct().ToList();
+        var returnCounts = await dbContext.HoSoXayDungVanBanLichSuXuLys.AsNoTracking()
+            .Where(x => hoSoIds.Contains(x.HoSoXayDungVanBanId) && x.HanhDong == "TRA_LAI_TRINH_THAM_DINH" && !x.IsDeleted)
+            .GroupBy(x => x.HoSoXayDungVanBanId)
+            .Select(x => new { HoSoId = x.Key, Count = x.Count() })
+            .ToDictionaryAsync(x => x.HoSoId, x => x.Count, cancellationToken);
+
+        return items.Select(item =>
+        {
+            var soLanTraLai = Math.Max(ExtractSoLanTraLai(item.LyDoTraLai), returnCounts.GetValueOrDefault(item.HoSoId));
+            return new HoSoTrinhThamDinhListItemDto(
+            item.HoSoId,
+            item.BoHoSoId,
+            item.MaHoSo,
+            item.TenHoSo,
+            item.TenDuThaoVanBan,
+            item.NamXayDung,
+            item.TrangThai,
+            item.DonViNhanThamDinhId,
+            item.NgayTao,
+            item.NgayGuiThamDinh,
+            soLanTraLai,
+            item.LyDoTraLai);
+        }).ToList();
+    }
 
     public async Task<IReadOnlyList<HoSoNguonTrinhThamDinhDto>> GetNguonKeThuaAsync(CancellationToken cancellationToken = default) =>
         await (from hoSo in dbContext.HoSoXayDungVanBans.AsNoTracking()
@@ -90,7 +129,7 @@ public sealed class XayDungVanBanTrinhThamDinhService(
     public async Task<XayDungVanBanTrinhThamDinhDto?> GetByHoSoIdAsync(Guid hoSoId, CancellationToken cancellationToken = default)
     {
         var data = await GetDataAsync(hoSoId, false, cancellationToken);
-        return data is null ? null : ToDto(data.HoSoId, data.BoHoSo, data.ChiTiet);
+        return data is null ? null : await ToDtoAsync(data.HoSoId, data.BoHoSo, data.ChiTiet, cancellationToken);
     }
 
     public async Task<XayDungVanBanTrinhThamDinhDto?> UpdateAsync(Guid hoSoId, CapNhatHoSoTrinhThamDinhRequest request, CancellationToken cancellationToken = default)
@@ -214,6 +253,12 @@ public sealed class XayDungVanBanTrinhThamDinhService(
                                  where link.BoHoSoNghiepVuId == data.BoHoSo.Id && link.HoSoXayDungVanBanFileId == request.FileDuThaoId && !link.IsDeleted && !file.IsDeleted && file.TenFile.EndsWith(".docx")
                                  select file).FirstOrDefaultAsync(cancellationToken)
             ?? throw new InvalidOperationException("File dự thảo phải là tài liệu .docx thuộc hồ sơ trình thẩm định.");
+        var latestReturn = await GetLatestReturnAsync(hoSoId, cancellationToken);
+        if (latestReturn is not null && duThaoDocx.NgayTaiLen <= latestReturn.CreatedAt)
+        {
+            var soLanTraLai = await GetSoLanTraLaiAsync(hoSoId, cancellationToken);
+            throw new InvalidOperationException($"Hồ sơ đã bị trả lại lần {soLanTraLai}. Vui lòng đính kèm file dự thảo lần {soLanTraLai + 1} trước khi gửi lại.");
+        }
         var daGuiFileNay = await (from submitted in dbContext.HoSoXayDungVanBanTrinhThamDinhs
                                    join submittedBo in dbContext.BoHoSoNghiepVus on submitted.BoHoSoNghiepVuId equals submittedBo.Id
                                    where submittedBo.HoSoXayDungVanBanId == hoSoId && submittedBo.LoaiBoHoSo == LoaiBoHoSo.TrinhThamDinh && submittedBo.TrangThai == TrangThaiBoHoSo.DaGui && submitted.FileDuThaoId == request.FileDuThaoId && !submittedBo.IsDeleted
@@ -224,7 +269,7 @@ public sealed class XayDungVanBanTrinhThamDinhService(
         var source = await dbContext.BoHoSoNghiepVus.FirstAsync(x => x.Id == data.BoHoSo.BoHoSoNguonId, cancellationToken);
         var now = DateTime.UtcNow;
         source.TrangThai = TrangThaiBoHoSo.DaGui; source.NgayGui = now; source.UpdatedAt = now; source.UpdatedBy = actor.UserId.ToString();
-        data.BoHoSo.TrangThai = TrangThaiBoHoSo.DaGui; data.BoHoSo.NgayGui = now; data.BoHoSo.UpdatedAt = now; data.BoHoSo.UpdatedBy = actor.UserId.ToString();
+        data.BoHoSo.TrangThai = TrangThaiBoHoSo.DaGui; data.BoHoSo.NgayGui = now; data.BoHoSo.LyDoTraLai = null; data.BoHoSo.UpdatedAt = now; data.BoHoSo.UpdatedBy = actor.UserId.ToString();
         data.ChiTiet.NgayGuiThamDinh = now;
         data.ChiTiet.FileDuThaoId = duThaoDocx.Id;
         var hoSo = await dbContext.HoSoXayDungVanBans.FirstAsync(x => x.Id == hoSoId, cancellationToken);
@@ -256,8 +301,30 @@ public sealed class XayDungVanBanTrinhThamDinhService(
         var hasDocuments = await dbContext.BoHoSoNghiepVuTaiLieus.AnyAsync(x => x.BoHoSoNghiepVuId == data.BoHoSo.Id && !x.IsDeleted, cancellationToken);
         if (!hasDocuments) conditions.Add("Chưa có tài liệu trình thẩm định.");
         if (await GetDuThaoDocxAsync(data, cancellationToken) is null) conditions.Add("Bắt buộc phải có file dự thảo định dạng .docx trước khi gửi thẩm định.");
+        var latestReturn = await GetLatestReturnAsync(data.HoSoId, cancellationToken);
+        if (latestReturn is not null && !await HasDraftAfterAsync(data.BoHoSo.Id, latestReturn.CreatedAt, cancellationToken))
+        {
+            var soLanTraLai = await GetSoLanTraLaiAsync(data.HoSoId, cancellationToken);
+            conditions.Add($"Hồ sơ đã bị trả lại lần {soLanTraLai}. Cần đính kèm file dự thảo lần {soLanTraLai + 1} trước khi gửi lại.");
+        }
         return conditions;
     }
+
+    private async Task<HoSoXayDungVanBanLichSuXuLy?> GetLatestReturnAsync(Guid hoSoId, CancellationToken cancellationToken) =>
+        await dbContext.HoSoXayDungVanBanLichSuXuLys.AsNoTracking()
+            .Where(x => x.HoSoXayDungVanBanId == hoSoId && x.HanhDong == "TRA_LAI_TRINH_THAM_DINH" && !x.IsDeleted)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    private async Task<int> GetSoLanTraLaiAsync(Guid hoSoId, CancellationToken cancellationToken) =>
+        await dbContext.HoSoXayDungVanBanLichSuXuLys.AsNoTracking()
+            .CountAsync(x => x.HoSoXayDungVanBanId == hoSoId && x.HanhDong == "TRA_LAI_TRINH_THAM_DINH" && !x.IsDeleted, cancellationToken);
+
+    private async Task<bool> HasDraftAfterAsync(Guid boHoSoId, DateTime after, CancellationToken cancellationToken) =>
+        await (from link in dbContext.BoHoSoNghiepVuTaiLieus.AsNoTracking()
+               join file in dbContext.HoSoXayDungVanBanFiles.AsNoTracking() on link.HoSoXayDungVanBanFileId equals file.Id
+               where link.BoHoSoNghiepVuId == boHoSoId && !link.IsDeleted && !file.IsDeleted && file.TenFile.EndsWith(".docx") && file.NgayTaiLen > after
+               select file.Id).AnyAsync(cancellationToken);
 
     private async Task<HoSoXayDungVanBanFile?> GetDuThaoDocxAsync(Data data, CancellationToken cancellationToken) => await (
         from link in dbContext.BoHoSoNghiepVuTaiLieus.AsNoTracking()
@@ -298,7 +365,26 @@ public sealed class XayDungVanBanTrinhThamDinhService(
     private void AddTimeline(Guid hoSoId, Guid boHoSoId, string hanhDong, string noiDung, CurrentActor actor, Guid? fileId = null, Guid? buocTruoc = null, Guid? buocSau = null, Guid? trangThaiTruoc = null, Guid? trangThaiSau = null) =>
         dbContext.HoSoXayDungVanBanLichSuXuLys.Add(new HoSoXayDungVanBanLichSuXuLy { HoSoXayDungVanBanId = hoSoId, BoHoSoNghiepVuId = boHoSoId, HanhDong = hanhDong, NoiDung = noiDung, NguoiXuLyId = actor.UserId, DonViXuLyId = actor.DonViId, HoSoXayDungVanBanFileId = fileId, BuocQuyTrinhTruocId = buocTruoc, BuocQuyTrinhSauId = buocSau, TrangThaiTruocId = trangThaiTruoc, TrangThaiSauId = trangThaiSau, CreatedBy = actor.UserId.ToString() });
 
-    private static XayDungVanBanTrinhThamDinhDto ToDto(Guid hoSoId, BoHoSoNghiepVu boHoSo, HoSoXayDungVanBanTrinhThamDinh detail) => new(hoSoId, boHoSo.Id, boHoSo.BoHoSoNguonId ?? Guid.Empty, detail.FileDuThaoId, boHoSo.BuocQuyTrinhId, boHoSo.TrangThai.ToString(), detail.SoToTrinh, detail.NgayToTrinh, detail.NgayGuiThamDinh, detail.DonViNhanThamDinhId, detail.NoiDungDeNghiThamDinh, detail.HanDeNghiTraKetQua, boHoSo.NoiDungGhiChu);
+    private static string ToTrangThaiHienThi(BoHoSoNghiepVu boHoSo) =>
+        boHoSo.TrangThai == TrangThaiBoHoSo.Nhap && !string.IsNullOrWhiteSpace(boHoSo.LyDoTraLai)
+            ? "BiTraLai"
+            : boHoSo.TrangThai.ToString();
+
+    private static int ExtractSoLanTraLai(string? lyDoTraLai)
+    {
+        if (string.IsNullOrWhiteSpace(lyDoTraLai) || !lyDoTraLai.StartsWith("Trả lại lần ", StringComparison.OrdinalIgnoreCase)) return 0;
+        var start = "Trả lại lần ".Length;
+        var end = lyDoTraLai.IndexOf(':', start);
+        return end > start && int.TryParse(lyDoTraLai[start..end].Trim(), out var value) ? value : 0;
+    }
+
+    private async Task<XayDungVanBanTrinhThamDinhDto> ToDtoAsync(Guid hoSoId, BoHoSoNghiepVu boHoSo, HoSoXayDungVanBanTrinhThamDinh detail, CancellationToken cancellationToken)
+    {
+        var soLanTraLai = Math.Max(ExtractSoLanTraLai(boHoSo.LyDoTraLai), await GetSoLanTraLaiAsync(hoSoId, cancellationToken));
+        return new(hoSoId, boHoSo.Id, boHoSo.BoHoSoNguonId ?? Guid.Empty, detail.FileDuThaoId, boHoSo.BuocQuyTrinhId, ToTrangThaiHienThi(boHoSo), detail.SoToTrinh, detail.NgayToTrinh, detail.NgayGuiThamDinh, detail.DonViNhanThamDinhId, detail.NoiDungDeNghiThamDinh, detail.HanDeNghiTraKetQua, boHoSo.NoiDungGhiChu, soLanTraLai, boHoSo.LyDoTraLai);
+    }
+
+    private static XayDungVanBanTrinhThamDinhDto ToDto(Guid hoSoId, BoHoSoNghiepVu boHoSo, HoSoXayDungVanBanTrinhThamDinh detail) => new(hoSoId, boHoSo.Id, boHoSo.BoHoSoNguonId ?? Guid.Empty, detail.FileDuThaoId, boHoSo.BuocQuyTrinhId, ToTrangThaiHienThi(boHoSo), detail.SoToTrinh, detail.NgayToTrinh, detail.NgayGuiThamDinh, detail.DonViNhanThamDinhId, detail.NoiDungDeNghiThamDinh, detail.HanDeNghiTraKetQua, boHoSo.NoiDungGhiChu, ExtractSoLanTraLai(boHoSo.LyDoTraLai), boHoSo.LyDoTraLai);
     private static XayDungVanBanTaiLieuDto ToTaiLieuDto(HoSoXayDungVanBanFile file) => new(file.Id, file.LoaiTaiLieuId, file.TenTaiLieu, file.PhienBan, file.TenFile, file.DuongDanFile, file.MimeType, file.DungLuong, file.IsCurrent, file.NgayTaiLen);
     private sealed record Data(Guid HoSoId, BoHoSoNghiepVu BoHoSo, HoSoXayDungVanBanTrinhThamDinh ChiTiet);
     private sealed record CurrentActor(Guid UserId, Guid DonViId);

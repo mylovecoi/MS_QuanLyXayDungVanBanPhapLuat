@@ -13,7 +13,7 @@ public sealed class QuanTriHeThongPermissionClient(HttpClient client, IHttpConte
         if (user.IsSSA) return true;
         if (user.UserId is null) return false;
         var token = accessor.HttpContext?.Request.Headers.Authorization.ToString(); if (string.IsNullOrWhiteSpace(token)) return false;
-        using var request = new HttpRequestMessage(HttpMethod.Post, "api/internal/permissions/check") { Content = JsonContent.Create(new { Controller = controller, Action = action, PermissionType = permissionType }) };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/he-thong/internal/permissions/check") { Content = JsonContent.Create(new { Controller = controller, Action = action, PermissionType = permissionType }) };
         request.Headers.TryAddWithoutValidation(HeaderNames.Authorization, token);
         try { using var response = await client.SendAsync(request, ct); var payload = await response.Content.ReadFromJsonAsync<Result>(cancellationToken: ct); return response.IsSuccessStatusCode && payload?.Data?.Allowed == true; }
         catch (HttpRequestException) { return false; } catch (JsonException) { return false; }

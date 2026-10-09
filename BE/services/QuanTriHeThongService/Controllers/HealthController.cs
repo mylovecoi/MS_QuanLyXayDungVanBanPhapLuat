@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace QuanTriHeThongService.Controllers;
 
 [ApiController]
-[Route("api/health")]
+[Route("api/he-thong/health")]
 public class HealthController : ControllerBase
 {
     [HttpGet]

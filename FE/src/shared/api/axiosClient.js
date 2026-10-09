@@ -1,7 +1,12 @@
 import axios from "axios";
 
+const qthtApiBaseUrl =
+    import.meta.env.VITE_QTHT_API_URL ||
+    import.meta.env.VITE_API_URL ||
+    "/api/qtht";
+
 const axiosClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "/api/qtht",
+    baseURL: qthtApiBaseUrl,
     timeout: 80000,
     headers: {
         "Content-Type": "application/json",

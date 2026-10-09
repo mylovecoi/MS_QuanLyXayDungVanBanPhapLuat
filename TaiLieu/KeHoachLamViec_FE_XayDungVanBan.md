@@ -396,7 +396,7 @@ VanBanWorkflowTabs.jsx
 - Hoàn thiện các màn nghiệp vụ riêng sau bước soạn thảo:
   - Trình thẩm định.
   - Thẩm định.
-  - Trình UBND/phê duyệt.
+  - Trình lấy ý kiến UBND.
   - Ý kiến UBND.
   - Thẩm tra HĐND.
   - Ban hành văn bản.
@@ -414,7 +414,9 @@ VanBanWorkflowTabs.jsx
 | 3. Soạn thảo/góp ý | Hoàn thành cơ bản | Tài liệu, ý kiến góp ý, tổng hợp ý kiến và chuyển bước. |
 | 4. Trình thẩm định | Đã triển khai | Danh sách, tạo từ hồ sơ nguồn, kế thừa tài liệu, phân loại file, kiểm tra/gửi và tải file. |
 | 5. Thẩm định | Đã triển khai đợt 1 | Danh sách, nhận hồ sơ, tiếp nhận, kết quả, tài liệu, so sánh dự thảo, trả lại và gửi kết quả. |
-| 6–9. Trình UBND, ý kiến UBND, thẩm tra HĐND, ban hành | Chưa triển khai FE | Là các hạng mục tiếp theo. |
+| 6. Trình lấy ý kiến UBND | Đã triển khai đợt 1 | Có danh sách hồ sơ đủ điều kiện sau thẩm định, tạo hồ sơ trình lấy ý kiến UBND, kế thừa tài liệu, cập nhật thông tin trình, tải tài liệu, kiểm tra điều kiện và gửi sang bước tiếp theo. |
+| 7. Ý kiến UBND | Đã triển khai đợt 1 | Có danh sách hồ sơ đã trình lấy ý kiến UBND, lập hồ sơ ý kiến, tổng hợp kết quả, tải tài liệu, kiểm tra điều kiện và chuyển sang bước tiếp theo kèm thời hạn/cảnh báo. |
+| 8–9. Thẩm tra HĐND, ban hành | Chưa triển khai FE | Là các hạng mục tiếp theo. |
 | 10–11. Component dùng chung/kiểm thử toàn luồng | Chưa hoàn tất | Cần tách component và kiểm thử hai luồng nghiệp vụ đầy đủ. |
 
 ### 16.2. Phần trình thẩm định đã hoàn thành
@@ -486,18 +488,87 @@ FE/src/features/xay-dung-van-ban/
   pages/HoSoTrinhThamDinhPage.jsx
   pages/HoSoThamDinhListPage.jsx
   pages/HoSoThamDinhPage.jsx
+  pages/HoSoTrinhYKienUBNDListPage.jsx
+  pages/HoSoTrinhYKienUBNDPage.jsx
+  pages/HoSoYKienUBNDListPage.jsx
+  pages/HoSoYKienUBNDPage.jsx
 
 BE/services/XayDungVanBanService/
   Controllers/XayDungVanBanTrinhThamDinhController.cs
   Controllers/XayDungVanBanThamDinhController.cs
+  Controllers/XayDungVanBanTrinhPheDuyetController.cs
   Application/Services/XayDungVanBanTrinhThamDinhService.cs
   Application/Services/XayDungVanBanThamDinhService.cs
+  Application/Services/XayDungVanBanTrinhPheDuyetService.cs
+  Application/Services/XayDungVanBanYKienUbndService.cs
   Application/DTOs/XayDungVanBanTrinhThamDinhDtos.cs
   Application/DTOs/XayDungVanBanThamDinhDtos.cs
+  Application/DTOs/XayDungVanBanTrinhPheDuyetDtos.cs
+  Application/DTOs/XayDungVanBanYKienUbndDtos.cs
   Infrastructure/Persistence/Migrations/20261008090000_AddTrinhThamDinhDraftFile.cs
 ```
 
-### 16.5. Cách khởi động ở máy mới
+### 16.5. Phần trình lấy ý kiến UBND đã triển khai đợt 1
+
+#### Route FE
+
+- `/xay-dung-van-ban/trinh-y-kien-ubnd`
+- `/xay-dung-van-ban/trinh-y-kien-ubnd/:id`
+- `/xay-dung-van-ban/trinh-phe-duyet` và `/xay-dung-van-ban/trinh-phe-duyet/:id` được giữ tương thích với route cũ.
+
+#### Chức năng
+
+- Danh sách hồ sơ đã có kết quả thẩm định và đủ điều kiện lập hồ sơ trình lấy ý kiến UBND.
+- Tạo hồ sơ trình lấy ý kiến UBND từ kết quả thẩm định; bộ hồ sơ nghiệp vụ mới lấy theo bước hiện tại của hồ sơ chính.
+- Kế thừa tài liệu từ hồ sơ thẩm định và cho phép tải thêm tài liệu bổ sung.
+- Cập nhật thông tin trình: cấp trình, mục đích, số tờ trình, ngày tờ trình, đơn vị đồng gửi và nội dung trình.
+- Kiểm tra điều kiện trước khi gửi hồ sơ trình lấy ý kiến UBND.
+- Chọn bước tiếp theo, trạng thái tiếp theo và gửi hồ sơ sang giai đoạn tiếp theo của quy trình.
+
+#### API/BE liên quan
+
+- Prefix hiện tại: `/api/xay-dung-van-ban/trinh-phe-duyet`.
+- Các endpoint đáng chú ý:
+  - `GET /` — danh sách hồ sơ trình lấy ý kiến UBND.
+  - `POST /` — tạo hồ sơ trình lấy ý kiến UBND từ hồ sơ đã có kết quả thẩm định.
+  - `GET /{id}` — chi tiết hồ sơ trình lấy ý kiến UBND.
+  - `PUT /{id}` — cập nhật hồ sơ trình lấy ý kiến UBND.
+  - `GET /{id}/tai-lieu` — danh sách tài liệu.
+  - `POST /{id}/tai-lieu` — tải thêm tài liệu.
+  - `GET /{id}/kiem-tra-gui` — kiểm tra điều kiện gửi.
+  - `POST /{id}/gui` — gửi hồ sơ sang bước tiếp theo.
+
+### 16.6. Phần ý kiến UBND đã triển khai đợt 1
+
+#### Route FE
+
+- `/xay-dung-van-ban/y-kien-ubnd`
+- `/xay-dung-van-ban/y-kien-ubnd/:id`
+
+#### Chức năng
+
+- Danh sách hồ sơ đã trình lấy ý kiến UBND.
+- Lập hồ sơ ý kiến UBND từ hồ sơ trình lấy ý kiến đã gửi.
+- Cập nhật tổng hợp ý kiến: ngày nhận, tổng số thành viên, số đồng ý, số không đồng ý, số ý kiến khác, kết luận, nội dung tổng hợp và giải trình.
+- Tải tài liệu tổng hợp ý kiến/biên bản/giải trình.
+- Chọn bước tiếp theo và trạng thái sau chuyển.
+- Tự lấy số ngày xử lý và số ngày cảnh báo từ danh mục bước quy trình để tính thời hạn xử lý và thời gian cảnh báo.
+- Hồ sơ sau khi chuyển bước chỉ còn xem timeline, không còn thao tác xử lý.
+
+#### API/BE liên quan
+
+- Prefix: `/api/xay-dung-van-ban/y-kien-ubnd`.
+- Các endpoint đáng chú ý:
+  - `GET /` — danh sách hồ sơ ý kiến UBND.
+  - `POST /` — tạo hồ sơ ý kiến UBND.
+  - `GET /{id}` — chi tiết hồ sơ ý kiến UBND.
+  - `PUT /{id}` — cập nhật tổng hợp ý kiến.
+  - `GET /{id}/tai-lieu` — danh sách tài liệu.
+  - `POST /{id}/tai-lieu` — tải thêm tài liệu.
+  - `GET /{id}/kiem-tra-truoc-gui` — kiểm tra điều kiện chuyển bước.
+  - `POST /{id}/gui` — chuyển hồ sơ sang bước tiếp theo.
+
+### 16.7. Cách khởi động ở máy mới
 
 1. Sao chép mã nguồn, file cấu hình môi trường và dữ liệu/migration cần thiết. Không ghi mật khẩu kết nối thật vào tài liệu hoặc source kiểm soát phiên bản.
 2. Kiểm tra chuỗi kết nối `DefaultConnection` của `XayDungVanBanService` phù hợp database đích.
@@ -518,9 +589,11 @@ npm run dev
 
 5. Kiểm tra phân quyền `XayDungVanBanTrinhThamDinh` và `XayDungVanBanThamDinh` cho tài khoản thử nghiệm. Nếu tài khoản không có `DonViId`, cần có cấu hình/dev data đơn vị xử lý phù hợp để kiểm tra đúng phân quyền thực tế.
 
-### 16.6. Bước kế tiếp đề nghị
+### 16.8. Bước kế tiếp đề nghị
 
 1. Kiểm thử toàn bộ vòng lặp: trình thẩm định → nhận thẩm định → trả lại → tải file dự thảo mới → gửi lại → thẩm định → gửi kết quả.
-2. Tiếp tục Giai đoạn 6: màn **Trình UBND/phê duyệt**; kế thừa tài liệu, tờ trình, kết quả thẩm định và tài liệu giải trình.
-3. Sau khi các bước nghiệp vụ ổn định, tách các component dùng chung `FileDinhKemTable`, `TienDoQuyTrinh`, `LichSuXuLyTable`, `TrangThaiBadge` và `ChuyenBuocActions`.
-4. Hoàn thiện quyền theo action API và chạy kiểm thử hai luồng: Quyết định UBND, Nghị quyết HĐND.
+2. Kiểm thử Giai đoạn 6: lập hồ sơ trình lấy ý kiến UBND → bổ sung tờ trình/tài liệu → gửi sang bước tiếp theo.
+3. Kiểm thử Giai đoạn 7: lập hồ sơ ý kiến UBND → cập nhật kết luận → tải tài liệu → chuyển sang bước tiếp theo.
+4. Tiếp tục Giai đoạn 8/9 theo nhánh quy trình: Quyết định chuyển Ban hành, Nghị quyết chuyển Thẩm tra HĐND.
+5. Sau khi các bước nghiệp vụ ổn định, tách các component dùng chung `FileDinhKemTable`, `TienDoQuyTrinh`, `LichSuXuLyTable`, `TrangThaiBadge` và `ChuyenBuocActions`.
+6. Hoàn thiện quyền theo action API và chạy kiểm thử hai luồng: Quyết định UBND, Nghị quyết HĐND.

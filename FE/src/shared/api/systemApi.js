@@ -19,5 +19,5 @@ export function getRoleActionList(params) {
 }
 
 export function getFrontendMenu() {
-  return quanTriHeThongRequest('/auth/frontend-menu');
+  return quanTriHeThongRequest('/he-thong/auth/frontend-menu');
 }

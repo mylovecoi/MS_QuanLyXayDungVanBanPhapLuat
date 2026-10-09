@@ -7,6 +7,7 @@ const Select = ({
                     className = "",
                     defaultValue = "",
                     value,
+                    disabled = false,
                 }) => {
     const [selectedValue, setSelectedValue] = useState(defaultValue);
 
@@ -29,6 +30,7 @@ const Select = ({
             } ${className}`}
             value={currentValue}
             onChange={handleChange}
+            disabled={disabled}
         >
             <option
                 value=""

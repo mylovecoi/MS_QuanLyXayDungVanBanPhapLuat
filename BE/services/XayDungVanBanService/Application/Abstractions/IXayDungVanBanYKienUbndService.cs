@@ -4,6 +4,7 @@ namespace XayDungVanBanService.Application.Abstractions;
 
 public interface IXayDungVanBanYKienUbndService
 {
+    Task<IReadOnlyList<HoSoYKienUbndListItemDto>> GetListAsync(CancellationToken cancellationToken = default);
     Task<XayDungVanBanYKienUbndDto> CreateAsync(TaoHoSoYKienUbndRequest request, CancellationToken cancellationToken = default);
     Task<XayDungVanBanYKienUbndDto?> GetAsync(Guid hoSoId, CancellationToken cancellationToken = default);
     Task<XayDungVanBanYKienUbndDto?> UpdateAsync(Guid hoSoId, CapNhatYKienUbndRequest request, CancellationToken cancellationToken = default);

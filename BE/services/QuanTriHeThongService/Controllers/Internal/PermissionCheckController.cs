@@ -11,7 +11,7 @@ namespace QuanTriHeThongService.Controllers.Internal;
 
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Route("api/internal/permissions")]
+[Route("api/he-thong/internal/permissions")]
 public sealed class PermissionCheckController(
     ICurrentUserContext currentUserContext,
     IPermissionChecker permissionChecker) : ControllerBase

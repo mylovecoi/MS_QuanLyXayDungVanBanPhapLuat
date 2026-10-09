@@ -4,6 +4,7 @@ namespace XayDungVanBanService.Controllers;
 public sealed class XayDungVanBanYKienUbndController(ICurrentUserContext u,IQuanTriHeThongPermissionClient p,IXayDungVanBanYKienUbndService s):XayDungVanBanControllerBase(u,p)
 {
  async Task<ActionResult?> A(string a,CancellationToken ct)=>await EnsurePermissionAsync("XayDungVanBanYKienUbnd",a,a,ct);
+ [HttpGet]public async Task<ActionResult>List(CancellationToken ct){var d=await A("Index",ct);return d??Ok(await s.GetListAsync(ct));}
  [HttpPost]public async Task<ActionResult>Create(TaoHoSoYKienUbndRequest r,CancellationToken ct){var d=await A("Create",ct);if(d!=null)return d;try{return Ok(await s.CreateAsync(r,ct));}catch(InvalidOperationException e){return BadRequest(e.Message);}}
  [HttpGet("{id:guid}")]public async Task<ActionResult>Get(Guid id,CancellationToken ct){var d=await A("Index",ct);if(d!=null)return d;return(await s.GetAsync(id,ct))is{} x?Ok(x):NotFound();}
  [HttpPut("{id:guid}")]public async Task<ActionResult>Update(Guid id,CapNhatYKienUbndRequest r,CancellationToken ct){var d=await A("Edit",ct);if(d!=null)return d;try{return(await s.UpdateAsync(id,r,ct))is{} x?Ok(x):NotFound();}catch(InvalidOperationException e){return BadRequest(e.Message);}}
