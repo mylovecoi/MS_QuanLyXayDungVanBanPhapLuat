@@ -1,6 +1,8 @@
 import axiosClient from "../../../shared/api/axiosClient";
 
 const BASE_URL = "/api/dang-ky-xay-dung-van-ban/ho-so";
+const LIST_URL = "/api/dang-ky-xay-dung-van-ban/danh-sach";
+const RESULT_URL = "/api/dang-ky-xay-dung-van-ban/ket-qua";
 
 function unwrapResponse(response) {
     const payload = response.data;
@@ -16,6 +18,22 @@ export async function getDangKyXayDungVanBanById(id) {
         baseURL: "",
     });
     return unwrapResponse(response).data;
+}
+
+export async function getDanhSachDangKyXayDungVanBan(params = {}) {
+    const response = await axiosClient.get(LIST_URL, {
+        baseURL: "",
+        params,
+    });
+    return unwrapResponse(response);
+}
+
+export async function getKetQuaDangKyXayDungVanBan(params = {}) {
+    const response = await axiosClient.get(RESULT_URL, {
+        baseURL: "",
+        params,
+    });
+    return unwrapResponse(response);
 }
 
 export async function createDangKyXayDungVanBan(data) {

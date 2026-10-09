@@ -274,7 +274,8 @@ public sealed class XayDungVanBanTrinhThamDinhService(
         data.ChiTiet.FileDuThaoId = duThaoDocx.Id;
         var hoSo = await dbContext.HoSoXayDungVanBans.FirstAsync(x => x.Id == hoSoId, cancellationToken);
         var previousBuoc = hoSo.BuocHienTaiId; var previousTrangThai = hoSo.TrangThaiHoSoId;
-        hoSo.BuocHienTaiId = request.BuocQuyTrinhTiepTheoId; hoSo.TrangThaiHoSoId = request.TrangThaiHoSoTiepTheoId; hoSo.UpdatedAt = now; hoSo.UpdatedBy = actor.UserId.ToString();
+        hoSo.BuocHienTaiId = request.BuocQuyTrinhTiepTheoId; hoSo.TrangThaiHoSoId = request.TrangThaiHoSoTiepTheoId; if (request.HanXuLy.HasValue) hoSo.ThoiGianDuKienHoanThanh = request.HanXuLy.Value; hoSo.UpdatedAt = now; hoSo.UpdatedBy = actor.UserId.ToString();
+        ThemNhacTienDoNeuCo(hoSoId, request.HanXuLy, request.ThoiGianCanhBao, actor);
         AddTimeline(hoSoId, data.BoHoSo.Id, "GUI_THAM_DINH", $"Gửi hồ sơ thẩm định lần {data.BoHoSo.LanXuLy}; file dự thảo: {duThaoDocx.TenFile}", actor, duThaoDocx.Id, previousBuoc, request.BuocQuyTrinhTiepTheoId, previousTrangThai, request.TrangThaiHoSoTiepTheoId);
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -347,6 +348,22 @@ public sealed class XayDungVanBanTrinhThamDinhService(
 
     private async Task<int> NextLanXuLyAsync(Guid hoSoId, Guid buocId, CancellationToken cancellationToken) =>
         (await dbContext.BoHoSoNghiepVus.Where(x => x.HoSoXayDungVanBanId == hoSoId && x.BuocQuyTrinhId == buocId).Select(x => (int?)x.LanXuLy).MaxAsync(cancellationToken) ?? 0) + 1;
+
+    private void ThemNhacTienDoNeuCo(Guid hoSoId, DateTime? hanXuLy, DateTime? thoiGianCanhBao, CurrentActor actor)
+    {
+        if (!thoiGianCanhBao.HasValue) return;
+        dbContext.HoSoXayDungVanBanNhacTienDos.Add(new HoSoXayDungVanBanNhacTienDo
+        {
+            HoSoXayDungVanBanId = hoSoId,
+            LoaiNhacNho = "CANH_BAO_SAP_HAN",
+            TrangThaiXuLy = "DA_GUI",
+            NoiDungNhacNho = $"Cảnh báo sắp đến hạn xử lý bước tiếp theo. Hạn xử lý: {hanXuLy:dd/MM/yyyy}.",
+            NguoiGuiId = actor.UserId,
+            DonViGuiId = actor.DonViId == Guid.Empty ? null : actor.DonViId,
+            NgayGui = thoiGianCanhBao.Value,
+            CreatedBy = actor.UserId.ToString()
+        });
+    }
 
     private static void EnsureNhap(BoHoSoNghiepVu boHoSo)
     {

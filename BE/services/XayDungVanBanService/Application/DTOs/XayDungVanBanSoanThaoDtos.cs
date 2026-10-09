@@ -140,6 +140,9 @@ public sealed class TrinhThamDinhRequest
     public Guid DonViNhanThamDinhId { get; init; }
     public DateTime? NgayChuyen { get; init; }
     public DateTime? HanDeNghiTraKetQua { get; init; }
+    public DateTime? ThoiGianCanhBao { get; init; }
+    public int? SoNgayXuLy { get; init; }
+    public int? SoNgayCanhBao { get; init; }
     public string? NoiDungGhiChu { get; init; }
 }
 

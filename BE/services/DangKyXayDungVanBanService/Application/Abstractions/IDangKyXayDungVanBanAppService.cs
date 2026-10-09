@@ -5,6 +5,7 @@ namespace DangKyXayDungVanBanService.Application.Abstractions;
 public interface IDangKyXayDungVanBanAppService
 {
     Task<PagedResultDto<DangKyXayDungVanBanDto>> GetListAsync(DangKyXayDungVanBanListRequest request, CancellationToken cancellationToken);
+    Task<PagedResultDto<DangKyXayDungVanBanKetQuaListItemDto>> GetKetQuaListAsync(DangKyXayDungVanBanListRequest request, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto> CreateAsync(TaoDangKyXayDungVanBanRequest request, CancellationToken cancellationToken);
     Task<DangKyXayDungVanBanDto?> UpdateAsync(Guid id, CapNhatDangKyXayDungVanBanRequest request, CancellationToken cancellationToken);

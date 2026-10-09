@@ -17,7 +17,7 @@ const ALL_VALUE = "__ALL__";
 const HO_SO_STATUS_GROUP = "HO_SO_XAY_DUNG_VAN_BAN";
 const DEFAULT_PROCESSING_DAYS = 5;
 const EDITABLE_STATUS_CODES = new Set(["NHAP", "TRA_LAI", "BI_TRA_LAI"]);
-const emptyTransfer = { buocQuyTrinhTiepTheoId: "", trangThaiHoSoTiepTheoId: "", donViNhanThamDinhId: "", ngayChuyen: "", soNgayXuLy: DEFAULT_PROCESSING_DAYS, hanDeNghiTraKetQua: "", noiDungGhiChu: "" };
+const emptyTransfer = { buocQuyTrinhTiepTheoId: "", trangThaiHoSoTiepTheoId: "", donViNhanThamDinhId: "", ngayChuyen: "", soNgayXuLy: DEFAULT_PROCESSING_DAYS, hanDeNghiTraKetQua: "", soNgayCanhBao: 0, thoiGianCanhBao: "", noiDungGhiChu: "" };
 
 function getErrorMessage(error, fallback = "Không thể xử lý yêu cầu.") {
   return error?.response?.data?.message || error?.message || fallback;
@@ -40,6 +40,18 @@ function addDaysToDateInput(startDate, days) {
   const date = startDate ? new Date(startDate) : new Date();
   date.setDate(date.getDate() + (Number(days) || DEFAULT_PROCESSING_DAYS));
   return toDateInput(date);
+}
+
+function subtractDaysToDateInput(startDate, days) {
+  const date = startDate ? new Date(startDate) : new Date();
+  date.setDate(date.getDate() - Math.max(0, Number(days) || 0));
+  return toDateInput(date);
+}
+
+function clampWarningDays(value, processingDays) {
+  const warningDays = Math.max(0, Number(value) || 0);
+  const maxDays = Math.max(1, Number(processingDays) || DEFAULT_PROCESSING_DAYS);
+  return Math.min(warningDays, maxDays);
 }
 
 function canNhapYKien(item) {
@@ -222,6 +234,8 @@ export default function HoSoListPage() {
         trangThais[0];
       const ngayChuyen = toDateInput();
       const soNgayXuLy = nextStep?.soNgayXuLyTieuChuan || DEFAULT_PROCESSING_DAYS;
+      const soNgayCanhBao = clampWarningDays(nextStep?.soNgayCanhBaoSapHan ?? 0, soNgayXuLy);
+      const hanDeNghiTraKetQua = addDaysToDateInput(ngayChuyen, soNgayXuLy);
       setTransferWorkflow(workflow);
       setTransfer({
         buocQuyTrinhTiepTheoId: nextStep?.id || "",
@@ -229,7 +243,9 @@ export default function HoSoListPage() {
         donViNhanThamDinhId: nextStep?.donViTiepNhanMacDinhId || "",
         ngayChuyen,
         soNgayXuLy,
-        hanDeNghiTraKetQua: addDaysToDateInput(ngayChuyen, soNgayXuLy),
+        hanDeNghiTraKetQua,
+        soNgayCanhBao,
+        thoiGianCanhBao: subtractDaysToDateInput(hanDeNghiTraKetQua, soNgayCanhBao),
         noiDungGhiChu: "",
       });
     } catch (openError) {
@@ -429,13 +445,19 @@ export default function HoSoListPage() {
                 onChange={(value) => {
                   const step = transferStepMap.get(value);
                   const soNgayXuLy = step?.soNgayXuLyTieuChuan || DEFAULT_PROCESSING_DAYS;
-                  setTransfer((current) => ({
-                    ...current,
-                    buocQuyTrinhTiepTheoId: value,
-                    donViNhanThamDinhId: step?.donViTiepNhanMacDinhId || "",
-                    soNgayXuLy,
-                    hanDeNghiTraKetQua: addDaysToDateInput(current.ngayChuyen, soNgayXuLy),
-                  }));
+                  const soNgayCanhBao = clampWarningDays(step?.soNgayCanhBaoSapHan ?? 0, soNgayXuLy);
+                  setTransfer((current) => {
+                    const hanDeNghiTraKetQua = addDaysToDateInput(current.ngayChuyen, soNgayXuLy);
+                    return {
+                      ...current,
+                      buocQuyTrinhTiepTheoId: value,
+                      donViNhanThamDinhId: step?.donViTiepNhanMacDinhId || "",
+                      soNgayXuLy,
+                      hanDeNghiTraKetQua,
+                      soNgayCanhBao,
+                      thoiGianCanhBao: subtractDaysToDateInput(hanDeNghiTraKetQua, soNgayCanhBao),
+                    };
+                  });
                 }}
               />
             </Field>
@@ -465,6 +487,7 @@ export default function HoSoListPage() {
                     ...current,
                     ngayChuyen,
                     hanDeNghiTraKetQua: addDaysToDateInput(ngayChuyen, current.soNgayXuLy),
+                    thoiGianCanhBao: subtractDaysToDateInput(addDaysToDateInput(ngayChuyen, current.soNgayXuLy), current.soNgayCanhBao),
                   }));
                 }}
                 disabled={transferLoading}
@@ -474,7 +497,7 @@ export default function HoSoListPage() {
               <Input
                 type="date"
                 value={transfer.hanDeNghiTraKetQua}
-                onChange={(event) => setTransfer((current) => ({ ...current, hanDeNghiTraKetQua: event.target.value }))}
+                onChange={(event) => setTransfer((current) => ({ ...current, hanDeNghiTraKetQua: event.target.value, thoiGianCanhBao: subtractDaysToDateInput(event.target.value, current.soNgayCanhBao) }))}
                 disabled={transferLoading}
               />
             </Field>
@@ -485,12 +508,43 @@ export default function HoSoListPage() {
                 value={transfer.soNgayXuLy}
                 onChange={(event) => {
                   const soNgayXuLy = Number(event.target.value) || DEFAULT_PROCESSING_DAYS;
+                  setTransfer((current) => {
+                    const soNgayCanhBao = clampWarningDays(current.soNgayCanhBao, soNgayXuLy);
+                    const hanDeNghiTraKetQua = addDaysToDateInput(current.ngayChuyen, soNgayXuLy);
+                    return {
+                      ...current,
+                      soNgayXuLy,
+                      soNgayCanhBao,
+                      hanDeNghiTraKetQua,
+                      thoiGianCanhBao: subtractDaysToDateInput(hanDeNghiTraKetQua, soNgayCanhBao),
+                    };
+                  });
+                }}
+                disabled={transferLoading}
+              />
+            </Field>
+            <Field label="Số ngày cảnh báo">
+              <Input
+                type="number"
+                min="0"
+                max={transfer.soNgayXuLy || DEFAULT_PROCESSING_DAYS}
+                value={transfer.soNgayCanhBao}
+                onChange={(event) => {
+                  const soNgayCanhBao = clampWarningDays(event.target.value, transfer.soNgayXuLy);
                   setTransfer((current) => ({
                     ...current,
-                    soNgayXuLy,
-                    hanDeNghiTraKetQua: addDaysToDateInput(current.ngayChuyen, soNgayXuLy),
+                    soNgayCanhBao,
+                    thoiGianCanhBao: subtractDaysToDateInput(current.hanDeNghiTraKetQua, soNgayCanhBao),
                   }));
                 }}
+                disabled={transferLoading}
+              />
+            </Field>
+            <Field label="Thời gian cảnh báo">
+              <Input
+                type="date"
+                value={transfer.thoiGianCanhBao}
+                onChange={(event) => setTransfer((current) => ({ ...current, thoiGianCanhBao: event.target.value }))}
                 disabled={transferLoading}
               />
             </Field>

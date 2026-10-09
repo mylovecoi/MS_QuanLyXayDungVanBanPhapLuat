@@ -1,11 +1,56 @@
 import Badge from "../../../app/components/ui/badge/Badge.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
-import {useMemo, useState} from "react";
-import {useNavigate} from "react-router";
+import {useEffect, useMemo, useState} from "react";
+import {useNavigate, useSearchParams} from "react-router";
+import Alert from "../../../app/components/ui/alert/Alert.jsx";
+import {getDanhSachDangKyXayDungVanBan} from "../api/dangKyXayDungVanBanApi.js";
+
+const badgeColor = (color) => ({
+    blue: "primary",
+    green: "success",
+    red: "error",
+    orange: "warning",
+    cyan: "info",
+    purple: "primary",
+    gray: "light",
+}[color] || "primary");
 
 export default function HoSoDangKyPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [data, setData] = useState([]);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
+    const donViId = searchParams.get("donViId");
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            try {
+                setLoading(true);
+                setError("");
+                const result = await getDanhSachDangKyXayDungVanBan({
+                    pageSize: 200,
+                    ...(donViId ? {donViId} : {}),
+                });
+                if (mounted) {
+                    setData(result.items || []);
+                }
+            } catch (err) {
+                if (mounted) {
+                    setError(err?.response?.data?.message || err?.message || "Không thể tải hồ sơ đăng ký.");
+                }
+            } finally {
+                if (mounted) {
+                    setLoading(false);
+                }
+            }
+        };
+        void load();
+        return () => {
+            mounted = false;
+        };
+    }, [donViId]);
 
     const columns = useMemo(
         () => [
@@ -37,23 +82,23 @@ export default function HoSoDangKyPage() {
                 ),
             },
             {
-                key: "tenDuThaoVanBan",
+                key: "tenVanBanDuKien",
                 header: "Tên dự thảo văn bản",
                 render: (item) => (
                     <div className="max-w-[320px] text-gray-700 dark:text-gray-300">
-                        {item.tenDuThaoVanBan || "-"}
+                        {item.tenVanBanDuKien || "-"}
                     </div>
                 ),
             },
             {
-                key: "namXayDung",
+                key: "namDangKy",
                 header: "Năm xây dựng",
                 headerClassName:
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
                 cellClassName:
                     "px-5 py-4 text-center text-sm text-gray-500 dark:text-gray-400",
                 render: (item) => (
-                    <span>{item.namXayDung || "-"}</span>
+                    <span>{item.namDangKy || "-"}</span>
                 ),
             },
             {
@@ -64,8 +109,8 @@ export default function HoSoDangKyPage() {
                 cellClassName:
                     "px-5 py-4 text-center",
                 render: (item) => (
-                    <Badge size="sm" color="primary">
-                        {item.trangThai || "-"}
+                    <Badge size="sm" color={badgeColor(item.mauTrangThaiHoSo)}>
+                        {item.tenTrangThaiHoSo || item.maTrangThaiHoSo || "-"}
                     </Badge>
                 ),
             },
@@ -91,6 +136,7 @@ export default function HoSoDangKyPage() {
                     <div className="flex items-center justify-center gap-2">
                         <button
                             type="button"
+                            onClick={() => navigate(`/dang-ky-xay-dung-van-ban/ho-so/${item.id}`)}
                             className="rounded-lg px-3 py-2 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:hover:bg-white/[0.05]"
                         >
                             Xem
@@ -127,13 +173,16 @@ export default function HoSoDangKyPage() {
                 data={data}
                 columns={columns}
                 searchPlaceholder="Tìm kiếm hồ sơ..."
+                emptyText={loading ? "Đang tải dữ liệu..." : "Không có hồ sơ đăng ký."}
                 searchFields={[
                     (item) => item.maHoSo,
                     (item) => item.tenHoSo,
-                    (item) => item.tenDuThaoVanBan,
-                    (item) => item.namXayDung,
+                    (item) => item.tenVanBanDuKien,
+                    (item) => item.namDangKy,
+                    (item) => item.tenTrangThaiHoSo,
                 ]}
             />
+            {error && <div className="mt-4"><Alert variant="error" title="Không thể tải dữ liệu" message={error}/></div>}
         </div>
     );
 }

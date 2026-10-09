@@ -37,27 +37,56 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             request);
 
         var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
-            .AsNoTracking()
+        var rows = await (
+            from hoSo in query
+            join trangThai in _dbContext.DangKyTrangThaiHoSos.AsNoTracking()
+                on hoSo.TrangThaiHoSoId equals trangThai.Id into trangThaiJoin
+            from trangThai in trangThaiJoin.DefaultIfEmpty()
+            select new
+            {
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenVanBanDuKien,
+                hoSo.LoaiVanBanId,
+                hoSo.QuyTrinhSoanThaoId,
+                hoSo.BuocHienTaiId,
+                hoSo.TrangThaiHoSoId,
+                hoSo.DonViSoanThaoId,
+                hoSo.DonViPheDuyetId,
+                hoSo.NamDangKy,
+                hoSo.DaKhoiTaoQuyTrinhXayDung,
+                hoSo.HoSoXayDungVanBanId,
+                hoSo.CreatedAt,
+                MaTrangThaiHoSo = trangThai == null ? null : trangThai.MaTrangThai,
+                TenTrangThaiHoSo = trangThai == null ? null : trangThai.TenTrangThai,
+                MauTrangThaiHoSo = trangThai == null ? null : trangThai.MauHienThi
+            })
             .OrderByDescending(x => x.CreatedAt)
             .Skip((pageCurrent - 1) * pageSize)
             .Take(pageSize)
-            .Select(x => new DangKyXayDungVanBanDto(
-                x.Id,
-                x.MaHoSo,
-                x.TenHoSo,
-                x.TenVanBanDuKien,
-                x.LoaiVanBanId,
-                x.QuyTrinhSoanThaoId,
-                x.BuocHienTaiId,
-                x.TrangThaiHoSoId,
-                x.DonViSoanThaoId,
-                x.DonViPheDuyetId,
-                x.NamDangKy,
-                x.DaKhoiTaoQuyTrinhXayDung,
-                x.HoSoXayDungVanBanId,
-                x.CreatedAt))
             .ToListAsync(cancellationToken);
+
+        var items = rows.Select(x => new DangKyXayDungVanBanDto(
+            x.Id,
+            x.MaHoSo,
+            x.TenHoSo,
+            x.TenVanBanDuKien,
+            x.LoaiVanBanId,
+            x.QuyTrinhSoanThaoId,
+            x.BuocHienTaiId,
+            x.TrangThaiHoSoId,
+            x.DonViSoanThaoId,
+            x.DonViPheDuyetId,
+            x.NamDangKy,
+            x.DaKhoiTaoQuyTrinhXayDung,
+            x.HoSoXayDungVanBanId,
+            x.CreatedAt,
+            x.MaTrangThaiHoSo,
+            x.TenTrangThaiHoSo,
+            x.MauTrangThaiHoSo,
+            GetMaBuocHienTai(x.BuocHienTaiId),
+            GetTenBuocHienTai(x.BuocHienTaiId))).ToList();
 
         return new PagedResultDto<DangKyXayDungVanBanDto>(
             items,
@@ -66,26 +95,122 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             pageCurrent);
     }
 
+    public async Task<PagedResultDto<DangKyXayDungVanBanKetQuaListItemDto>> GetKetQuaListAsync(DangKyXayDungVanBanListRequest request, CancellationToken cancellationToken)
+    {
+        var pageSize = Math.Clamp(request.PageSize, 1, 200);
+        var pageCurrent = Math.Max(request.PageCurrent, 1);
+        var query = ApplyListFilters(
+            ApplyDataScope(_dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted)),
+            request);
+
+        query = query.Where(hoSo => _dbContext.DangKyXayDungVanBanLichSuXuLys.Any(lichSu =>
+            lichSu.DangKyXayDungVanBanId == hoSo.Id
+            && !lichSu.IsDeleted
+            && lichSu.ChuyenBuocId == DangKySeedIds.DanhMucChuyenBuocDangKyXayDungQppl.PheDuyetToCapNhatKetQua));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var rows = await (
+            from hoSo in query
+            join trangThai in _dbContext.DangKyTrangThaiHoSos.AsNoTracking()
+                on hoSo.TrangThaiHoSoId equals trangThai.Id into trangThaiJoin
+            from trangThai in trangThaiJoin.DefaultIfEmpty()
+            join ketQua in _dbContext.DangKyXayDungVanBanKetQuaPheDuyets.AsNoTracking().Where(x => !x.IsDeleted)
+                on hoSo.KetQuaPheDuyetId equals ketQua.Id into ketQuaJoin
+            from ketQua in ketQuaJoin.DefaultIfEmpty()
+            select new
+            {
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenVanBanDuKien,
+                hoSo.NamDangKy,
+                hoSo.TrangThaiHoSoId,
+                hoSo.BuocHienTaiId,
+                hoSo.CreatedAt,
+                MaTrangThaiHoSo = trangThai == null ? null : trangThai.MaTrangThai,
+                TenTrangThaiHoSo = trangThai == null ? null : trangThai.TenTrangThai,
+                MauTrangThaiHoSo = trangThai == null ? null : trangThai.MauHienThi,
+                KetQua = ketQua == null ? null : ketQua.KetQua,
+                NgayKetQua = ketQua == null ? null : ketQua.NgayVanBan
+            })
+            .OrderByDescending(x => x.NgayKetQua ?? x.CreatedAt)
+            .Skip((pageCurrent - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = rows.Select(x => new DangKyXayDungVanBanKetQuaListItemDto(
+            x.Id,
+            x.MaHoSo,
+            x.TenHoSo,
+            x.TenVanBanDuKien,
+            x.NamDangKy,
+            x.TrangThaiHoSoId,
+            x.MaTrangThaiHoSo,
+            x.TenTrangThaiHoSo,
+            x.MauTrangThaiHoSo,
+            x.BuocHienTaiId,
+            GetMaBuocHienTai(x.BuocHienTaiId),
+            GetTenBuocHienTai(x.BuocHienTaiId),
+            x.KetQua,
+            x.NgayKetQua,
+            x.CreatedAt)).ToList();
+
+        return new PagedResultDto<DangKyXayDungVanBanKetQuaListItemDto>(
+            items,
+            totalCount,
+            pageSize,
+            pageCurrent);
+    }
+
     public async Task<DangKyXayDungVanBanDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await ApplyDataScope(_dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted))
-            .Where(x => x.Id == id)
-            .Select(x => new DangKyXayDungVanBanDto(
-                x.Id,
-                x.MaHoSo,
-                x.TenHoSo,
-                x.TenVanBanDuKien,
-                x.LoaiVanBanId,
-                x.QuyTrinhSoanThaoId,
-                x.BuocHienTaiId,
-                x.TrangThaiHoSoId,
-                x.DonViSoanThaoId,
-                x.DonViPheDuyetId,
-                x.NamDangKy,
-                x.DaKhoiTaoQuyTrinhXayDung,
-                x.HoSoXayDungVanBanId,
-                x.CreatedAt))
-            .FirstOrDefaultAsync(cancellationToken);
+        var row = await (
+            from hoSo in ApplyDataScope(_dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted))
+            join trangThai in _dbContext.DangKyTrangThaiHoSos.AsNoTracking()
+                on hoSo.TrangThaiHoSoId equals trangThai.Id into trangThaiJoin
+            from trangThai in trangThaiJoin.DefaultIfEmpty()
+            where hoSo.Id == id
+            select new
+            {
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenVanBanDuKien,
+                hoSo.LoaiVanBanId,
+                hoSo.QuyTrinhSoanThaoId,
+                hoSo.BuocHienTaiId,
+                hoSo.TrangThaiHoSoId,
+                hoSo.DonViSoanThaoId,
+                hoSo.DonViPheDuyetId,
+                hoSo.NamDangKy,
+                hoSo.DaKhoiTaoQuyTrinhXayDung,
+                hoSo.HoSoXayDungVanBanId,
+                hoSo.CreatedAt,
+                MaTrangThaiHoSo = trangThai == null ? null : trangThai.MaTrangThai,
+                TenTrangThaiHoSo = trangThai == null ? null : trangThai.TenTrangThai,
+                MauTrangThaiHoSo = trangThai == null ? null : trangThai.MauHienThi
+            }).FirstOrDefaultAsync(cancellationToken);
+
+        return row is null ? null : new DangKyXayDungVanBanDto(
+            row.Id,
+            row.MaHoSo,
+            row.TenHoSo,
+            row.TenVanBanDuKien,
+            row.LoaiVanBanId,
+            row.QuyTrinhSoanThaoId,
+            row.BuocHienTaiId,
+            row.TrangThaiHoSoId,
+            row.DonViSoanThaoId,
+            row.DonViPheDuyetId,
+            row.NamDangKy,
+            row.DaKhoiTaoQuyTrinhXayDung,
+            row.HoSoXayDungVanBanId,
+            row.CreatedAt,
+            row.MaTrangThaiHoSo,
+            row.TenTrangThaiHoSo,
+            row.MauTrangThaiHoSo,
+            GetMaBuocHienTai(row.BuocHienTaiId),
+            GetTenBuocHienTai(row.BuocHienTaiId));
     }
 
     public async Task<DangKyXayDungVanBanDto> CreateAsync(TaoDangKyXayDungVanBanRequest request, CancellationToken cancellationToken)
@@ -738,6 +863,13 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             query = query.Where(x => x.TrangThaiHoSoId == request.TrangThaiHoSoId.Value);
         }
 
+        if (request.DonViId.HasValue)
+        {
+            query = query.Where(x =>
+                x.DonViSoanThaoId == request.DonViId.Value
+                || x.DonViPheDuyetId == request.DonViId.Value);
+        }
+
         if (request.DonViSoanThaoId.HasValue)
         {
             query = query.Where(x => x.DonViSoanThaoId == request.DonViSoanThaoId.Value);
@@ -767,6 +899,26 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
         return string.IsNullOrWhiteSpace(name) ? "file" : name;
     }
 
+    private static string? GetMaBuocHienTai(Guid buocId)
+    {
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.LapHoSo) return "LAP_HO_SO";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "TRINH_HO_SO";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyet) return "PHE_DUYET";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "CAP_NHAT_KET_QUA";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "HOAN_THANH";
+        return null;
+    }
+
+    private static string? GetTenBuocHienTai(Guid buocId)
+    {
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.LapHoSo) return "Lập hồ sơ đề nghị/đăng ký";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "Trình hồ sơ";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyet) return "Phê duyệt";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "Cập nhật kết quả";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "Hoàn thành";
+        return null;
+    }
+
     private static DangKyXayDungVanBanDto ToDto(DangKyXayDungVanBan entity)
     {
         return new DangKyXayDungVanBanDto(
@@ -783,7 +935,12 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             entity.NamDangKy,
             entity.DaKhoiTaoQuyTrinhXayDung,
             entity.HoSoXayDungVanBanId,
-            entity.CreatedAt);
+            entity.CreatedAt,
+            null,
+            null,
+            null,
+            GetMaBuocHienTai(entity.BuocHienTaiId),
+            GetTenBuocHienTai(entity.BuocHienTaiId));
     }
 
     private sealed record CurrentUserInfo(Guid UserId, Guid? DonViId, bool IsSSA);
