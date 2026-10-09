@@ -20,4 +20,8 @@ export const dangKyVanBanRoutes = [
         path: "/dang-ky-xay-dung-van-ban/ho-so/them-moi",
         element: <DangKyForm />,
     },
+    {
+        path: "/dang-ky-xay-dung-van-ban/ho-so/:id",
+        element: <DangKyForm />,
+    },
 ]

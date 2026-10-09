@@ -94,7 +94,10 @@ public sealed class XayDungVanBanYKienUbndService(XayDungVanBanDbContext db, ICu
                 await TraLaiHoSoTrinhYKienAsync(x.B, r.LyDoTraLai?.Trim(), ct);
             else
             {
-                await TaoHoSoBanHanhNeuChuaCoAsync(id, r.BuocQuyTrinhTiepTheoId, x.B, actor, ct);
+                if (LaBuocThamTraHdnd(r.MaBuocTiepTheo))
+                    await TaoHoSoThamTraHdndNeuChuaCoAsync(id, r.BuocQuyTrinhTiepTheoId, x.B, actor, ct);
+                else
+                    await TaoHoSoBanHanhNeuChuaCoAsync(id, r.BuocQuyTrinhTiepTheoId, x.B, actor, ct);
                 ThemNhacTienDoNeuCo(id, r, actor);
             }
 
@@ -190,6 +193,24 @@ public sealed class XayDungVanBanYKienUbndService(XayDungVanBanDbContext db, ICu
                 ThuTu = link.ThuTu,
                 CreatedBy = actor.UserId.ToString()
             });
+    }
+
+    private async Task TaoHoSoThamTraHdndNeuChuaCoAsync(Guid hoSoId, Guid buocQuyTrinhId, BoHoSoNghiepVu source, CurrentActor actor, CancellationToken ct)
+    {
+        var existing = await db.BoHoSoNghiepVus.AnyAsync(x => x.HoSoXayDungVanBanId == hoSoId && x.BuocQuyTrinhId == buocQuyTrinhId && x.LoaiBoHoSo == LoaiBoHoSo.ThamTraHdnd && !x.IsDeleted, ct);
+        if (existing) return;
+        var lanXuLy = (await db.BoHoSoNghiepVus.Where(x => x.HoSoXayDungVanBanId == hoSoId && x.BuocQuyTrinhId == buocQuyTrinhId && !x.IsDeleted).Select(x => (int?)x.LanXuLy).MaxAsync(ct) ?? 0) + 1;
+        var boHoSoThamTra = new BoHoSoNghiepVu { HoSoXayDungVanBanId = hoSoId, BuocQuyTrinhId = buocQuyTrinhId, LoaiBoHoSo = LoaiBoHoSo.ThamTraHdnd, TrangThai = TrangThaiBoHoSo.Nhap, LanXuLy = lanXuLy, BoHoSoNguonId = source.Id, NguoiLapId = actor.UserId, DonViLapId = actor.DonViId, CreatedBy = actor.UserId.ToString() };
+        db.BoHoSoNghiepVus.Add(boHoSoThamTra);
+        db.HoSoXayDungVanBanThamTraHdnds.Add(new() { BoHoSoNghiepVuId = boHoSoThamTra.Id });
+        var links = await db.BoHoSoNghiepVuTaiLieus.Where(x => x.BoHoSoNghiepVuId == source.Id && !x.IsDeleted).ToListAsync(ct);
+        foreach (var link in links) db.BoHoSoNghiepVuTaiLieus.Add(new() { BoHoSoNghiepVuId = boHoSoThamTra.Id, HoSoXayDungVanBanFileId = link.HoSoXayDungVanBanFileId, LoaiTaiLieuId = link.LoaiTaiLieuId, HinhThucThem = "KeThua", BoHoSoTaiLieuNguonId = link.Id, ThuTu = link.ThuTu, CreatedBy = actor.UserId.ToString() });
+    }
+
+    private static bool LaBuocThamTraHdnd(string? maBuoc)
+    {
+        var value = maBuoc?.Trim().ToUpperInvariant() ?? string.Empty;
+        return value.Contains("THAM_TRA") || value.Contains("HDND") || value.Contains("HĐND");
     }
 
     private void ThemNhacTienDoNeuCo(Guid hoSoId, GuiYKienUbndRequest r, CurrentActor actor)

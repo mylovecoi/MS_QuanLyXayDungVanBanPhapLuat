@@ -68,6 +68,10 @@ public sealed class GuiThamDinhRequest
     public Guid FileDuThaoId { get; init; }
     public Guid BuocQuyTrinhTiepTheoId { get; init; }
     public Guid TrangThaiHoSoTiepTheoId { get; init; }
+    public DateTime? HanXuLy { get; init; }
+    public DateTime? ThoiGianCanhBao { get; init; }
+    public int? SoNgayXuLy { get; init; }
+    public int? SoNgayCanhBao { get; init; }
 }
 
 public sealed record TaiTaiLieuTrinhThamDinhRequest(

@@ -6,9 +6,9 @@ public sealed record TaoHoSoThamDinhRequest(Guid HoSoId);
 public sealed record HoSoThamDinhListItemDto(Guid HoSoId, Guid? BoHoSoId, string MaHoSo, string TenHoSo, string? TenDuThaoVanBan, int NamXayDung, string TrangThai, DateTime? NgayGuiThamDinh, DateTime? NgayTiepNhan);
 public sealed record TiepNhanThamDinhRequest(DateTime? NgayTiepNhan, Guid NguoiTiepNhanId);
 public sealed class CapNhatKetQuaThamDinhRequest { [Required] public string HinhThucThamDinh { get; init; } = string.Empty; public DateTime? NgayThamDinh { get; init; } [Required] public string KetQuaThamDinh { get; init; } = string.Empty; public string? NoiDungKetLuan { get; init; } public Guid? NguoiKetLuanId { get; init; } }
-public sealed record YeuCauBoSungThamDinhRequest(string NoiDungYeuCauBoSung, DateTime? HanBoSung, Guid BuocQuyTrinhSoanThaoId, Guid TrangThaiHoSoBoSungId);
+public sealed record YeuCauBoSungThamDinhRequest(string NoiDungYeuCauBoSung, DateTime? HanBoSung, Guid BuocQuyTrinhSoanThaoId, Guid TrangThaiHoSoBoSungId, DateTime? ThoiGianCanhBao, int? SoNgayXuLy, int? SoNgayCanhBao);
 public sealed record TraLaiTrinhThamDinhRequest(string NoiDungYeuCauBoSung);
-public sealed record GuiKetQuaThamDinhRequest(DateTime? NgayGuiKetQua, Guid BuocQuyTrinhTiepTheoId, Guid TrangThaiHoSoTiepTheoId);
+public sealed record GuiKetQuaThamDinhRequest(DateTime? NgayGuiKetQua, Guid BuocQuyTrinhTiepTheoId, Guid TrangThaiHoSoTiepTheoId, DateTime? HanXuLy, DateTime? ThoiGianCanhBao, int? SoNgayXuLy, int? SoNgayCanhBao);
 public sealed record XayDungVanBanThamDinhDto(Guid HoSoId, Guid BoHoSoId, string TrangThai, DateTime? NgayTiepNhan, string? HinhThucThamDinh, DateTime? NgayThamDinh, string? KetQuaThamDinh, string? NoiDungKetLuan, string? NoiDungYeuCauBoSung, DateTime? HanBoSung, Guid? NguoiKetLuanId);
 public sealed record DieuKienGuiKetQuaThamDinhDto(bool Dat, IReadOnlyList<string> DieuKienChuaDat);
 public sealed record TaiTaiLieuThamDinhRequest(Guid LoaiTaiLieuId, string TenTaiLieu, string TenFile, string? MimeType, Stream NoiDung);

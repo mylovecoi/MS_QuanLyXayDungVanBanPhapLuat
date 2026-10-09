@@ -697,8 +697,13 @@ public sealed class XayDungVanBanSoanThaoService(
         data.BoHoSo.UpdatedBy = actor.UserId.ToString();
         data.HoSo.BuocHienTaiId = request.BuocQuyTrinhTiepTheoId;
         data.HoSo.TrangThaiHoSoId = request.TrangThaiHoSoTiepTheoId;
+        if (request.HanDeNghiTraKetQua.HasValue)
+        {
+            data.HoSo.ThoiGianDuKienHoanThanh = request.HanDeNghiTraKetQua.Value;
+        }
         data.HoSo.UpdatedAt = now;
         data.HoSo.UpdatedBy = actor.UserId.ToString();
+        ThemNhacTienDoNeuCo(hoSoId, request.HanDeNghiTraKetQua, request.ThoiGianCanhBao, actor);
         dbContext.HoSoXayDungVanBanLichSuXuLys.Add(new HoSoXayDungVanBanLichSuXuLy
         {
             HoSoXayDungVanBanId = hoSoId,
@@ -717,6 +722,26 @@ public sealed class XayDungVanBanSoanThaoService(
         await transaction.CommitAsync(cancellationToken);
         return new TrinhThamDinhDto(hoSoId, data.BoHoSo.Id, newBoHoSo.Id,
             data.HoSo.BuocHienTaiId, data.HoSo.TrangThaiHoSoId);
+    }
+
+    private void ThemNhacTienDoNeuCo(Guid hoSoId, DateTime? hanXuLy, DateTime? thoiGianCanhBao, CurrentActor actor)
+    {
+        if (!thoiGianCanhBao.HasValue)
+        {
+            return;
+        }
+
+        dbContext.HoSoXayDungVanBanNhacTienDos.Add(new HoSoXayDungVanBanNhacTienDo
+        {
+            HoSoXayDungVanBanId = hoSoId,
+            LoaiNhacNho = "CANH_BAO_SAP_HAN",
+            TrangThaiXuLy = "DA_GUI",
+            NoiDungNhacNho = $"Cảnh báo sắp đến hạn xử lý bước tiếp theo. Hạn xử lý: {hanXuLy:dd/MM/yyyy}.",
+            NguoiGuiId = actor.UserId,
+            DonViGuiId = actor.DonViId == Guid.Empty ? null : actor.DonViId,
+            NgayGui = thoiGianCanhBao.Value,
+            CreatedBy = actor.UserId.ToString()
+        });
     }
 
     private async Task<IReadOnlyList<string>> GetDieuKienChuaDatAsync(DraftData data, CancellationToken cancellationToken)

@@ -14,7 +14,12 @@ public record DangKyXayDungVanBanDto(
     int NamDangKy,
     bool DaKhoiTaoQuyTrinhXayDung,
     Guid? HoSoXayDungVanBanId,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? MaTrangThaiHoSo = null,
+    string? TenTrangThaiHoSo = null,
+    string? MauTrangThaiHoSo = null,
+    string? MaBuocHienTai = null,
+    string? TenBuocHienTai = null);
 
 public class DangKyXayDungVanBanListRequest
 {
@@ -22,6 +27,7 @@ public class DangKyXayDungVanBanListRequest
     public Guid? LoaiVanBanId { get; set; }
     public Guid? BuocHienTaiId { get; set; }
     public Guid? TrangThaiHoSoId { get; set; }
+    public Guid? DonViId { get; set; }
     public Guid? DonViSoanThaoId { get; set; }
     public Guid? DonViPheDuyetId { get; set; }
     public int? NamDangKy { get; set; }
@@ -34,6 +40,23 @@ public record PagedResultDto<T>(
     int TotalCount,
     int PageSize,
     int PageCurrent);
+
+public record DangKyXayDungVanBanKetQuaListItemDto(
+    Guid Id,
+    string MaHoSo,
+    string TenHoSo,
+    string TenVanBanDuKien,
+    int NamDangKy,
+    Guid TrangThaiHoSoId,
+    string? MaTrangThaiHoSo,
+    string? TenTrangThaiHoSo,
+    string? MauTrangThaiHoSo,
+    Guid BuocHienTaiId,
+    string? MaBuocHienTai,
+    string? TenBuocHienTai,
+    string? KetQua,
+    DateTime? NgayKetQua,
+    DateTime CreatedAt);
 
 public record TaoDangKyXayDungVanBanRequest(
     string TenHoSo,

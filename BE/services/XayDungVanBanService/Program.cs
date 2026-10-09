@@ -43,6 +43,8 @@ builder.Services.AddScoped<IXayDungVanBanTrinhThamDinhService, XayDungVanBanTrin
 builder.Services.AddScoped<IXayDungVanBanThamDinhService, XayDungVanBanThamDinhService>();
 builder.Services.AddScoped<IXayDungVanBanTrinhPheDuyetService, XayDungVanBanTrinhPheDuyetService>();
 builder.Services.AddScoped<IXayDungVanBanYKienUbndService, XayDungVanBanYKienUbndService>();
+builder.Services.AddScoped<IXayDungVanBanThamTraHdndService, XayDungVanBanThamTraHdndService>();
+builder.Services.AddScoped<IXayDungVanBanBanHanhService, XayDungVanBanBanHanhService>();
 builder.Services.AddScoped<IXayDungVanBanChamDiemService, XayDungVanBanChamDiemService>();
 builder.Services.AddScoped<IXayDungVanBanTienDoService, XayDungVanBanTienDoService>();
 builder.Services.Configure<QuanTriHeThongPermissionOptions>(

@@ -366,6 +366,7 @@ export default function HoSoYKienUBNDPage() {
         soNgayCanhBao: Number(form.soNgayCanhBao) || 0,
         loaiChuyenBuoc: form.loaiChuyenBuoc || selectedTransition?.loaiChuyenBuoc || null,
         lyDoTraLai: mustReturn ? form.lyDoTraLai.trim() : null,
+        maBuocTiepTheo: stepMap.get(form.buocQuyTrinhTiepTheoId)?.maBuoc || selectedTransition?.denBuocMa || null,
       });
       navigate("/xay-dung-van-ban/y-kien-ubnd", { state: { success: mustReturn ? "Đã trả lại hồ sơ về bước trình." : "Đã chuyển hồ sơ sang bước tiếp theo." } });
     } catch (e) {

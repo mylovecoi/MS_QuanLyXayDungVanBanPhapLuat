@@ -248,3 +248,21 @@ export async function getTaiLieuYKienUBND(hoSoId) { return (await axiosClient.ge
 export async function uploadTaiLieuYKienUBND(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${Y_KIEN_UBND_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
 export async function kiemTraGuiKetQuaYKienUBND(hoSoId) { return (await axiosClient.get(`${Y_KIEN_UBND_PATH}/${hoSoId}/kiem-tra-truoc-gui`, { baseURL: "" })).data; }
 export async function guiKetQuaYKienUBND(hoSoId, input) { return (await axiosClient.post(`${Y_KIEN_UBND_PATH}/${hoSoId}/gui`, input, { baseURL: "" })).data; }
+
+const BAN_HANH_PATH = "/api/xay-dung-van-ban/ban-hanh";
+export async function getDanhSachHoSoBanHanh() { return (await axiosClient.get(BAN_HANH_PATH, { baseURL: "" })).data; }
+export async function getHoSoBanHanh(hoSoId) { return (await axiosClient.get(`${BAN_HANH_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function updateHoSoBanHanh(hoSoId, input) { return (await axiosClient.put(`${BAN_HANH_PATH}/${hoSoId}`, input, { baseURL: "" })).data; }
+export async function getTaiLieuBanHanh(hoSoId) { return (await axiosClient.get(`${BAN_HANH_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuBanHanh(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${BAN_HANH_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function kiemTraHoanThanhBanHanh(hoSoId) { return (await axiosClient.get(`${BAN_HANH_PATH}/${hoSoId}/kiem-tra-truoc-hoan-thanh`, { baseURL: "" })).data; }
+export async function hoanThanhBanHanh(hoSoId) { return (await axiosClient.post(`${BAN_HANH_PATH}/${hoSoId}/hoan-thanh`, null, { baseURL: "" })).data; }
+
+const THAM_TRA_HDND_PATH = "/api/xay-dung-van-ban/tham-tra-hdnd";
+export async function getDanhSachHoSoThamTraHDND() { return (await axiosClient.get(THAM_TRA_HDND_PATH, { baseURL: "" })).data; }
+export async function getHoSoThamTraHDND(hoSoId) { return (await axiosClient.get(`${THAM_TRA_HDND_PATH}/${hoSoId}`, { baseURL: "" })).data; }
+export async function updateHoSoThamTraHDND(hoSoId, input) { return (await axiosClient.put(`${THAM_TRA_HDND_PATH}/${hoSoId}`, input, { baseURL: "" })).data; }
+export async function getTaiLieuThamTraHDND(hoSoId) { return (await axiosClient.get(`${THAM_TRA_HDND_PATH}/${hoSoId}/tai-lieu`, { baseURL: "" })).data; }
+export async function uploadTaiLieuThamTraHDND(hoSoId, { file, loaiTaiLieuId, tenTaiLieu }) { const form = new FormData(); form.append("file", file); form.append("loaiTaiLieuId", loaiTaiLieuId); form.append("tenTaiLieu", tenTaiLieu); return (await axiosClient.post(`${THAM_TRA_HDND_PATH}/${hoSoId}/tai-lieu`, form, { baseURL: "", headers: { "Content-Type": "multipart/form-data" } })).data; }
+export async function kiemTraGuiThamTraHDND(hoSoId) { return (await axiosClient.get(`${THAM_TRA_HDND_PATH}/${hoSoId}/kiem-tra-truoc-gui`, { baseURL: "" })).data; }
+export async function guiKetQuaThamTraHDND(hoSoId, input) { return (await axiosClient.post(`${THAM_TRA_HDND_PATH}/${hoSoId}/gui`, input, { baseURL: "" })).data; }

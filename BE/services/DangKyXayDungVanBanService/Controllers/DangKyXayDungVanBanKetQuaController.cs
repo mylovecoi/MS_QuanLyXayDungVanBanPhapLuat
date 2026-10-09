@@ -10,6 +10,14 @@ public class DangKyXayDungVanBanKetQuaController(IDangKyXayDungVanBanAppService 
 {
     private readonly IDangKyXayDungVanBanAppService _appService = appService;
 
+    [HttpGet]
+    public async Task<ActionResult<PagedResultDto<DangKyXayDungVanBanKetQuaListItemDto>>> GetList(
+        [FromQuery] DangKyXayDungVanBanListRequest request,
+        CancellationToken cancellationToken)
+    {
+        return Ok(await _appService.GetKetQuaListAsync(request, cancellationToken));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<DangKyXayDungVanBanDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
