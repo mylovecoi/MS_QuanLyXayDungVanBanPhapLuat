@@ -128,6 +128,10 @@ public sealed class PhieuNopKhaoSat : BaseEntity
     public string MaHash { get; set; } = null!;
     public Guid TrangThaiId { get; set; }
     public DateTime? NgayImport { get; set; }
+    public string? TenPhanMem { get; set; }
+    public string? PhienBanPhanMem { get; set; }
+    public string? DuongDanHeThongNguon { get; set; }
+    public string? GhiChuNguonDuLieu { get; set; }
 }
 
 public sealed class CauTraLoiKhaoSat : BaseEntity

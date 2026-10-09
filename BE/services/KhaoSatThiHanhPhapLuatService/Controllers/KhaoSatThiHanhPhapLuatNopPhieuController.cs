@@ -21,7 +21,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
         var items = await query.OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
         var ids = items.Select(x => x.Id).ToList();
         var errorCounts = await db.LoiImportKhaoSats.AsNoTracking().Where(x => ids.Contains(x.PhieuNopKhaoSatId) && !x.IsDeleted).GroupBy(x => x.PhieuNopKhaoSatId).Select(x => new { Id = x.Key, Count = x.Count() }).ToListAsync(ct);
-        return Ok(items.Select(x => new { x.Id, x.NhomDoiTuongKhaoSatId, x.MauPhieuKhaoSatId, x.TenFile, x.NgayImport, x.TrangThaiId, SoLoi = errorCounts.SingleOrDefault(y => y.Id == x.Id)?.Count ?? 0 }));
+        return Ok(items.Select(x => new { x.Id, x.NhomDoiTuongKhaoSatId, x.MauPhieuKhaoSatId, x.TenFile, x.NgayImport, x.TrangThaiId, x.TenPhanMem, x.PhienBanPhanMem, x.DuongDanHeThongNguon, x.GhiChuNguonDuLieu, SoLoi = errorCounts.SingleOrDefault(y => y.Id == x.Id)?.Count ?? 0 }));
     }
 
     [HttpGet("ket-qua-tong-hop/{id:guid}/loi")]
@@ -37,7 +37,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
     }
     [HttpPost("ket-qua-tong-hop/upload")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<ActionResult> UploadAggregate(Guid cuocKhaoSatId, Guid nhomDoiTuongId, Guid mauPhieuId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, CancellationToken ct)
+    public async Task<ActionResult> UploadAggregate(Guid cuocKhaoSatId, Guid nhomDoiTuongId, Guid mauPhieuId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, string? tenPhanMem, string? phienBanPhanMem, string? duongDanHeThongNguon, string? ghiChuNguonDuLieu, CancellationToken ct)
     {
         if (file.Length == 0 || !string.Equals(Path.GetExtension(file.FileName), ".docx", StringComparison.OrdinalIgnoreCase)) return BadRequest("Chỉ nhận file kết quả Word .docx.");
         var template = await db.MauPhieuKhaoSats.SingleOrDefaultAsync(x => x.Id == mauPhieuId && x.CuocKhaoSatId == cuocKhaoSatId && x.NhomDoiTuongKhaoSatId == nhomDoiTuongId && !x.IsDeleted, ct);
@@ -46,7 +46,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
         var questions = await db.CauHoiMauPhieus.Where(x => x.MauPhieuKhaoSatId == template.Id && !x.IsDeleted).ToListAsync(ct);
         var options = await db.LuaChonTraLois.Where(x => questions.Select(q => q.Id).Contains(x.CauHoiMauPhieuId) && !x.IsDeleted).ToListAsync(ct);
         await using var hashStream = file.OpenReadStream();
-        var submission = new PhieuNopKhaoSat { CuocKhaoSatId = cuocKhaoSatId, NhomDoiTuongKhaoSatId = nhomDoiTuongId, DoiTuongKhaoSatId = Guid.Empty, MauPhieuKhaoSatId = template.Id, TenFile = Path.GetFileName(file.FileName), MaHash = Convert.ToHexString(await SHA256.HashDataAsync(hashStream, ct)), DuongDanFile = string.Empty, NgayImport = DateTime.UtcNow, TrangThaiId = trangThaiThanhCongId };
+        var submission = new PhieuNopKhaoSat { CuocKhaoSatId = cuocKhaoSatId, NhomDoiTuongKhaoSatId = nhomDoiTuongId, DoiTuongKhaoSatId = Guid.Empty, MauPhieuKhaoSatId = template.Id, TenFile = Path.GetFileName(file.FileName), MaHash = Convert.ToHexString(await SHA256.HashDataAsync(hashStream, ct)), DuongDanFile = string.Empty, NgayImport = DateTime.UtcNow, TrangThaiId = trangThaiThanhCongId, TenPhanMem = tenPhanMem?.Trim(), PhienBanPhanMem = phienBanPhanMem?.Trim(), DuongDanHeThongNguon = duongDanHeThongNguon?.Trim(), GhiChuNguonDuLieu = ghiChuNguonDuLieu?.Trim() };
         var errors = new List<LoiImportKhaoSat>();
         foreach (var row in parsed.Rows)
         {
@@ -67,7 +67,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
     }
     [HttpPost("{doiTuongId:guid}/upload")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<ActionResult> Upload(Guid doiTuongId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, CancellationToken ct)
+    public async Task<ActionResult> Upload(Guid doiTuongId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, string? tenPhanMem, string? phienBanPhanMem, string? duongDanHeThongNguon, string? ghiChuNguonDuLieu, CancellationToken ct)
     {
         var subject = await db.DoiTuongKhaoSats.SingleOrDefaultAsync(x => x.Id == doiTuongId && !x.IsDeleted, ct);
         if (subject is null) return NotFound();
@@ -77,7 +77,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
         var questions = await db.CauHoiMauPhieus.Where(x => x.MauPhieuKhaoSatId == template.Id && !x.IsDeleted).ToListAsync(ct);
         var options = await db.LuaChonTraLois.Where(x => questions.Select(q => q.Id).Contains(x.CauHoiMauPhieuId) && !x.IsDeleted).ToListAsync(ct);
         await using var hashStream = file.OpenReadStream(); var hash = Convert.ToHexString(await SHA256.HashDataAsync(hashStream, ct));
-        var submission = new PhieuNopKhaoSat { CuocKhaoSatId = subject.CuocKhaoSatId, NhomDoiTuongKhaoSatId = subject.NhomDoiTuongKhaoSatId, DoiTuongKhaoSatId = subject.Id, MauPhieuKhaoSatId = template.Id, TenFile = Path.GetFileName(file.FileName), MaHash = hash, DuongDanFile = string.Empty, NgayImport = DateTime.UtcNow, TrangThaiId = trangThaiThanhCongId };
+        var submission = new PhieuNopKhaoSat { CuocKhaoSatId = subject.CuocKhaoSatId, NhomDoiTuongKhaoSatId = subject.NhomDoiTuongKhaoSatId, DoiTuongKhaoSatId = subject.Id, MauPhieuKhaoSatId = template.Id, TenFile = Path.GetFileName(file.FileName), MaHash = hash, DuongDanFile = string.Empty, NgayImport = DateTime.UtcNow, TrangThaiId = trangThaiThanhCongId, TenPhanMem = tenPhanMem?.Trim(), PhienBanPhanMem = phienBanPhanMem?.Trim(), DuongDanHeThongNguon = duongDanHeThongNguon?.Trim(), GhiChuNguonDuLieu = ghiChuNguonDuLieu?.Trim() };
         var errors = new List<LoiImportKhaoSat>();
         foreach (var requiredQuestion in questions.Where(x => x.BatBuoc && !parsed.Rows.Any(row => string.Equals(row.MaCauHoi, x.MaCauHoi, StringComparison.OrdinalIgnoreCase))))
             errors.Add(new LoiImportKhaoSat { PhieuNopKhaoSatId = submission.Id, ViTri = "Toàn bộ tệp", MaCauHoi = requiredQuestion.MaCauHoi, NoiDungLoi = "Thiếu kết quả của câu hỏi bắt buộc." });

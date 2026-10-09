@@ -21,7 +21,57 @@ public sealed class ThiHanhPhapLuatDanhGiaController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatDanhGia", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
+        if (!await CanManageContentAsync(noiDungKeHoachId, cancellationToken)) return NotFound();
         return Ok(await dbContext.DanhGiaThiHanhs.AsNoTracking().Where(x => x.NoiDungKeHoachId == noiDungKeHoachId && !x.IsDeleted).OrderByDescending(x => x.NgayDanhGia).ToListAsync(cancellationToken));
+    }
+
+    [HttpGet("cho-danh-gia")]
+    public async Task<ActionResult> GetPendingReports([FromQuery] int? nam, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("ThiHanhPhapLuatDanhGia", "Index", "Index", cancellationToken);
+        if (denied is not null) return denied;
+        if (!CurrentUser.IsSSA && CurrentUser.DonViId is null) return Forbid();
+
+        var query =
+            from report in dbContext.BaoCaoTienDoThiHanhs.AsNoTracking()
+            join content in dbContext.NoiDungKeHoachs.AsNoTracking() on report.NoiDungKeHoachId equals content.Id
+            join plan in dbContext.KeHoachThiHanhPhapLuats.AsNoTracking() on content.KeHoachId equals plan.Id
+            join assignment in dbContext.PhanCongThiHanhs.AsNoTracking() on report.PhanCongThiHanhId equals assignment.Id into assignments
+            from assignment in assignments.DefaultIfEmpty()
+            where !report.IsDeleted && !content.IsDeleted && !plan.IsDeleted
+            select new { report, content, plan, assignment };
+
+        if (!CurrentUser.IsSSA) query = query.Where(x => x.plan.DonViChuTriId == CurrentUser.DonViId!.Value);
+        if (nam.HasValue) query = query.Where(x => x.plan.Nam == nam.Value);
+
+        var candidates = await query.OrderByDescending(x => x.report.NgayBaoCao).Take(300).ToListAsync(cancellationToken);
+        var items = new List<object>();
+        foreach (var item in candidates)
+        {
+            if (!await IsReportStatusAsync(item.report.TrangThaiId, "DA_GUI", cancellationToken)) continue;
+            items.Add(new
+            {
+                BaoCaoTienDoId = item.report.Id,
+                item.report.KyBaoCao,
+                item.report.TyLeHoanThanh,
+                item.report.KetQua,
+                item.report.KhoKhan,
+                item.report.KienNghi,
+                item.report.NgayBaoCao,
+                NoiDungKeHoachId = item.content.Id,
+                item.content.MaNoiDung,
+                TenNoiDung = item.content.TenNoiDung,
+                HanHoanThanh = item.content.HanHoanThanh,
+                KeHoachId = item.plan.Id,
+                item.plan.MaKeHoach,
+                TenKeHoach = item.plan.TenKeHoach,
+                item.plan.Nam,
+                DonViDuocGiaoId = item.assignment == null ? (Guid?)null : item.assignment.DonViDuocGiaoId,
+                CanBoDuocGiaoId = item.assignment == null ? null : item.assignment.CanBoDuocGiaoId
+            });
+        }
+
+        return Ok(items);
     }
 
     [HttpPost("{baoCaoTienDoId:guid}/dat")]
@@ -70,7 +120,16 @@ public sealed class ThiHanhPhapLuatDanhGiaController(
     private async Task<BaoCaoTienDoThiHanh?> GetSubmittedReportAsync(Guid id, CancellationToken cancellationToken)
     {
         var report = await dbContext.BaoCaoTienDoThiHanhs.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
-        return report is not null && await IsReportStatusAsync(report.TrangThaiId, "DA_GUI", cancellationToken) ? report : null;
+        return report is not null && await CanManageContentAsync(report.NoiDungKeHoachId, cancellationToken) && await IsReportStatusAsync(report.TrangThaiId, "DA_GUI", cancellationToken) ? report : null;
+    }
+    private async Task<bool> CanManageContentAsync(Guid contentId, CancellationToken cancellationToken)
+    {
+        var query = from content in dbContext.NoiDungKeHoachs.AsNoTracking()
+                    join plan in dbContext.KeHoachThiHanhPhapLuats.AsNoTracking() on content.KeHoachId equals plan.Id
+                    where content.Id == contentId && !content.IsDeleted && !plan.IsDeleted
+                    select plan.DonViChuTriId;
+        if (CurrentUser.IsSSA) return await query.AnyAsync(cancellationToken);
+        return CurrentUser.DonViId is { } donViId && await query.AnyAsync(x => x == donViId, cancellationToken);
     }
     private void AddEvaluation(NoiDungKeHoach content, BaoCaoTienDoThiHanh report, string result, string? comment, Guid statusId) => dbContext.DanhGiaThiHanhs.Add(new DanhGiaThiHanh { NoiDungKeHoachId = content.Id, BaoCaoTienDoThiHanhId = report.Id, KetQuaDanhGia = result, NhanXet = comment, TrangThaiSauId = statusId, NguoiDanhGiaId = CurrentUser.UserId!.Value, NgayDanhGia = DateTime.UtcNow, CreatedBy = CurrentUser.UserId!.Value.ToString() });
     private void AddHistory(NoiDungKeHoach content, Guid oldStatus, Guid newStatus, string action, string? comment) => dbContext.LichSuXuLyThiHanhs.Add(new LichSuXuLyThiHanh { KeHoachId = content.KeHoachId, NoiDungKeHoachId = content.Id, HanhDong = action, TrangThaiTruocId = oldStatus, TrangThaiSauId = newStatus, NoiDung = comment, NguoiXuLyId = CurrentUser.UserId!.Value, DonViXuLyId = CurrentUser.DonViId });

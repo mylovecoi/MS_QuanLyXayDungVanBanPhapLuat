@@ -33,6 +33,43 @@ public sealed class KhaoSatThiHanhPhapLuatCuocKhaoSatController(KhaoSatThiHanhPh
         var entity = new CuocKhaoSat { MaCuocKhaoSat = request.MaCuocKhaoSat.Trim(), TenCuocKhaoSat = request.TenCuocKhaoSat.Trim(), MucDich = request.MucDich, PhamVi = request.PhamVi, DonViChuTriId = request.DonViChuTriId, TuNgay = request.TuNgay, DenNgay = request.DenNgay, TrangThaiId = request.TrangThaiId, LinhVucId = request.LinhVucId, VanBanId = request.VanBanId };
         db.CuocKhaoSats.Add(entity); await db.SaveChangesAsync(ct); return Ok(new { entity.Id });
     }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        var survey = await db.CuocKhaoSats.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
+        if (survey is null) return NotFound();
+
+        var groups = await db.NhomDoiTuongKhaoSats.AsNoTracking()
+            .Where(x => x.CuocKhaoSatId == id && !x.IsDeleted).OrderBy(x => x.ThuTu).ToListAsync(ct);
+        var templates = await db.MauPhieuKhaoSats.AsNoTracking()
+            .Where(x => x.CuocKhaoSatId == id && !x.IsDeleted).OrderBy(x => x.NhomDoiTuongKhaoSatId).ThenByDescending(x => x.PhienBan).ToListAsync(ct);
+        var subjects = await db.DoiTuongKhaoSats.AsNoTracking()
+            .Where(x => x.CuocKhaoSatId == id && !x.IsDeleted).OrderBy(x => x.HanNop).ToListAsync(ct);
+        var submissions = await db.PhieuNopKhaoSats.AsNoTracking()
+            .Where(x => x.CuocKhaoSatId == id && !x.IsDeleted).ToListAsync(ct);
+        var errors = await db.LoiImportKhaoSats.AsNoTracking()
+            .Where(x => submissions.Select(y => y.Id).Contains(x.PhieuNopKhaoSatId) && !x.IsDeleted)
+            .GroupBy(x => x.PhieuNopKhaoSatId).Select(x => new { PhieuNopKhaoSatId = x.Key, SoLoi = x.Count() }).ToListAsync(ct);
+
+        return Ok(new
+        {
+            CuocKhaoSat = survey,
+            NhomDoiTuong = groups,
+            MauPhieu = templates.Select(x => new
+            {
+                x.Id, x.NhomDoiTuongKhaoSatId, x.PhienBan, x.TenFile, x.DuongDanFile, x.DaPhatHanh,
+                x.TrangThaiMauPhieu, x.NgayHieuLuc, x.NgayHetHieuLuc, x.CreatedAt
+            }),
+            DonViKhaoSat = subjects.Select(x => new
+            {
+                x.Id, x.NhomDoiTuongKhaoSatId, x.MauPhieuKhaoSatId, x.DonViId, x.CanBoId, x.HanNop, x.TrangThaiId,
+                SoLanNop = submissions.Count(y => y.DoiTuongKhaoSatId == x.Id),
+                PhieuGanNhat = submissions.Where(y => y.DoiTuongKhaoSatId == x.Id).OrderByDescending(y => y.CreatedAt)
+                    .Select(y => new { y.Id, y.TenFile, y.NgayImport, y.TrangThaiId, SoLoi = errors.Where(e => e.PhieuNopKhaoSatId == y.Id).Select(e => e.SoLoi).FirstOrDefault() }).FirstOrDefault()
+            })
+        });
+    }
     [HttpPost("{id:guid}/nhom-doi-tuong")]
     public async Task<ActionResult> AddGroup(Guid id, CreateNhomDoiTuongRequest request, CancellationToken ct)
     {

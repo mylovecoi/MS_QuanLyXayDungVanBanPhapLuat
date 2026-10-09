@@ -816,8 +816,15 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("DoiTuongKhaoSatId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("DuongDanHeThongNguon")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("DuongDanFile")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GhiChuNguonDuLieu")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -829,6 +836,14 @@ namespace KhaoSatThiHanhPhapLuatService.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("MauPhieuKhaoSatId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhienBanPhanMem")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TenPhanMem")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime?>("NgayImport")
                         .HasColumnType("datetime2");

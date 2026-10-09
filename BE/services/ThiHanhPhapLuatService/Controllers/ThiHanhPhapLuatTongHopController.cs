@@ -22,6 +22,7 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
+        if (await GetScopedPlanAsync(keHoachId, cancellationToken) is null) return NotFound();
         return Ok(await dbContext.BaoCaoTongHopThiHanhs.AsNoTracking().Where(x => x.KeHoachId == keHoachId && !x.IsDeleted).OrderByDescending(x => x.CreatedAt).ToListAsync(cancellationToken));
     }
 
@@ -31,7 +32,7 @@ public sealed class ThiHanhPhapLuatTongHopController(
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Create", "Create", cancellationToken);
         if (denied is not null) return denied;
         if (request.TuNgay > request.DenNgay) return BadRequest("Khoảng thời gian báo cáo không hợp lệ.");
-        if (!await PlanExistsAsync(request.KeHoachId, cancellationToken)) return NotFound("Không tìm thấy kế hoạch.");
+        if (await GetScopedPlanAsync(request.KeHoachId, cancellationToken) is null) return NotFound("Không tìm thấy kế hoạch.");
         if (!await IsReportStatusAsync(request.TrangThaiId, "NHAP", cancellationToken)) return BadRequest("Trạng thái báo cáo tổng hợp mới phải là NHAP.");
         if (await dbContext.BaoCaoTongHopThiHanhs.AnyAsync(x => x.KeHoachId == request.KeHoachId && x.KyBaoCao == request.KyBaoCao && !x.IsDeleted, cancellationToken)) return Conflict("Đã có báo cáo tổng hợp cho kỳ này.");
         var entity = new BaoCaoTongHopThiHanh { MaBaoCao = request.MaBaoCao.Trim(), KeHoachId = request.KeHoachId, KyBaoCao = request.KyBaoCao.Trim(), TuNgay = request.TuNgay, DenNgay = request.DenNgay, TrangThaiId = request.TrangThaiId, CreatedBy = CurrentUser.UserId!.Value.ToString() };
@@ -46,7 +47,7 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
-        var entity = await dbContext.BaoCaoTongHopThiHanhs.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        var entity = await GetScopedReportAsync(id, tracking: false, cancellationToken);
         return entity is null ? NotFound() : Ok(entity);
     }
 
@@ -55,8 +56,7 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
-        var exists = await dbContext.BaoCaoTongHopThiHanhs.AnyAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
-        if (!exists) return NotFound();
+        if (await GetScopedReportAsync(id, tracking: false, cancellationToken) is null) return NotFound();
         var query = dbContext.BaoCaoTongHopChiTiets.AsNoTracking().Where(x => x.BaoCaoTongHopThiHanhId == id && !x.IsDeleted);
         if (lanChot.HasValue) query = query.Where(x => x.LanChot == lanChot);
         return Ok(await query.OrderBy(x => x.LanChot).ThenBy(x => x.CreatedAt).ToListAsync(cancellationToken));
@@ -67,11 +67,12 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Approve", "Approve", cancellationToken);
         if (denied is not null) return denied;
-        var report = await dbContext.BaoCaoTongHopThiHanhs.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        var report = await GetScopedReportAsync(id, tracking: true, cancellationToken);
         if (report is null) return NotFound();
         if (!await IsReportStatusAsync(report.TrangThaiId, "NHAP", cancellationToken) && !await IsReportStatusAsync(report.TrangThaiId, "MO_LAI", cancellationToken)) return BadRequest("Chỉ được chốt báo cáo NHAP hoặc MO_LAI.");
         if (!await IsReportStatusAsync(request.TrangThaiBaoCaoId, "DA_CHOT", cancellationToken) || !await IsPlanStatusAsync(request.TrangThaiKeHoachId, "DA_TONG_HOP", cancellationToken)) return BadRequest("Trạng thái chốt không hợp lệ.");
-        var plan = await dbContext.KeHoachThiHanhPhapLuats.SingleAsync(x => x.Id == report.KeHoachId && !x.IsDeleted, cancellationToken);
+        var plan = await GetScopedPlanAsync(report.KeHoachId, cancellationToken);
+        if (plan is null) return NotFound();
         var contents = await dbContext.NoiDungKeHoachs.Where(x => x.KeHoachId == plan.Id && !x.IsDeleted).OrderBy(x => x.ThuTu).ToListAsync(cancellationToken);
         if (contents.Count == 0) return BadRequest("Kế hoạch chưa có đầu việc để tổng hợp.");
         foreach (var content in contents)
@@ -100,10 +101,11 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Approve", "Approve", cancellationToken);
         if (denied is not null) return denied;
-        var report = await dbContext.BaoCaoTongHopThiHanhs.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        var report = await GetScopedReportAsync(id, tracking: true, cancellationToken);
         if (report is null) return NotFound();
         if (!await IsReportStatusAsync(report.TrangThaiId, "DA_CHOT", cancellationToken) || !await IsReportStatusAsync(request.TrangThaiBaoCaoId, "MO_LAI", cancellationToken) || !await IsPlanStatusAsync(request.TrangThaiKeHoachId, "DANG_THUC_HIEN", cancellationToken)) return BadRequest("Chuyển trạng thái mở lại không hợp lệ.");
-        var plan = await dbContext.KeHoachThiHanhPhapLuats.SingleAsync(x => x.Id == report.KeHoachId && !x.IsDeleted, cancellationToken);
+        var plan = await GetScopedPlanAsync(report.KeHoachId, cancellationToken);
+        if (plan is null) return NotFound();
         report.TrangThaiId = request.TrangThaiBaoCaoId; report.UpdatedAt = DateTime.UtcNow; report.UpdatedBy = CurrentUser.UserId!.Value.ToString();
         plan.TrangThaiId = request.TrangThaiKeHoachId; plan.UpdatedAt = DateTime.UtcNow; plan.UpdatedBy = CurrentUser.UserId!.Value.ToString();
         AddHistory(plan.Id, "MO_LAI_BAO_CAO_TONG_HOP", request.LyDo, plan.TrangThaiId);
@@ -116,7 +118,7 @@ public sealed class ThiHanhPhapLuatTongHopController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatTongHop", "Approve", "Approve", cancellationToken);
         if (denied is not null) return denied;
-        var plan = await dbContext.KeHoachThiHanhPhapLuats.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        var plan = await GetScopedPlanAsync(id, cancellationToken);
         if (plan is null) return NotFound();
         if (!await IsPlanStatusAsync(plan.TrangThaiId, "DA_TONG_HOP", cancellationToken) || !await IsPlanStatusAsync(request.TrangThaiKeHoachId, "HOAN_THANH", cancellationToken)) return BadRequest("Chuyển trạng thái hoàn thành không hợp lệ.");
         if (!await dbContext.BaoCaoTongHopThiHanhs.AnyAsync(x => x.KeHoachId == id && !x.IsDeleted && x.NgayChot != null, cancellationToken)) return BadRequest("Kế hoạch chưa có báo cáo tổng hợp đã chốt.");
@@ -124,7 +126,23 @@ public sealed class ThiHanhPhapLuatTongHopController(
         await dbContext.SaveChangesAsync(cancellationToken); return NoContent();
     }
 
-    private async Task<bool> PlanExistsAsync(Guid id, CancellationToken cancellationToken) => await dbContext.KeHoachThiHanhPhapLuats.AnyAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+    private async Task<KeHoachThiHanhPhapLuat?> GetScopedPlanAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var query = dbContext.KeHoachThiHanhPhapLuats.Where(x => x.Id == id && !x.IsDeleted);
+        if (!CurrentUser.IsSSA)
+        {
+            if (CurrentUser.DonViId is not { } donViId) return null;
+            query = query.Where(x => x.DonViChuTriId == donViId);
+        }
+        return await query.SingleOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<BaoCaoTongHopThiHanh?> GetScopedReportAsync(Guid id, bool tracking, CancellationToken cancellationToken)
+    {
+        var reports = tracking ? dbContext.BaoCaoTongHopThiHanhs : dbContext.BaoCaoTongHopThiHanhs.AsNoTracking();
+        var report = await reports.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
+        return report is not null && await GetScopedPlanAsync(report.KeHoachId, cancellationToken) is not null ? report : null;
+    }
     private async Task<int> CountContentStatusAsync(IEnumerable<NoiDungKeHoach> contents, string code, CancellationToken cancellationToken) { var count = 0; foreach (var content in contents) if (await IsContentStatusAsync(content.TrangThaiId, code, cancellationToken)) count++; return count; }
     private async Task<bool> IsContentFinishedAsync(Guid id, CancellationToken cancellationToken) => await IsContentStatusAsync(id, "DAT", cancellationToken) || await IsContentStatusAsync(id, "KHONG_DAT", cancellationToken);
     private async Task<bool> IsContentStatusAsync(Guid id, string code, CancellationToken cancellationToken) { var status = await trangThaiClient.GetAsync(id, cancellationToken); return status is { TrangThai: true, NhomTrangThai: "NOI_DUNG_THI_HANH_PHAP_LUAT" } && status.MaTrangThai == code; }
