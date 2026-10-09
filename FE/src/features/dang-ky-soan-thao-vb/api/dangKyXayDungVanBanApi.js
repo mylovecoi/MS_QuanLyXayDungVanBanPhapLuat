@@ -1,56 +1,97 @@
 import axiosClient from "../../../shared/api/axiosClient";
 
-const BASE_URL = "/dang-ky-xay-dung-van-ban/ho-so";
+const BASE_URL = "/api/dang-ky-xay-dung-van-ban/ho-so";
 
-export const getDangKyXayDungVanBanById = (id) => {
-    return axiosClient.get(`${BASE_URL}/${id}`);
-};
+function unwrapResponse(response) {
+    const payload = response.data;
 
-export const createDangKyXayDungVanBan = (data) => {
-    return axiosClient.post(BASE_URL, data);
-};
+    if (payload.isSuccess === false) {
+        throw new Error(payload?.message || "Thao tác không thành công.");
+    }
+    return payload;
+}
 
-export const updateDangKyXayDungVanBan = (id, data) => {
-    return axiosClient.put(`${BASE_URL}/${id}`, data);
-};
+export async function getDangKyXayDungVanBanById(id) {
+    const response = await axiosClient.get(`${BASE_URL}/${id}`, {
+        baseURL: "",
+    });
+    return unwrapResponse(response).data;
+}
 
-export const deleteDangKyXayDungVanBan = (id) => {
-    return axiosClient.delete(`${BASE_URL}/${id}`);
-};
+export async function createDangKyXayDungVanBan(data) {
+    const response = await axiosClient.post(BASE_URL, data, {
+        baseURL: "",
+    });
+    return unwrapResponse(response).data;
+}
 
-export const getDangKyXayDungVanBanTimeline = (id) => {
-    return axiosClient.get(`${BASE_URL}/${id}/timeline`);
-};
+export async function updateDangKyXayDungVanBan(id, data) {
+    const response = await axiosClient.put(`${BASE_URL}/${id}`, data, {
+        baseURL: "",
+    });
+    return unwrapResponse(response);
+}
 
-export const getHanhDongKhaDung = (id) => {
-    return axiosClient.get(`${BASE_URL}/${id}/hanh-dong-kha-dung`);
-};
+export async function deleteDangKyXayDungVanBan(id) {
+    const response = await axiosClient.delete(`${BASE_URL}/${id}`, {
+        baseURL: "",
+    });
+    return unwrapResponse(response);
+}
 
-export const getDangKyXayDungVanBanFiles = (id) => {
-    return axiosClient.get(`${BASE_URL}/${id}/files`);
-};
+export async function getDangKyXayDungVanBanTimeline(id) {
+    const response = await axiosClient.get(`${BASE_URL}/${id}/timeline`, {
+        baseURL: "",
+    });
+    return unwrapResponse(response).data;
+}
 
-export const uploadDangKyXayDungVanBanFile = (id, formData) => {
-    return axiosClient.post(`${BASE_URL}/${id}/files`, formData);
-};
-
-export const deleteDangKyXayDungVanBanFile = (id, fileId) => {
-    return axiosClient.delete(
-        `${BASE_URL}/${id}/files/${fileId}`
+export async function getHanhDongKhaDung(id) {
+    const response = await axiosClient.get(
+        `${BASE_URL}/${id}/hanh-dong-kha-dung`,
+        {baseURL: ""}
     );
-};
+    return unwrapResponse(response).data;
+}
 
-export const xuLyDangKyXayDungVanBan = (id, data) => {
-    return axiosClient.post(
+export async function getDangKyXayDungVanBanFiles(id) {
+    const response = await axiosClient.get(`${BASE_URL}/${id}/files`, {
+        baseURL: "",
+    });
+    return unwrapResponse(response).data;
+}
+
+export async function uploadDangKyXayDungVanBanFile(id, formData) {
+    const response = await axiosClient.post(
+        `${BASE_URL}/${id}/files`,
+        formData,
+        {baseURL: ""}
+    );
+    return unwrapResponse(response).data;
+}
+
+export async function deleteDangKyXayDungVanBanFile(id, fileId) {
+    const response = await axiosClient.delete(
+        `${BASE_URL}/${id}/files/${fileId}`,
+        {baseURL: ""}
+    );
+    return unwrapResponse(response);
+}
+
+export async function xuLyDangKyXayDungVanBan(id, data) {
+    const response = await axiosClient.post(
         `${BASE_URL}/${id}/xu-ly`,
-        data
+        data,
+        {baseURL: ""}
     );
-};
+    return unwrapResponse(response);
+}
 
-export const khoiTaoQuyTrinhXayDung = (id, data) => {
-    return axiosClient.post(
+export async function khoiTaoQuyTrinhXayDung(id, data) {
+    const response = await axiosClient.post(
         `${BASE_URL}/${id}/khoi-tao-quy-trinh-xay-dung`,
-        data
+        data,
+        {baseURL: ""}
     );
-};
-
+    return unwrapResponse(response);
+}

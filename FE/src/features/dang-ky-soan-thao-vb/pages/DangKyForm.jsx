@@ -7,6 +7,8 @@ import Label from "../../../app/components/forms/Label";
 import Select from "../../../app/components/forms/Select";
 import {getDonViOptions} from "../../danh-muc/api/donViApi";
 import {getVanBans} from "../../danh-muc/api/vanBanApi";
+import DatePicker from "../../../app/components/forms/date-picker.jsx";
+
 import {
     createDangKyXayDungVanBan,
     getDangKyXayDungVanBanById,
@@ -175,18 +177,33 @@ export default function DangKyForm() {
         return "";
     };
 
-    const buildPayload = () => ({
-        tenHoSo: form.tenHoSo.trim(),
-        tenVanBanDuKien: form.tenVanBanDuKien.trim(),
-        loaiVanBanId: form.loaiVanBanId,
-        donViSoanThaoId: form.donViSoanThaoId,
-        donViPheDuyetId: form.donViPheDuyetId,
-        namDangKy: Number(form.namDangKy),
-        canCuDeXuat: emptyToNull(form.canCuDeXuat),
-        suCanThiet: emptyToNull(form.suCanThiet),
-        noiDungChinhSach: emptyToNull(form.noiDungChinhSach),
-        duKienThoiGianTrinh: form.duKienThoiGianTrinh || null,
-    });
+    const buildPayload = () => {
+        let userInfo = {};
+
+        try {
+            userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+        } catch {
+            userInfo = {};
+        }
+
+        return {
+            tenHoSo: form.tenHoSo.trim(),
+            tenVanBanDuKien: form.tenVanBanDuKien.trim(),
+            loaiVanBanId: form.loaiVanBanId,
+            donViSoanThaoId: form.donViSoanThaoId,
+            donViPheDuyetId: form.donViPheDuyetId,
+            namDangKy: Number(form.namDangKy),
+
+            canCuDeXuat: emptyToNull(form.canCuDeXuat),
+            suCanThiet: emptyToNull(form.suCanThiet),
+            noiDungChinhSach: emptyToNull(form.noiDungChinhSach),
+            duKienThoiGianTrinh: form.duKienThoiGianTrinh || null,
+
+            nguoiXuLyId: userInfo.userId,
+            tenNguoiXuLy: userInfo.displayName || userInfo.username || "",
+            tenDonViXuLy: form.tenDonViSoanThao || "",
+        };
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -211,10 +228,11 @@ export default function DangKyForm() {
 
                 setSuccess("Cập nhật hồ sơ đăng ký thành công.");
             } else {
-                const result =
-                    await createDangKyXayDungVanBan(
-                        buildPayload()
-                    );
+                const payload = buildPayload();
+
+                console.log("CREATE PAYLOAD:", payload);
+
+                const result = await createDangKyXayDungVanBan(payload);
 
                 setSuccess("Tạo hồ sơ đăng ký thành công.");
 
@@ -223,7 +241,7 @@ export default function DangKyForm() {
                 if (createdId) {
                     setTimeout(() => {
                         navigate(
-                            `/admin/dang-ky-xay-dung-van-ban/ho-so/${createdId}`
+                            `/dang-ky-xay-dung-van-ban/ho-so/${createdId}`
                         );
                     }, 300);
 
@@ -233,7 +251,7 @@ export default function DangKyForm() {
 
             setTimeout(() => {
                 navigate(
-                    "/admin/dang-ky-xay-dung-van-ban/danh-sach"
+                    "/dang-ky-xay-dung-van-ban/danh-sach"
                 );
             }, 500);
         } catch (saveError) {
@@ -450,18 +468,14 @@ export default function DangKyForm() {
                         </Field>
 
                         <Field label="Dự kiến thời gian trình">
-                            <Input
-                                type="date"
-                                value={
-                                    form.duKienThoiGianTrinh
-                                }
-                                onChange={(event) =>
-                                    updateForm(
-                                        "duKienThoiGianTrinh",
-                                        event.target.value
-                                    )
-                                }
-                                disabled={saving}
+                            <DatePicker
+                                id="duKienThoiGianTrinh"
+                                mode="single"
+                                placeholder="Chọn ngày dự kiến trình"
+                                defaultDate={form.duKienThoiGianTrinh || undefined}
+                                onChange={(selectedDates, dateStr) => {
+                                    updateForm("duKienThoiGianTrinh", dateStr || "");
+                                }}
                             />
                         </Field>
                     </div>
