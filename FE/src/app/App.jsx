@@ -23,6 +23,9 @@ import BarChart from "../pages/Charts/BarChart.jsx";
 import LayoutSettings from "../pages/Settings/LayoutSettings.jsx";
 import {appFeatureRoutes} from "./routes.jsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import DanhSachDangKyPage from "../features/dang-ky-soan-thao-vb/pages/DanhSachDangKyPage.jsx";
+import HoSoDangKyPage from "../features/dang-ky-soan-thao-vb/pages/HoSoDangKyPage.jsx";
+import KetQuaDangKyPage from "../features/dang-ky-soan-thao-vb/pages/KetQuaDangKyPage.jsx";
 
 export function App() {
   return (

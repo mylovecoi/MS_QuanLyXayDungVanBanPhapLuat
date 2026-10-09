@@ -17,7 +17,7 @@ export default function BasicTableTwo({
                                           searchPlaceholder = "Search...",
                                           searchFields = [],
                                           pageSizeOptions = [5, 10, 20, 100],
-                                          emptyText = "No data found.",
+                                          emptyText = "Không tìm thấy dữ liệu",
                                       }) {
     const [search, setSearch] = useState("");
     const [pageCurrent, setPageCurrent] = useState(1);
@@ -254,7 +254,7 @@ export default function BasicTableTwo({
 
             {/* Table */}
             <div className="max-w-full overflow-x-auto">
-                <Table>
+                <Table className="w-full">
                     <TableHeader
                         className="
                             border-b
@@ -290,12 +290,12 @@ export default function BasicTableTwo({
 
                     <TableBody
                         className="
-                            divide-y
-                            divide-gray-100
-                            dark:divide-white/[0.05]
-                        "
+        divide-y
+        divide-gray-100
+        dark:divide-white/[0.05]
+    "
                     >
-                        {paginatedData.length > 0 ? (
+                        {paginatedData.length > 0 &&
                             paginatedData.map(
                                 (item, rowIndex) => (
                                     <TableRow
@@ -305,13 +305,9 @@ export default function BasicTableTwo({
                                         }
                                     >
                                         {columns.map(
-                                            (
-                                                column
-                                            ) => (
+                                            (column) => (
                                                 <TableCell
-                                                    key={
-                                                        column.key
-                                                    }
+                                                    key={column.key}
                                                     className={
                                                         column.cellClassName ||
                                                         `
@@ -339,28 +335,27 @@ export default function BasicTableTwo({
                                         )}
                                     </TableRow>
                                 )
-                            )
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={
-                                        columns.length
-                                    }
-                                    className="
-                                        px-5
-                                        py-10
-                                        text-center
-                                        text-sm
-                                        text-gray-500
-                                        dark:text-gray-400
-                                    "
-                                >
-                                    {emptyText}
-                                </TableCell>
-                            </TableRow>
-                        )}
+                            )}
                     </TableBody>
                 </Table>
+                {paginatedData.length === 0 && (
+                    <div
+                        className="
+                            w-full
+                            border-t
+                            border-gray-100
+                            px-5
+                            py-10
+                            text-center
+                            text-sm
+                            text-gray-500
+                            dark:border-white/[0.05]
+                            dark:text-gray-400
+                        "
+                    >
+                        {emptyText}
+                    </div>
+                )}
             </div>
 
             {/* Pagination */}

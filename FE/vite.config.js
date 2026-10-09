@@ -71,7 +71,12 @@ export default defineConfig({
       '/api/xay-dung-van-ban': {
         target: process.env.XDVB_SERVICE_URL || 'http://localhost:50048',
         changeOrigin: true,
-      }
+      },
+      "/api/dang-ky-xay-dung-van-ban": {
+        target: "https://localhost:60577",
+        changeOrigin: true,
+        secure: false,
+      },
     }
   }
 });

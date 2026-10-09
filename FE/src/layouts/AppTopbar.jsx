@@ -1,15 +1,25 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import MegaMenu from "../app/components/MegaMenu/MegaMenu.jsx";
-import {navItems, othersItems} from "../config/menuConfig.jsx";
+import {getFrontendMenu} from "../shared/api/systemApi.js";
 
 const AppTopbar = () => {
-    const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+    const [activeMenu, setActiveMenu] = useState(null);
+    const [allMenus, setAllMenus] = useState([]);
 
-    const allMenus = [
-        ...navItems,
-        ...othersItems,
-    ];
+    useEffect(() => {
+        const loadMenu = async () => {
+            try {
+                const data = await getFrontendMenu();
+                setAllMenus(data?.items || []);
+            } catch (error) {
+                console.error("Lỗi lấy menu:", error);
+                setAllMenus([]);
+            }
+        };
+
+        void loadMenu();
+    }, []);
 
     return (
         <div
@@ -21,15 +31,15 @@ const AppTopbar = () => {
                 dark:border-gray-800
                 dark:bg-gray-900
             "
-            onMouseLeave={() => setIsMegaMenuOpen(false)}
+            onMouseLeave={() => setActiveMenu(null)}
         >
             {/* TOPBAR */}
-            <div className="flex justify-center px-4">
-                <div className="flex items-center gap-1">
+            <div className="flex justify-start px-8">
+                <div className="flex items-center gap-3">
                     {allMenus.map((item) => (
                         <div
-                            key={item.name}
-                            onMouseEnter={() => setIsMegaMenuOpen(true)}
+                            key={item.id}
+                            onMouseEnter={() => setActiveMenu(item)}
                         >
                             <div
                                 className="
@@ -38,7 +48,7 @@ const AppTopbar = () => {
                                     items-center
                                     gap-2
                                     rounded-lg
-                                    px-4
+                                    px-5
                                     py-3
                                     text-sm
                                     font-medium
@@ -50,13 +60,9 @@ const AppTopbar = () => {
                                     dark:hover:bg-white/5
                                     dark:hover:text-brand-400
                                 "
-                            >
-                                <span className="menu-item-icon-size">
-                                    {item.icon}
-                                </span>
-
+                                            >
                                 <span className="whitespace-nowrap">
-                                    {item.name}
+                                    {item.title}
                                 </span>
                             </div>
                         </div>
@@ -65,10 +71,10 @@ const AppTopbar = () => {
             </div>
 
             {/* MEGA MENU */}
-            {isMegaMenuOpen && (
+            {activeMenu && (
                 <MegaMenu
-                    items={allMenus}
-                    onClose={() => setIsMegaMenuOpen(false)}
+                    item={activeMenu}
+                    onClose={() => setActiveMenu(null)}
                 />
             )}
         </div>
