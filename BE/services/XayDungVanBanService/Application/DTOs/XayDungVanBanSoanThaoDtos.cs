@@ -111,7 +111,10 @@ public sealed record XayDungVanBanTaiLieuDto(
     string? MimeType,
     long? DungLuong,
     bool IsCurrent,
-    DateTime NgayTaiLen);
+    DateTime NgayTaiLen,
+    Guid? BoHoSoTaiLieuId = null,
+    string? HinhThucThem = null,
+    string? LoaiDinhKem = null);
 
 public sealed record TaiFileTongHopYKienRequest(
     Guid LoaiTaiLieuId,

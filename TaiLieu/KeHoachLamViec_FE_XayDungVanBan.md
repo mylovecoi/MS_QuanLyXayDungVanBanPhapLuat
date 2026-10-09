@@ -402,3 +402,125 @@ VanBanWorkflowTabs.jsx
   - Ban hành văn bản.
 - Tách component dùng chung cho file đính kèm, timeline, trạng thái và thao tác chuyển bước khi các màn nghiệp vụ tiếp theo ổn định.
 - Hoàn thiện kiểm soát quyền thao tác theo API hành động khả dụng thay vì chỉ dựa trên trạng thái ở client.
+
+## 16. Bản bàn giao để tiếp tục trên máy khác (cập nhật 09/10/2026)
+
+### 16.1. Tình trạng thực hiện theo kế hoạch
+
+| Giai đoạn | Trạng thái | Kết quả hiện có |
+| --- | --- | --- |
+| 1. Nền tảng module | Hoàn thành | Module, API client và route riêng trong `FE/src/features/xay-dung-van-ban`. |
+| 2. Hồ sơ gốc | Hoàn thành cơ bản | Danh sách, tìm kiếm/lọc, tạo, sửa, xóa, chi tiết và timeline. |
+| 3. Soạn thảo/góp ý | Hoàn thành cơ bản | Tài liệu, ý kiến góp ý, tổng hợp ý kiến và chuyển bước. |
+| 4. Trình thẩm định | Đã triển khai | Danh sách, tạo từ hồ sơ nguồn, kế thừa tài liệu, phân loại file, kiểm tra/gửi và tải file. |
+| 5. Thẩm định | Đã triển khai đợt 1 | Danh sách, nhận hồ sơ, tiếp nhận, kết quả, tài liệu, so sánh dự thảo, trả lại và gửi kết quả. |
+| 6–9. Trình UBND, ý kiến UBND, thẩm tra HĐND, ban hành | Chưa triển khai FE | Là các hạng mục tiếp theo. |
+| 10–11. Component dùng chung/kiểm thử toàn luồng | Chưa hoàn tất | Cần tách component và kiểm thử hai luồng nghiệp vụ đầy đủ. |
+
+### 16.2. Phần trình thẩm định đã hoàn thành
+
+#### Route FE
+
+- `/xay-dung-van-ban/trinh-tham-dinh`
+- `/xay-dung-van-ban/trinh-tham-dinh/:id`
+- `/admin/xay-dung-van-ban/ho-so/:id/trinh-tham-dinh` (route tương thích cũ)
+
+#### Chức năng
+
+- Lập hồ sơ trình thẩm định từ hồ sơ soạn thảo và kế thừa tài liệu.
+- Phân biệt rõ ba nhóm tài liệu:
+  - Tài liệu kế thừa.
+  - Tài liệu kèm tờ trình.
+  - File dự thảo; chỉ chấp nhận `.docx` khi chọn loại này.
+- File dự thảo được chốt theo từng lần gửi; file cũ vẫn được giữ để phục vụ so sánh.
+- Kiểm tra điều kiện trước khi gửi và bắt buộc chọn file dự thảo cho lần gửi.
+- Sau khi gửi, hồ sơ trình chỉ xem được, không sửa/cập nhật.
+- Tải từng file thông qua API có kiểm tra quyền.
+
+#### API/BE liên quan
+
+- Prefix: `/api/xay-dung-van-ban/trinh-tham-dinh`.
+- Có endpoint tải file: `GET /{hoSoId}/tai-lieu/{fileId}/tai-xuong`.
+- Migration đã có: `20261008090000_AddTrinhThamDinhDraftFile`.
+- Database đích phải có cột `FileDuThaoId` trong bảng `HoSoXayDungVanBanTrinhThamDinhs` trước khi chạy luồng gửi file dự thảo.
+
+### 16.3. Phần thẩm định đã hoàn thành
+
+#### Route FE
+
+- `/xay-dung-van-ban/tham-dinh`
+- `/xay-dung-van-ban/tham-dinh/:id`
+
+#### Chức năng
+
+- Danh sách hồ sơ đã gửi thẩm định, với trạng thái chờ tiếp nhận/đang thẩm định/đã hoàn thành.
+- Nút **Nhận hồ sơ trình** trong cột thao tác thực hiện liên tiếp:
+  1. Tạo hồ sơ thẩm định.
+  2. Tiếp nhận hồ sơ.
+  3. Mở màn hình xử lý thẩm định.
+- Cập nhật hình thức, ngày, kết quả và kết luận thẩm định.
+- Tải thêm/tải xuống tài liệu thẩm định.
+- So sánh hai file dự thảo `.docx`.
+- Kiểm tra điều kiện và gửi kết quả thẩm định sang bước tiếp theo.
+- Nút **Trả lại hồ sơ trình thẩm định**: bắt buộc nhập lý do; mở lại bộ trình thẩm định ở trạng thái nhập để đơn vị lập bổ sung và gửi lại.
+
+#### API/BE liên quan
+
+- Prefix: `/api/xay-dung-van-ban/tham-dinh`.
+- Các endpoint đáng chú ý:
+  - `GET /` — danh sách hồ sơ thẩm định.
+  - `POST /` — tạo hồ sơ thẩm định từ hồ sơ trình đã gửi.
+  - `POST /{id}/tiep-nhan` — tiếp nhận.
+  - `PUT /{id}/ket-qua` — lưu kết quả.
+  - `POST /{id}/tra-lai-trinh-tham-dinh` — trả lại bước trình thẩm định.
+  - `POST /{id}/gui-ket-qua` — gửi kết quả.
+  - `GET /{id}/tai-lieu/{fileId}/tai-xuong` — tải file có kiểm tra quyền.
+
+### 16.4. File trọng tâm để tiếp tục phát triển
+
+```text
+FE/src/features/xay-dung-van-ban/
+  api/xayDungVanBanApi.js
+  routes.jsx
+  pages/HoSoTrinhThamDinhListPage.jsx
+  pages/HoSoTrinhThamDinhPage.jsx
+  pages/HoSoThamDinhListPage.jsx
+  pages/HoSoThamDinhPage.jsx
+
+BE/services/XayDungVanBanService/
+  Controllers/XayDungVanBanTrinhThamDinhController.cs
+  Controllers/XayDungVanBanThamDinhController.cs
+  Application/Services/XayDungVanBanTrinhThamDinhService.cs
+  Application/Services/XayDungVanBanThamDinhService.cs
+  Application/DTOs/XayDungVanBanTrinhThamDinhDtos.cs
+  Application/DTOs/XayDungVanBanThamDinhDtos.cs
+  Infrastructure/Persistence/Migrations/20261008090000_AddTrinhThamDinhDraftFile.cs
+```
+
+### 16.5. Cách khởi động ở máy mới
+
+1. Sao chép mã nguồn, file cấu hình môi trường và dữ liệu/migration cần thiết. Không ghi mật khẩu kết nối thật vào tài liệu hoặc source kiểm soát phiên bản.
+2. Kiểm tra chuỗi kết nối `DefaultConnection` của `XayDungVanBanService` phù hợp database đích.
+3. Khôi phục package và cập nhật database (nếu database chưa có migration):
+
+```powershell
+dotnet restore BE/services/XayDungVanBanService/XayDungVanBanService.csproj
+dotnet ef database update --project BE/services/XayDungVanBanService
+```
+
+4. Chạy backend `XayDungVanBanService`, sau đó chạy FE:
+
+```powershell
+cd FE
+npm install
+npm run dev
+```
+
+5. Kiểm tra phân quyền `XayDungVanBanTrinhThamDinh` và `XayDungVanBanThamDinh` cho tài khoản thử nghiệm. Nếu tài khoản không có `DonViId`, cần có cấu hình/dev data đơn vị xử lý phù hợp để kiểm tra đúng phân quyền thực tế.
+
+### 16.6. Bước kế tiếp đề nghị
+
+1. Kiểm thử toàn bộ vòng lặp: trình thẩm định → nhận thẩm định → trả lại → tải file dự thảo mới → gửi lại → thẩm định → gửi kết quả.
+2. Tiếp tục Giai đoạn 6: màn **Trình UBND/phê duyệt**; kế thừa tài liệu, tờ trình, kết quả thẩm định và tài liệu giải trình.
+3. Sau khi các bước nghiệp vụ ổn định, tách các component dùng chung `FileDinhKemTable`, `TienDoQuyTrinh`, `LichSuXuLyTable`, `TrangThaiBadge` và `ChuyenBuocActions`.
+4. Hoàn thiện quyền theo action API và chạy kiểm thử hai luồng: Quyết định UBND, Nghị quyết HĐND.

@@ -965,6 +965,9 @@ namespace XayDungVanBanService.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("DonViNhanThamDinhId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("FileDuThaoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("HanDeNghiTraKetQua")
                         .HasColumnType("datetime2");
 
