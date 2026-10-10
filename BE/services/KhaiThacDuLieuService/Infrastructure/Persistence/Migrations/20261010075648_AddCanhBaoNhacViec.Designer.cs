@@ -4,6 +4,7 @@ using KhaiThacDuLieuService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KhaiThacDuLieuService.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(KhaiThacDuLieuDbContext))]
-    partial class KhaiThacDuLieuDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261010075648_AddCanhBaoNhacViec")]
+    partial class AddCanhBaoNhacViec
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,68 +120,6 @@ namespace KhaiThacDuLieuService.Infrastructure.Persistence.Migrations
                     b.HasIndex("NhomCanhBao", "TrangThaiXuLy", "NgayPhatSinh");
 
                     b.ToTable("CanhBaoKhaiThacDuLieus");
-                });
-
-            modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoLichSuXuLy", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CanhBaoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("DonViThucHienId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("HanhDong")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("NguoiThucHienId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("NhacViecId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("NoiDung")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("ThoiGian")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrangThaiSau")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TrangThaiTruoc")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CanhBaoId", "ThoiGian");
-
-                    b.HasIndex("NhacViecId", "ThoiGian");
-
-                    b.ToTable("CanhBaoLichSuXuLys");
                 });
 
             modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoNhacViec", b =>
@@ -517,24 +458,6 @@ namespace KhaiThacDuLieuService.Infrastructure.Persistence.Migrations
                     b.ToTable("DongBoKhaiThacDuLieuLogs");
                 });
 
-            modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoLichSuXuLy", b =>
-                {
-                    b.HasOne("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoKhaiThacDuLieu", "CanhBao")
-                        .WithMany("LichSuXuLys")
-                        .HasForeignKey("CanhBaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoNhacViec", "NhacViec")
-                        .WithMany("LichSuXuLys")
-                        .HasForeignKey("NhacViecId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("CanhBao");
-
-                    b.Navigation("NhacViec");
-                });
-
             modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoNhacViec", b =>
                 {
                     b.HasOne("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoKhaiThacDuLieu", "CanhBao")
@@ -548,14 +471,7 @@ namespace KhaiThacDuLieuService.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoKhaiThacDuLieu", b =>
                 {
-                    b.Navigation("LichSuXuLys");
-
                     b.Navigation("NhacViecs");
-                });
-
-            modelBuilder.Entity("KhaiThacDuLieuService.Infrastructure.Persistence.Entities.CanhBaoNhacViec", b =>
-                {
-                    b.Navigation("LichSuXuLys");
                 });
 #pragma warning restore 612, 618
         }

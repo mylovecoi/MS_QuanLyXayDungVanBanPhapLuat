@@ -53,6 +53,55 @@ public sealed record TaoCanhBaoRequest(
 
 public sealed record XacNhanXuLyCanhBaoRequest(string? GhiChuXuLy);
 
+public sealed record CanhBaoNhacViecDto(
+    Guid Id,
+    Guid CanhBaoId,
+    string TieuDe,
+    string NoiDung,
+    Guid NguoiGiaoId,
+    Guid? DonViGiaoId,
+    Guid? NguoiNhanId,
+    Guid? DonViNhanId,
+    DateTime? HanXuLy,
+    DateTime? ThoiGianNhac,
+    string MucDoUuTien,
+    string TrangThai,
+    DateTime NgayGui,
+    DateTime? NgayXem,
+    DateTime? NgayHoanThanh,
+    string? GhiChuHoanThanh);
+
+public sealed record TaoCanhBaoNhacViecRequest(
+    string TieuDe,
+    string NoiDung,
+    Guid? NguoiNhanId,
+    Guid? DonViNhanId,
+    DateTime? HanXuLy,
+    DateTime? ThoiGianNhac,
+    string? MucDoUuTien);
+
+public sealed record HoanThanhCanhBaoNhacViecRequest(string? GhiChuHoanThanh);
+
+public sealed record CanhBaoLichSuXuLyDto(
+    Guid Id,
+    Guid CanhBaoId,
+    Guid? NhacViecId,
+    string HanhDong,
+    string? NoiDung,
+    Guid? NguoiThucHienId,
+    Guid? DonViThucHienId,
+    string? TrangThaiTruoc,
+    string? TrangThaiSau,
+    DateTime ThoiGian);
+
+public sealed record SinhCanhBaoResultDto(
+    int SoCauHinhDangHoatDong,
+    int SoDoiTuongDuocKiemTra,
+    int SoCanhBaoTaoMoi,
+    int SoCanhBaoCapNhat,
+    int SoCanhBaoTuDongDong,
+    int SoNhacViecChuyenQuaHan);
+
 public sealed record CauHinhCanhBaoDto(
     Guid Id,
     string MaCanhBao,

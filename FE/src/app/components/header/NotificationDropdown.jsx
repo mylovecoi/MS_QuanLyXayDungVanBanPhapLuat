@@ -1,11 +1,55 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown.jsx";
 import { DropdownItem } from "../ui/dropdown/DropdownItem.jsx";
 import { Link } from "react-router";
+import { danhDauDaXemCanhBao, danhDauDaXemNhacViec, getCanhBao, getNhacViecCuaToi } from "../../../features/khai-thac-du-lieu/api/canhBaoApi";
+
+const formatDate = (value) => value ? new Intl.DateTimeFormat("vi-VN").format(new Date(value)) : "";
 
 export default function NotificationDropdown() {
     const [isOpen, setIsOpen] = useState(false);
-    const [notifying, setNotifying] = useState(true);
+    const [alerts, setAlerts] = useState([]);
+    const [totalUnread, setTotalUnread] = useState(0);
+    const [error, setError] = useState("");
+    const notifying = totalUnread > 0;
+
+    const visibleAlerts = useMemo(() => alerts.slice(0, 5), [alerts]);
+
+    const loadAlerts = async () => {
+        try {
+            setError("");
+            const [alertResponse, reminders] = await Promise.all([getCanhBao({
+                trangThaiXuLy: "MOI",
+                pageSize: 5,
+                pageCurrent: 1,
+            }), getNhacViecCuaToi()]);
+            const alertItems = alertResponse?.items ?? alertResponse?.data ?? [];
+            const reminderItems = Array.isArray(reminders) ? reminders : [];
+            const merged = [
+                ...alertItems.map((item) => ({ ...item, loaiThongBao: "CANH_BAO" })),
+                ...reminderItems.map((item) => ({
+                    ...item,
+                    loaiThongBao: "NHAC_VIEC",
+                    tieuDe: item.tieuDe,
+                    noiDung: item.noiDung,
+                    mucDo: item.mucDoUuTien,
+                    ngayPhatSinh: item.ngayGui,
+                })),
+            ].sort((a, b) => new Date(b.ngayPhatSinh || 0) - new Date(a.ngayPhatSinh || 0));
+            setAlerts(merged);
+            setTotalUnread((alertResponse?.totalCount ?? alertItems.length ?? 0) + reminderItems.length);
+        } catch {
+            setAlerts([]);
+            setTotalUnread(0);
+            setError("Không thể tải cảnh báo.");
+        }
+    };
+
+    useEffect(() => {
+        loadAlerts();
+        const interval = window.setInterval(loadAlerts, 60000);
+        return () => window.clearInterval(interval);
+    }, []);
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -17,7 +61,26 @@ export default function NotificationDropdown() {
 
     const handleClick = () => {
         toggleDropdown();
-        setNotifying(false);
+        if (!isOpen) {
+            loadAlerts();
+        }
+    };
+
+    const notificationUrl = (alert) => {
+        const canhBaoId = alert.loaiThongBao === "NHAC_VIEC" ? alert.canhBaoId : alert.id;
+        return `/canh-bao/thong-minh?canhBaoId=${canhBaoId}`;
+    };
+
+    const handleNotificationClick = (alert) => {
+        if (alert.loaiThongBao === "NHAC_VIEC" && alert.canhBaoId && alert.id) {
+            danhDauDaXemNhacViec(alert.canhBaoId, alert.id).catch(() => {});
+        }
+        if (alert.loaiThongBao === "CANH_BAO" && alert.id) {
+            danhDauDaXemCanhBao(alert.id).catch(() => {});
+        }
+        setAlerts((current) => current.filter((item) => !(item.loaiThongBao === alert.loaiThongBao && item.id === alert.id)));
+        setTotalUnread((current) => Math.max(0, current - 1));
+        closeDropdown();
     };
 
     return (
@@ -28,8 +91,9 @@ export default function NotificationDropdown() {
                 onClick={handleClick}
             >
                 {notifying && (
-                    <span className="absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-400">
-                        <span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping" />
+                    <span className="absolute -right-1 -top-1 z-10 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-semibold text-white">
+                        {totalUnread > 9 ? "9+" : totalUnread}
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-50 animate-ping" />
                     </span>
                 )}
 
@@ -56,7 +120,7 @@ export default function NotificationDropdown() {
             >
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
                     <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Notification
+                        Cảnh báo
                     </h5>
 
                     <button
@@ -81,49 +145,52 @@ export default function NotificationDropdown() {
                 </div>
 
                 <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-                    <li>
-                        <DropdownItem
-                            onItemClick={closeDropdown}
-                            className="flex gap-3 rounded-lg border-b border-gray-100 p-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-                        >
-                            <span className="relative block w-full h-10 rounded-full max-w-10">
-                                <img
-                                    src="/images/user/user-02.jpg"
-                                    alt="User"
-                                    className="w-full overflow-hidden rounded-full"
-                                />
+                    {error ? (
+                        <li className="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">{error}</li>
+                    ) : visibleAlerts.length ? visibleAlerts.map((alert) => (
+                        <li key={`${alert.loaiThongBao}-${alert.id}`}>
+                            <DropdownItem
+                                tag="a"
+                                to={notificationUrl(alert)}
+                                onItemClick={() => handleNotificationClick(alert)}
+                                className="flex gap-3 rounded-lg border-b border-gray-100 p-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+                            >
+                                <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600 dark:bg-orange-500/10">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                                        <path d="M12 9v4" />
+                                        <path d="M12 17h.01" />
+                                    </svg>
+                                </span>
 
-                                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900" />
-                            </span>
-
-                            <span className="block">
-                                <span className="mb-1.5 block text-sm text-gray-500 dark:text-gray-400">
-                                    <span className="font-medium text-gray-800 dark:text-white/90">
-                                        Terry Franci
-                                    </span>{" "}
-                                    requests permission to change{" "}
-                                    <span className="font-medium text-gray-800 dark:text-white/90">
-                                        Project - Nganter App
+                                <span className="block min-w-0">
+                                    <span className="mb-1 block line-clamp-2 text-sm font-medium text-gray-800 dark:text-white/90">
+                                        {alert.tieuDe}
+                                    </span>
+                                    <span className="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                                        {alert.noiDung}
+                                    </span>
+                                    <span className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                        <span>{alert.loaiThongBao === "NHAC_VIEC" ? "Nhắc việc" : "Cảnh báo"}</span>
+                                        <span className="h-1 w-1 rounded-full bg-gray-400" />
+                                        <span>{alert.mucDo}</span>
+                                        <span className="h-1 w-1 rounded-full bg-gray-400" />
+                                        <span>{formatDate(alert.ngayPhatSinh)}</span>
                                     </span>
                                 </span>
-
-                                <span className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                    <span>Project</span>
-                                    <span className="w-1 h-1 bg-gray-400 rounded-full" />
-                                    <span>5 min ago</span>
-                                </span>
-                            </span>
-                        </DropdownItem>
-                    </li>
-
-                    {/* Sau này dữ liệu notification sẽ lấy từ API */}
+                            </DropdownItem>
+                        </li>
+                    )) : (
+                        <li className="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Không có cảnh báo mới.</li>
+                    )}
                 </ul>
 
                 <Link
-                    to="/notifications"
+                    to="/canh-bao/thong-minh"
+                    onClick={closeDropdown}
                     className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
                 >
-                    View All Notifications
+                    Xem tất cả cảnh báo
                 </Link>
             </Dropdown>
         </div>

@@ -16,6 +16,18 @@ public interface ICanhBaoKhaiThacDuLieuService
     Task<CanhBaoDto?> XacNhanXuLyAsync(Guid id, XacNhanXuLyCanhBaoRequest request, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CauHinhCanhBaoDto>> GetCauHinhAsync(CancellationToken cancellationToken = default);
     Task<CauHinhCanhBaoDto?> UpdateCauHinhAsync(Guid id, CapNhatCauHinhCanhBaoRequest request, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CanhBaoNhacViecDto>?> GetNhacViecAsync(Guid canhBaoId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CanhBaoNhacViecDto>> GetNhacViecCuaToiAsync(CancellationToken cancellationToken = default);
+    Task<CanhBaoNhacViecDto?> TaoNhacViecAsync(Guid canhBaoId, TaoCanhBaoNhacViecRequest request, CancellationToken cancellationToken = default);
+    Task<CanhBaoNhacViecDto?> DanhDauDaXemNhacViecAsync(Guid canhBaoId, Guid nhacViecId, CancellationToken cancellationToken = default);
+    Task<CanhBaoNhacViecDto?> HoanThanhNhacViecAsync(Guid canhBaoId, Guid nhacViecId, HoanThanhCanhBaoNhacViecRequest request, CancellationToken cancellationToken = default);
+    Task<CanhBaoNhacViecDto?> HuyNhacViecAsync(Guid canhBaoId, Guid nhacViecId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CanhBaoLichSuXuLyDto>?> GetLichSuAsync(Guid canhBaoId, CancellationToken cancellationToken = default);
+}
+
+public interface ICanhBaoThongMinhGeneratorService
+{
+    Task<SinhCanhBaoResultDto> SinhCanhBaoTuDongAsync(CancellationToken cancellationToken = default);
 }
 
 public interface ITraCuuKhaiThacDuLieuService

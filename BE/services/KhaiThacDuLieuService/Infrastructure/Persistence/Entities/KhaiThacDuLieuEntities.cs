@@ -59,6 +59,68 @@ public sealed class CanhBaoKhaiThacDuLieu : BaseEntity
 
     [MaxLength(2000)]
     public string? GhiChuXuLy { get; set; }
+
+    public ICollection<CanhBaoNhacViec> NhacViecs { get; set; } = new List<CanhBaoNhacViec>();
+    public ICollection<CanhBaoLichSuXuLy> LichSuXuLys { get; set; } = new List<CanhBaoLichSuXuLy>();
+}
+
+public sealed class CanhBaoNhacViec : BaseEntity
+{
+    public Guid CanhBaoId { get; set; }
+    public CanhBaoKhaiThacDuLieu? CanhBao { get; set; }
+
+    [Required, MaxLength(500)]
+    public string TieuDe { get; set; } = string.Empty;
+
+    [Required, MaxLength(2000)]
+    public string NoiDung { get; set; } = string.Empty;
+
+    public Guid NguoiGiaoId { get; set; }
+    public Guid? DonViGiaoId { get; set; }
+    public Guid? NguoiNhanId { get; set; }
+    public Guid? DonViNhanId { get; set; }
+    public DateTime? HanXuLy { get; set; }
+    public DateTime? ThoiGianNhac { get; set; }
+
+    [Required, MaxLength(50)]
+    public string MucDoUuTien { get; set; } = "TRUNG_BINH";
+
+    [Required, MaxLength(50)]
+    public string TrangThai { get; set; } = "DA_GUI";
+
+    public DateTime NgayGui { get; set; } = DateTime.UtcNow;
+    public DateTime? NgayXem { get; set; }
+    public DateTime? NgayHoanThanh { get; set; }
+
+    [MaxLength(2000)]
+    public string? GhiChuHoanThanh { get; set; }
+
+    public ICollection<CanhBaoLichSuXuLy> LichSuXuLys { get; set; } = new List<CanhBaoLichSuXuLy>();
+}
+
+public sealed class CanhBaoLichSuXuLy : BaseEntity
+{
+    public Guid CanhBaoId { get; set; }
+    public CanhBaoKhaiThacDuLieu? CanhBao { get; set; }
+    public Guid? NhacViecId { get; set; }
+    public CanhBaoNhacViec? NhacViec { get; set; }
+
+    [Required, MaxLength(100)]
+    public string HanhDong { get; set; } = string.Empty;
+
+    [MaxLength(2000)]
+    public string? NoiDung { get; set; }
+
+    public Guid? NguoiThucHienId { get; set; }
+    public Guid? DonViThucHienId { get; set; }
+
+    [MaxLength(50)]
+    public string? TrangThaiTruoc { get; set; }
+
+    [MaxLength(50)]
+    public string? TrangThaiSau { get; set; }
+
+    public DateTime ThoiGian { get; set; } = DateTime.UtcNow;
 }
 
 public sealed class DongBoKhaiThacDuLieuLog : BaseEntity

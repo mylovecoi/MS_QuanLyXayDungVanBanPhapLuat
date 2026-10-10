@@ -7,6 +7,8 @@ public sealed class KhaiThacDuLieuDbContext(DbContextOptions<KhaiThacDuLieuDbCon
 {
     public DbSet<CauHinhCanhBaoKhaiThacDuLieu> CauHinhCanhBaoKhaiThacDuLieus => Set<CauHinhCanhBaoKhaiThacDuLieu>();
     public DbSet<CanhBaoKhaiThacDuLieu> CanhBaoKhaiThacDuLieus => Set<CanhBaoKhaiThacDuLieu>();
+    public DbSet<CanhBaoNhacViec> CanhBaoNhacViecs => Set<CanhBaoNhacViec>();
+    public DbSet<CanhBaoLichSuXuLy> CanhBaoLichSuXuLys => Set<CanhBaoLichSuXuLy>();
     public DbSet<DongBoKhaiThacDuLieuLog> DongBoKhaiThacDuLieuLogs => Set<DongBoKhaiThacDuLieuLog>();
     public DbSet<DangKyXayDungVanBanTraCuu> DangKyXayDungVanBans => Set<DangKyXayDungVanBanTraCuu>();
     public DbSet<DangKyTrangThaiHoSoTraCuu> DangKyTrangThaiHoSos => Set<DangKyTrangThaiHoSoTraCuu>();
@@ -25,6 +27,31 @@ public sealed class KhaiThacDuLieuDbContext(DbContextOptions<KhaiThacDuLieuDbCon
             entity.HasIndex(x => new { x.DonViNhanId, x.TrangThaiXuLy, x.NgayPhatSinh });
             entity.HasIndex(x => new { x.NguoiNhanId, x.TrangThaiXuLy, x.NgayPhatSinh });
             entity.HasIndex(x => new { x.DoiTuongNguon, x.DoiTuongNguonId, x.MaCanhBao });
+        });
+
+        modelBuilder.Entity<CanhBaoNhacViec>(entity =>
+        {
+            entity.HasOne(x => x.CanhBao)
+                .WithMany(x => x.NhacViecs)
+                .HasForeignKey(x => x.CanhBaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(x => new { x.CanhBaoId, x.TrangThai, x.HanXuLy });
+            entity.HasIndex(x => new { x.NguoiNhanId, x.TrangThai, x.HanXuLy });
+            entity.HasIndex(x => new { x.DonViNhanId, x.TrangThai, x.HanXuLy });
+        });
+
+        modelBuilder.Entity<CanhBaoLichSuXuLy>(entity =>
+        {
+            entity.HasOne(x => x.CanhBao)
+                .WithMany(x => x.LichSuXuLys)
+                .HasForeignKey(x => x.CanhBaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.NhacViec)
+                .WithMany(x => x.LichSuXuLys)
+                .HasForeignKey(x => x.NhacViecId)
+                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasIndex(x => new { x.CanhBaoId, x.ThoiGian });
+            entity.HasIndex(x => new { x.NhacViecId, x.ThoiGian });
         });
 
         modelBuilder.Entity<DongBoKhaiThacDuLieuLog>(entity =>

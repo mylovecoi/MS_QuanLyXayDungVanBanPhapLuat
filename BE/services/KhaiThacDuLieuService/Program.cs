@@ -42,8 +42,10 @@ builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
 
 builder.Services.AddScoped<IDashboardKhaiThacDuLieuService, DashboardKhaiThacDuLieuService>();
 builder.Services.AddScoped<ICanhBaoKhaiThacDuLieuService, CanhBaoKhaiThacDuLieuService>();
+builder.Services.AddScoped<ICanhBaoThongMinhGeneratorService, CanhBaoThongMinhGeneratorService>();
 builder.Services.AddScoped<ITraCuuKhaiThacDuLieuService, TraCuuKhaiThacDuLieuService>();
 builder.Services.AddScoped<IBaoCaoKhaiThacDuLieuService, BaoCaoKhaiThacDuLieuService>();
+builder.Services.AddHostedService<CanhBaoThongMinhBackgroundService>();
 
 builder.Services.Configure<QuanTriHeThongPermissionOptions>(
     builder.Configuration.GetSection(QuanTriHeThongPermissionOptions.SectionName));

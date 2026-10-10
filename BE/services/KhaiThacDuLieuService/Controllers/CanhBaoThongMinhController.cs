@@ -11,7 +11,8 @@ namespace KhaiThacDuLieuService.Controllers;
 public sealed class CanhBaoThongMinhController(
     ICurrentUserContext user,
     IQuanTriHeThongPermissionClient permissionClient,
-    ICanhBaoKhaiThacDuLieuService canhBaoService) : KhaiThacDuLieuControllerBase(user, permissionClient)
+    ICanhBaoKhaiThacDuLieuService canhBaoService,
+    ICanhBaoThongMinhGeneratorService generatorService) : KhaiThacDuLieuControllerBase(user, permissionClient)
 {
     [HttpGet]
     public async Task<ActionResult<PagedResultDto<CanhBaoDto>>> GetList([FromQuery] CanhBaoListRequest request, CancellationToken cancellationToken)
@@ -46,6 +47,13 @@ public sealed class CanhBaoThongMinhController(
         }
     }
 
+    [HttpPost("quet-tu-dong")]
+    public async Task<ActionResult<SinhCanhBaoResultDto>> SinhCanhBaoTuDong(CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Approve", cancellationToken);
+        return denied ?? Ok(await generatorService.SinhCanhBaoTuDongAsync(cancellationToken));
+    }
+
     [HttpPost("{id:guid}/danh-dau-da-xem")]
     public async Task<ActionResult<CanhBaoDto>> DanhDauDaXem(Guid id, CancellationToken cancellationToken)
     {
@@ -61,6 +69,75 @@ public sealed class CanhBaoThongMinhController(
         var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Approve", cancellationToken);
         if (denied is not null) return denied;
         var result = await canhBaoService.XacNhanXuLyAsync(id, request, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("{id:guid}/lich-su")]
+    public async Task<ActionResult<IReadOnlyList<CanhBaoLichSuXuLyDto>>> GetLichSu(Guid id, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Index", cancellationToken);
+        if (denied is not null) return denied;
+        var result = await canhBaoService.GetLichSuAsync(id, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("nhac-viec")]
+    public async Task<ActionResult<IReadOnlyList<CanhBaoNhacViecDto>>> GetNhacViecCuaToi(CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Index", cancellationToken);
+        return denied ?? Ok(await canhBaoService.GetNhacViecCuaToiAsync(cancellationToken));
+    }
+
+    [HttpGet("{id:guid}/nhac-viec")]
+    public async Task<ActionResult<IReadOnlyList<CanhBaoNhacViecDto>>> GetNhacViec(Guid id, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Index", cancellationToken);
+        if (denied is not null) return denied;
+        var result = await canhBaoService.GetNhacViecAsync(id, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("{id:guid}/nhac-viec")]
+    public async Task<ActionResult<CanhBaoNhacViecDto>> TaoNhacViec(Guid id, TaoCanhBaoNhacViecRequest request, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Create", cancellationToken);
+        if (denied is not null) return denied;
+
+        try
+        {
+            var result = await canhBaoService.TaoNhacViecAsync(id, request, cancellationToken);
+            return result is null ? NotFound() : Ok(result);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(exception.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/nhac-viec/{nhacViecId:guid}/danh-dau-da-xem")]
+    public async Task<ActionResult<CanhBaoNhacViecDto>> DanhDauDaXemNhacViec(Guid id, Guid nhacViecId, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Edit", cancellationToken);
+        if (denied is not null) return denied;
+        var result = await canhBaoService.DanhDauDaXemNhacViecAsync(id, nhacViecId, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("{id:guid}/nhac-viec/{nhacViecId:guid}/hoan-thanh")]
+    public async Task<ActionResult<CanhBaoNhacViecDto>> HoanThanhNhacViec(Guid id, Guid nhacViecId, HoanThanhCanhBaoNhacViecRequest request, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Edit", cancellationToken);
+        if (denied is not null) return denied;
+        var result = await canhBaoService.HoanThanhNhacViecAsync(id, nhacViecId, request, cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPost("{id:guid}/nhac-viec/{nhacViecId:guid}/huy")]
+    public async Task<ActionResult<CanhBaoNhacViecDto>> HuyNhacViec(Guid id, Guid nhacViecId, CancellationToken cancellationToken)
+    {
+        var denied = await EnsurePermissionAsync("CanhBaoThongMinh", "Edit", cancellationToken);
+        if (denied is not null) return denied;
+        var result = await canhBaoService.HuyNhacViecAsync(id, nhacViecId, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 

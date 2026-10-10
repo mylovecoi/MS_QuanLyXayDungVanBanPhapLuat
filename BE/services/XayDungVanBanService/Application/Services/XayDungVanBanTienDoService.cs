@@ -313,10 +313,15 @@ public sealed class XayDungVanBanTienDoService(
                         && boHoSo.LoaiBoHoSo == LoaiBoHoSo.BanHanh
                         && boHoSo.TrangThai == TrangThaiBoHoSo.DaHoanThanh)),
                 "DUNG_HAN" => query.Where(x =>
-                    x.BoHoSos.Any(boHoSo => !boHoSo.IsDeleted
+                    !x.BoHoSos.Any(boHoSo => !boHoSo.IsDeleted
                         && boHoSo.LoaiBoHoSo == LoaiBoHoSo.BanHanh
                         && boHoSo.TrangThai == TrangThaiBoHoSo.DaHoanThanh)
-                    || (x.ThoiGianDuKienHoanThanh.HasValue && x.ThoiGianDuKienHoanThanh.Value > soon)),
+                    && x.ThoiGianDuKienHoanThanh.HasValue
+                    && x.ThoiGianDuKienHoanThanh.Value > soon),
+                "DA_HOAN_THANH" => query.Where(x =>
+                    x.BoHoSos.Any(boHoSo => !boHoSo.IsDeleted
+                        && boHoSo.LoaiBoHoSo == LoaiBoHoSo.BanHanh
+                        && boHoSo.TrangThai == TrangThaiBoHoSo.DaHoanThanh)),
                 _ => query
             };
         }
@@ -444,7 +449,7 @@ public sealed class XayDungVanBanTienDoService(
 
         if (daHoanThanh)
         {
-            return "DUNG_HAN";
+            return "DA_HOAN_THANH";
         }
 
         var today = now.Date;
