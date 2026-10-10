@@ -72,8 +72,19 @@ export default defineConfig({
         target: process.env.XDVB_SERVICE_URL || 'http://localhost:50048',
         changeOrigin: true,
       },
+
+      '/api/thi-hanh-phap-luat': {
+        target: process.env.THPL_SERVICE_URL || 'http://localhost:57354',
+        changeOrigin: true,
+      },
+
+      '/api/khao-sat-thi-hanh-phap-luat': {
+        target: process.env.KSTHPL_SERVICE_URL || 'http://localhost:60400',
+        changeOrigin: true,
+      },
+
       "/api/dang-ky-xay-dung-van-ban": {
-        target: "https://localhost:60577",
+        target: process.env.DKXDVB_SERVICE_URL || "http://localhost:60578",
         changeOrigin: true,
         secure: false,
       },

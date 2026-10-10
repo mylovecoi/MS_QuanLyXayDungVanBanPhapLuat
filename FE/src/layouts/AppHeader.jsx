@@ -41,11 +41,11 @@ const AppHeader = () => {
     }, []);
 
     return (
-        <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
-            <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
-                <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
+        <header className="relative z-50 flex w-full px-3 pt-3 lg:px-6 lg:pt-5">
+            <div className="modern-admin-header flex grow flex-col items-center justify-between rounded-[var(--admin-radius-lg)] border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[var(--admin-shadow-soft)] backdrop-blur lg:flex-row lg:px-4">
+                <div className="flex w-full items-center justify-between gap-2 border-b border-[var(--admin-border)] px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0">
                     <button
-                        className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
+                        className="modern-icon-button z-99999 flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--admin-border)] bg-white text-gray-500 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:bg-white/[0.04] dark:text-gray-400 lg:h-11 lg:w-11"
                         onClick={handleToggle}
                         aria-label="Toggle Sidebar"
                     >
@@ -97,7 +97,7 @@ const AppHeader = () => {
 
                     <button
                         onClick={toggleApplicationMenu}
-                        className="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 lg:hidden"
+                        className="modern-icon-button z-99999 flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--admin-border)] bg-white text-gray-700 transition hover:bg-gray-100 dark:bg-white/[0.04] dark:text-gray-400 lg:hidden"
                     >
                         <svg
                             width="24"
@@ -139,11 +139,11 @@ const AppHeader = () => {
                                 <input
                                     ref={inputRef}
                                     type="text"
-                                    placeholder="Search or type command..."
-                                    className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
+                                    placeholder="Tìm kiếm hồ sơ, văn bản, chức năng..."
+                                    className="modern-form-control h-11 w-full rounded-2xl border border-[var(--admin-border)] bg-gray-50/80 py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-none placeholder:text-gray-400 focus:border-brand-300 focus:bg-white focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:bg-white/[0.04] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
                                 />
 
-                                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
+                                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-xl border border-[var(--admin-border)] bg-white px-[7px] py-[4.5px] text-xs text-gray-500 dark:bg-white/[0.04] dark:text-gray-400">
                                     <span>⌘</span>
                                     <span>K</span>
                                 </button>
@@ -155,7 +155,7 @@ const AppHeader = () => {
                 <div
                     className={`${
                         isApplicationMenuOpen ? "flex" : "hidden"
-                    } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
+                    } items-center justify-between w-full gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0 lg:shadow-none`}
                 >
                     <div className="flex items-center gap-2 2xsm:gap-3">
                         <ThemeToggleButton />

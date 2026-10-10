@@ -106,60 +106,68 @@ function getDecisionTransitions(workflow, currentStepId) {
   const allTransitions = workflow?.chuyenBuocs || [];
   const direct = allTransitions.filter((item) => item.tuBuocId === currentStepId && !item.isKetThuc);
   const configured = direct.length ? direct : allTransitions.filter((item) => currentStep?.maBuoc && item.tuBuocMa === currentStep.maBuoc && !item.isKetThuc);
-  const transitions = [...configured];
+  if (configured.some((item) => isApproveTransition(item) || isReturnTransition(item))) return configured;
 
-  if (!transitions.some(isApproveTransition)) {
-    const banHanhStep = steps.find((step) => step.maBuoc === "BAN_HANH" || step.maBuoc === "THONG_QUA_BAN_HANH" || step.maBuoc?.includes("BAN_HANH"));
-    if (banHanhStep) {
-      transitions.push({
-        id: "__approve_ban_hanh__",
-        tuBuocId: currentStepId,
-        tuBuocMa: currentStep?.maBuoc,
-        denBuocId: banHanhStep.id,
-        denBuocMa: banHanhStep.maBuoc,
-        dieuKienKetQua: banHanhStep.maBuoc === "THONG_QUA_BAN_HANH" ? "DONG_Y_TRINH_HDND" : "DONG_Y_BAN_HANH",
-        loaiChuyenBuoc: "Approve",
-        laNhanhMacDinh: true,
-        yeuCauNhapLyDo: false,
-        isKetThuc: false,
-      });
-    }
+  const yKienStep = steps.find((step) => step.maBuoc === "LAY_Y_KIEN_UBND");
+  if (yKienStep && yKienStep.id !== currentStepId) {
+    const yKienDirect = allTransitions.filter((item) => item.tuBuocId === yKienStep.id && !item.isKetThuc);
+    const yKienConfigured = yKienDirect.length ? yKienDirect : allTransitions.filter((item) => item.tuBuocMa === yKienStep.maBuoc && !item.isKetThuc);
+    if (yKienConfigured.some((item) => isApproveTransition(item) || isReturnTransition(item))) return yKienConfigured;
   }
 
-  if (!transitions.some(isReturnTransition)) {
-    const trinhStep = steps.find((step) => step.maBuoc === "TRINH_UBND" || step.maBuoc === "TRINH_UBND_CHO_Y_KIEN");
-    if (trinhStep) {
-      transitions.push({
-        id: "__return_trinh_ubnd__",
-        tuBuocId: currentStepId,
-        tuBuocMa: currentStep?.maBuoc,
-        denBuocId: trinhStep.id,
-        denBuocMa: trinhStep.maBuoc,
-        dieuKienKetQua: "KHONG_DONG_Y_TRA_LAI",
-        loaiChuyenBuoc: "Return",
-        laNhanhMacDinh: false,
-        yeuCauNhapLyDo: true,
-        isKetThuc: false,
-      });
-    }
-  }
+  if (configured.length) return configured;
 
-  return transitions;
+  const nextStep = steps.find((step) => (step.thuTuSapXep || 0) > (currentStep?.thuTuSapXep || 0));
+  return nextStep ? [{
+    id: "__next_step__",
+    tuBuocId: currentStepId,
+    tuBuocMa: currentStep?.maBuoc,
+    denBuocId: nextStep.id,
+    denBuocMa: nextStep.maBuoc,
+    dieuKienKetQua: APPROVE_RESULT,
+    loaiChuyenBuoc: "Forward",
+    laNhanhMacDinh: true,
+    yeuCauNhapLyDo: false,
+    isKetThuc: false,
+  }] : [];
+}
+
+function transitionConditionText(transition) {
+  return `${transition?.loaiChuyenBuoc || ""} ${transition?.dieuKienKetQua || ""}`.toUpperCase();
+}
+
+function transitionResultText(transition) {
+  return `${transition?.dieuKienKetQua || ""}`.toUpperCase();
+}
+
+function isApproveResultText(text) {
+  return text.includes(LEGACY_APPROVE_RESULT) || (text.includes(APPROVE_RESULT) && !text.includes(RETURN_RESULT) && !text.includes("KHONG_DONG"));
 }
 
 function isApproveTransition(transition) {
-  const text = `${transition?.loaiChuyenBuoc || ""} ${transition?.dieuKienKetQua || ""} ${transition?.denBuocMa || ""}`.toUpperCase();
-  return text.includes("APPROVE") || text.includes("DONG_Y") || text.includes("BAN_HANH") || text.includes("THONG_QUA");
+  const text = transitionConditionText(transition);
+  return text.includes("APPROVE") || isApproveResultText(transitionResultText(transition));
 }
 
 function isReturnTransition(transition) {
-  const text = `${transition?.loaiChuyenBuoc || ""} ${transition?.dieuKienKetQua || ""}`.toUpperCase();
-  return text.includes("RETURN") || text.includes("TRA_LAI") || text.includes("KHONG_DONG") || text.includes("CO_Y_KIEN_KHAC");
+  const text = transitionConditionText(transition);
+  return text.includes("RETURN") || text.includes("TRA_LAI") || text.includes(RETURN_RESULT) || text.includes(LEGACY_RETURN_RESULT);
+}
+
+function matchesApproveResult(transition) {
+  return isApproveResultText(transitionResultText(transition));
+}
+
+function matchesReturnResult(transition) {
+  const text = transitionResultText(transition);
+  return text.includes(RETURN_RESULT) || text.includes(LEGACY_RETURN_RESULT) || text.includes("TRA_LAI");
 }
 
 function chooseTransition(transitions, result) {
-  if (isReturnResult(result)) return transitions.find(isReturnTransition) || transitions.find((item) => item.yeuCauNhapLyDo) || transitions[0];
-  return transitions.find(isApproveTransition) || transitions.find((item) => item.laNhanhMacDinh) || transitions[0];
+  if (isReturnResult(result)) {
+    return transitions.find(matchesReturnResult) || transitions.find((item) => item.yeuCauNhapLyDo) || transitions.find(isReturnTransition) || transitions[0];
+  }
+  return transitions.find(matchesApproveResult) || transitions.find((item) => item.laNhanhMacDinh) || transitions.find(isApproveTransition) || transitions[0];
 }
 
 function findStatusForTransition(statuses, transition, targetStep, fallbackStatusId) {
@@ -395,8 +403,8 @@ export default function HoSoYKienUBNDPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="rounded-xl border bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-5 dark:border-white/[0.05]">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">Ý kiến thành viên UBND</h1>
           <p className="mt-1 text-sm text-gray-500">{hoSo ? `${hoSo.maHoSo} · ${hoSo.tenHoSo}` : "Tổng hợp ý kiến thành viên UBND."}</p>
@@ -406,16 +414,16 @@ export default function HoSoYKienUBNDPage() {
           <button onClick={() => window.open(`/admin/xay-dung-van-ban/ho-so/chi-tiet/${id}`, "_blank", "noopener,noreferrer")} className="rounded-lg border px-4 py-2 text-sm">Xem hồ sơ</button>
         </div>
       </div>
-      {error && <Alert variant="error" title="Có lỗi" message={error} />}
-      {success && <Alert variant="success" title="Hoàn tất" message={success} />}
+      {error && <div className="mt-5"><Alert variant="error" title="Có lỗi" message={error} /></div>}
+      {success && <div className="mt-5"><Alert variant="success" title="Hoàn tất" message={success} /></div>}
       {loading ? (
         <div className="py-16 text-center text-sm text-gray-500">Đang tải hồ sơ...</div>
       ) : !data ? (
-        <Alert variant="warning" title="Chưa có hồ sơ ý kiến UBND" message="Vui lòng lập hồ sơ ý kiến từ màn danh sách." />
+        <div className="mt-5"><Alert variant="warning" title="Chưa có hồ sơ ý kiến UBND" message="Vui lòng lập hồ sơ ý kiến từ màn danh sách." /></div>
       ) : (
-        <>
-          <div className="rounded-xl border bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
+        <div className="space-y-6">
+          <section className="pt-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="font-semibold">Tổng hợp ý kiến</h2>
               <Badge size="sm" color={status.color}>{status.label}</Badge>
             </div>
@@ -430,9 +438,9 @@ export default function HoSoYKienUBNDPage() {
               <div className="sm:col-span-3"><Label>Nội dung giải trình</Label><TextArea rows={3} value={form.noiDungGiaiTrinh} onChange={(value) => update("noiDungGiaiTrinh", value)} disabled={!isEditable} /></div>
             </div>
             {isEditable && <div className="mt-5 flex justify-end"><button onClick={save} disabled={saving} className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50">Lưu tổng hợp</button></div>}
-          </div>
+          </section>
 
-          <div className="rounded-xl border bg-white p-5">
+          <section className="border-t border-gray-100 pt-6 dark:border-white/[0.05]">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="font-semibold">Tài liệu ý kiến UBND</h2>
@@ -448,9 +456,9 @@ export default function HoSoYKienUBNDPage() {
                 </div>
               )) : <div className="p-6 text-center text-sm text-gray-500">Chưa có tài liệu.</div>}
             </div>
-          </div>
+          </section>
 
-          <div className="rounded-xl border bg-white p-5">
+          <section className="border-t border-gray-100 pt-6 dark:border-white/[0.05]">
             <h2 className="mb-4 font-semibold">Chuyển hồ sơ theo kết quả ý kiến UBND</h2>
             {!approveTransition && !returnTransition && <Alert variant="warning" title="Chưa có nhánh chuyển" message="Danh mục quy trình chưa cấu hình nhánh chuyển từ bước ý kiến UBND. Vui lòng kiểm tra lại danh mục quy trình soạn thảo." />}
             <div className="mb-5 grid gap-3 md:grid-cols-2">
@@ -483,16 +491,16 @@ export default function HoSoYKienUBNDPage() {
               <div><Label>Thời gian cảnh báo</Label><Input type="date" value={form.thoiGianCanhBao} onChange={(event) => update("thoiGianCanhBao", event.target.value)} disabled={!isEditable} /></div>
               {mustReturn && <div className="sm:col-span-2 lg:col-span-3"><Label>Lý do trả lại *</Label><TextArea rows={3} value={form.lyDoTraLai} onChange={(value) => update("lyDoTraLai", value)} disabled={!isEditable} /></div>}
             </div>
-          </div>
+          </section>
 
           {isEditable && (
-            <div className="flex flex-wrap justify-end gap-3">
+            <div className="flex flex-wrap justify-end gap-3 border-t border-gray-100 pt-5 dark:border-white/[0.05]">
               <button onClick={validate} disabled={saving} className="rounded-lg border px-4 py-2.5 text-sm font-medium">Kiểm tra trước khi chuyển</button>
               <button onClick={send} disabled={saving || check?.dat === false || (!approveTransition && !returnTransition)} className="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50">{mustReturn ? "Trả lại hồ sơ" : "Chuyển bước"}</button>
             </div>
           )}
           {check && !check.dat && <Alert variant="warning" title="Chưa thể chuyển bước" message={check.dieuKienChuaDat?.join(" ")} />}
-        </>
+        </div>
       )}
     </div>
   );

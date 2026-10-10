@@ -12,7 +12,7 @@ const SidebarLayout = () => {
     } = useSidebar();
 
     return (
-        <div className="min-h-screen xl:flex">
+        <div className="modern-admin-shell min-h-screen bg-[var(--admin-bg)] text-[var(--admin-text)] xl:flex">
             <div>
                 <AppSidebar/>
                 <BackDrop/>
@@ -30,7 +30,7 @@ const SidebarLayout = () => {
                 <AppHeader/>
 
                 <main className="flex-1">
-                    <div className="w-full p-4 md:p-6">
+                    <div className="modern-admin-content w-full p-4 md:p-6 lg:p-7">
                         <Outlet/>
                     </div>
                 </main>

@@ -1,10 +1,32 @@
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {DropdownItem} from "../ui/dropdown/DropdownItem.jsx";
 import {Dropdown} from "../ui/dropdown/Dropdown.jsx";
-import {Link} from "react-router";
+import {Link, useNavigate} from "react-router";
+
+const readUserInfo = () => {
+    try {
+        const rawUserInfo = window.localStorage.getItem("userInfo");
+
+        if (rawUserInfo) {
+            return JSON.parse(rawUserInfo);
+        }
+
+        const rawAuth = window.localStorage.getItem("ms_xdvb_auth");
+        const auth = rawAuth ? JSON.parse(rawAuth) : null;
+
+        return auth?.user || null;
+    } catch {
+        return null;
+    }
+};
 
 export default function UserDropdown() {
     const [isOpen, setIsOpen] = useState(false);
+    const navigate = useNavigate();
+    const userInfo = useMemo(() => readUserInfo(), []);
+    const displayName = userInfo?.displayName || userInfo?.name || userInfo?.username || "Người dùng";
+    const accountText = userInfo?.email || userInfo?.username || "";
+    const shortName = displayName.split(" ").filter(Boolean).slice(-1)[0] || displayName;
 
     function toggleDropdown() {
         setIsOpen(!isOpen);
@@ -14,18 +36,27 @@ export default function UserDropdown() {
         setIsOpen(false);
     }
 
+    function handleLogout(event) {
+        event.preventDefault();
+        window.localStorage.removeItem("accessToken");
+        window.localStorage.removeItem("userInfo");
+        window.localStorage.removeItem("ms_xdvb_auth");
+        closeDropdown();
+        navigate("/signin", { replace: true });
+    }
+
     return (
         <div className="relative">
             <button
                 onClick={toggleDropdown}
-                className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
+                className="dropdown-toggle flex items-center rounded-2xl border border-transparent px-2 py-1.5 text-gray-700 transition hover:border-[var(--admin-border)] hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.04]"
             >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
           <img src="/images/user/default-user.png"  alt="User"/>
         </span>
 
-                <span className="block mr-1 font-medium text-theme-sm">
-          Hoàng
+                <span className="mr-1 block max-w-32 truncate font-medium text-theme-sm">
+          {shortName}
         </span>
 
                 <svg
@@ -51,15 +82,15 @@ export default function UserDropdown() {
             <Dropdown
                 isOpen={isOpen}
                 onClose={closeDropdown}
-                className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+                className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-[var(--admin-radius-lg)] border border-[var(--admin-border)] bg-white p-3 shadow-[var(--admin-shadow-panel)] dark:bg-gray-dark"
             >
                 <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
+          <span className="block truncate font-medium text-gray-700 text-theme-sm dark:text-gray-300">
+            {displayName}
           </span>
 
-                    <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+                    <span className="mt-0.5 block truncate text-theme-xs text-gray-500 dark:text-gray-400">
+            {accountText || "Tài khoản đăng nhập"}
           </span>
                 </div>
 
@@ -88,7 +119,7 @@ export default function UserDropdown() {
                                 />
                             </svg>
 
-                            Edit profile
+                            Hồ sơ cá nhân
                         </DropdownItem>
                     </li>
 
@@ -115,7 +146,7 @@ export default function UserDropdown() {
                                 />
                             </svg>
 
-                            Account settings
+                            Thiết lập tài khoản
                         </DropdownItem>
                     </li>
 
@@ -142,13 +173,14 @@ export default function UserDropdown() {
                                 />
                             </svg>
 
-                            Support
+                            Hỗ trợ
                         </DropdownItem>
                     </li>
                 </ul>
 
                 <Link
                     to="/signin"
+                    onClick={handleLogout}
                     className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                 >
                     <svg
@@ -167,7 +199,7 @@ export default function UserDropdown() {
                         />
                     </svg>
 
-                    Sign out
+                    Đăng xuất
                 </Link>
             </Dropdown>
         </div>

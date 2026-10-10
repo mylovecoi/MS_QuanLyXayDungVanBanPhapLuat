@@ -14,6 +14,8 @@ import HoSoBanHanhListPage from "./pages/HoSoBanHanhListPage.jsx";
 import HoSoBanHanhPage from "./pages/HoSoBanHanhPage.jsx";
 import HoSoThamTraHDNDListPage from "./pages/HoSoThamTraHDNDListPage.jsx";
 import HoSoThamTraHDNDPage from "./pages/HoSoThamTraHDNDPage.jsx";
+import HoSoTienDoPage from "./pages/HoSoTienDoPage.jsx";
+import HoSoChamDiemPage from "./pages/HoSoChamDiemPage.jsx";
 
 export const xayDungVanBanRoutes = [
   {
@@ -131,5 +133,13 @@ export const xayDungVanBanRoutes = [
   {
     path: "/xay-dung-van-ban/tham-tra-hdnd/:id",
     element: <HoSoThamTraHDNDPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/tien-do",
+    element: <HoSoTienDoPage />,
+  },
+  {
+    path: "/xay-dung-van-ban/cham-diem",
+    element: <HoSoChamDiemPage />,
   },
 ];

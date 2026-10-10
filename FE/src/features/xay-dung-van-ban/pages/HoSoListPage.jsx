@@ -16,7 +16,7 @@ import { deleteHoSoSoanThao, getHoSoXayDungVanBans, kiemTraTruocTrinhThamDinh, t
 const ALL_VALUE = "__ALL__";
 const HO_SO_STATUS_GROUP = "HO_SO_XAY_DUNG_VAN_BAN";
 const DEFAULT_PROCESSING_DAYS = 5;
-const EDITABLE_STATUS_CODES = new Set(["NHAP", "TRA_LAI", "BI_TRA_LAI"]);
+const EDITABLE_STATUS_CODES = new Set(["NHAP", "TRA_LAI", "BI_TRA_LAI", "DANG_XU_LY"]);
 const emptyTransfer = { buocQuyTrinhTiepTheoId: "", trangThaiHoSoTiepTheoId: "", donViNhanThamDinhId: "", ngayChuyen: "", soNgayXuLy: DEFAULT_PROCESSING_DAYS, hanDeNghiTraKetQua: "", soNgayCanhBao: 0, thoiGianCanhBao: "", noiDungGhiChu: "" };
 
 function getErrorMessage(error, fallback = "Không thể xử lý yêu cầu.") {
@@ -139,7 +139,8 @@ export default function HoSoListPage() {
     if (!transferItem) return [];
     const transitions = transferWorkflow?.chuyenBuocs || [];
     const directSteps = transitions
-      .filter((item) => item.tuBuocId === transferItem.buocHienTaiId && !item.isKetThuc)
+      .filter((item) => item.tuBuocId === transferItem.buocHienTaiId && !item.isKetThuc && item.loaiChuyenBuoc !== "Return" && item.loaiChuyenBuoc !== "Reject")
+      .sort((a, b) => Number(b.laNhanhMacDinh) - Number(a.laNhanhMacDinh))
       .map((item) => transferStepMap.get(item.denBuocId))
       .filter(Boolean);
     const currentOrder = transferStepMap.get(transferItem.buocHienTaiId)?.thuTuSapXep || 0;
@@ -222,7 +223,8 @@ export default function HoSoListPage() {
       const stepMap = new Map(steps.map((step) => [step.id, step]));
       const transitions = workflow?.chuyenBuocs || [];
       const directSteps = transitions
-        .filter((transition) => transition.tuBuocId === item.buocHienTaiId && !transition.isKetThuc)
+        .filter((transition) => transition.tuBuocId === item.buocHienTaiId && !transition.isKetThuc && transition.loaiChuyenBuoc !== "Return" && transition.loaiChuyenBuoc !== "Reject")
+        .sort((a, b) => Number(b.laNhanhMacDinh) - Number(a.laNhanhMacDinh))
         .map((transition) => stepMap.get(transition.denBuocId))
         .filter(Boolean);
       const currentOrder = stepMap.get(item.buocHienTaiId)?.thuTuSapXep || 0;

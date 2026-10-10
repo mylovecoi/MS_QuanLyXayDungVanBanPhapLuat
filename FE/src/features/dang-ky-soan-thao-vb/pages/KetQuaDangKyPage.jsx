@@ -141,8 +141,8 @@ export default function KetQuaDangKyPage() {
     );
 
     return (
-        <div>
-            <div className="mb-5">
+        <div className="space-y-5">
+            <div>
                 <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
                     Kết quả đăng ký
                 </h3>

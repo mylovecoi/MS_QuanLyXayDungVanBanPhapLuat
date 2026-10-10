@@ -12,6 +12,11 @@ import {
 import {useSidebar} from "../context/SidebarContext";
 import {getFrontendMenu} from "../shared/api/systemApi.js";
 
+const normalizePath = (path = "") => {
+    const normalized = path.split("?")[0].split("#")[0].replace(/\/+$/, "");
+    return normalized || "/";
+};
+
 const AppSidebar = () => {
     const {
         isExpanded,
@@ -28,7 +33,17 @@ const AppSidebar = () => {
     const [openSubmenu, setOpenSubmenu] = useState({});
 
     const isActive = useCallback(
-        (path) => location.pathname === path,
+        (path) => {
+            const currentPath = normalizePath(location.pathname);
+            const targetPath = normalizePath(path);
+
+            if (!targetPath || targetPath === "/") {
+                return currentPath === "/";
+            }
+
+            return currentPath === targetPath ||
+                currentPath.startsWith(`${targetPath}/`);
+        },
         [location.pathname]
     );
 
@@ -102,7 +117,7 @@ const AppSidebar = () => {
     };
 
     const renderMenuItems = (items, parentKey = "") => (
-        <ul className="flex flex-col gap-4 w-full">
+        <ul className="flex w-full flex-col gap-1.5">
             {items.map((item, index) => {
                 const key = parentKey
                     ? `${parentKey}-${index}`
@@ -204,7 +219,7 @@ const AppSidebar = () => {
                                     }`}
                                 >
                                     <div className="min-h-0">
-                                        <ul className="mt-2 space-y-1 ml-3 w-[calc(100%-0.75rem)]">
+                                        <ul className="ml-3 mt-2 w-[calc(100%-0.75rem)] space-y-1 border-l border-[var(--admin-border)] pl-2">
                                             {item.children.map(
                                                 (child, childIndex) => {
                                                     const childKey =
@@ -281,7 +296,7 @@ const AppSidebar = () => {
 
     return (
         <aside
-            className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 ${
+            className={`modern-admin-sidebar fixed left-0 top-0 z-50 mt-16 flex h-[calc(100vh-1rem)] flex-col rounded-r-[var(--admin-radius-xl)] border border-l-0 border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-gray-900 shadow-[var(--admin-shadow-panel)] transition-all duration-300 ease-in-out dark:bg-gray-900 lg:bottom-4 lg:left-4 lg:top-4 lg:mt-0 lg:h-[calc(100vh-2rem)] lg:rounded-[var(--admin-radius-xl)] lg:border ${
                 isExpanded || isMobileOpen
                     ? "w-[300px]"
                     : isHovered
@@ -296,7 +311,7 @@ const AppSidebar = () => {
             onMouseLeave={() => setIsHovered(false)}
         >
             <div
-                className={`py-4 flex ${
+                className={`modern-admin-sidebar-logo flex py-5 ${
                     !isExpanded && !isHovered
                         ? "lg:justify-center"
                         : "justify-center"
@@ -336,10 +351,10 @@ const AppSidebar = () => {
 
             <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
                 <nav className="mb-6">
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 rounded-[var(--admin-radius-md)] bg-gray-50/80 p-2 dark:bg-white/[0.03]">
                         <div>
                             <h2
-                                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                                className={`mb-3 flex px-2 text-xs font-semibold uppercase leading-[20px] tracking-[0.08em] text-gray-400 ${
                                     !isExpanded && !isHovered
                                         ? "lg:justify-center"
                                         : "justify-start"

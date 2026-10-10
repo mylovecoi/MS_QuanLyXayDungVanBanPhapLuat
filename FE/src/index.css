@@ -174,6 +174,35 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+    :root {
+        --admin-bg: #eef3f8;
+        --admin-surface: rgba(255, 255, 255, 0.94);
+        --admin-surface-muted: #f8fafc;
+        --admin-text: #162033;
+        --admin-muted: #667085;
+        --admin-border: rgba(148, 163, 184, 0.28);
+        --admin-radius-sm: 14px;
+        --admin-radius-md: 18px;
+        --admin-radius-lg: 20px;
+        --admin-radius-xl: 24px;
+        --admin-space: 20px;
+        --admin-shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.08);
+        --admin-shadow-panel: 0 20px 56px rgba(15, 23, 42, 0.12);
+        --admin-shadow-control: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .dark {
+        --admin-bg: #0f172a;
+        --admin-surface: rgba(17, 24, 39, 0.94);
+        --admin-surface-muted: rgba(255, 255, 255, 0.04);
+        --admin-text: #f8fafc;
+        --admin-muted: #98a2b3;
+        --admin-border: rgba(255, 255, 255, 0.08);
+        --admin-shadow-soft: 0 18px 44px rgba(0, 0, 0, 0.26);
+        --admin-shadow-panel: 0 24px 60px rgba(0, 0, 0, 0.32);
+        --admin-shadow-control: 0 1px 2px rgba(0, 0, 0, 0.22);
+    }
+
     *,
     ::after,
     ::before,
@@ -188,20 +217,188 @@
     }
 
     body {
-        @apply relative font-normal font-outfit z-1 bg-gray-50 dark:bg-gray-900;
+        @apply relative font-normal font-outfit z-1 bg-gray-50 text-gray-800 dark:bg-gray-900;
     }
 }
 
+.modern-admin-shell {
+    background:
+        radial-gradient(circle at top left, rgba(70, 95, 255, 0.08), transparent 30rem),
+        linear-gradient(180deg, #f6f8fb 0%, var(--admin-bg) 100%);
+    min-height: 100vh;
+}
+
+.dark .modern-admin-shell {
+    background:
+        radial-gradient(circle at top left, rgba(70, 95, 255, 0.16), transparent 30rem),
+        linear-gradient(180deg, #111827 0%, var(--admin-bg) 100%);
+}
+
+.modern-admin-content {
+    max-width: 100%;
+}
+
+.modern-admin-content > .space-y-5,
+.modern-admin-content > .space-y-6 {
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow-soft);
+    overflow: hidden;
+    padding: clamp(1rem, 1.8vw, 1.375rem);
+}
+
+.modern-admin-content > .space-y-5 > :not([hidden]) ~ :not([hidden]),
+.modern-admin-content > .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    border-top: 1px solid var(--admin-border);
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+}
+
+.modern-admin-content > .space-y-5 > .rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-5 > .rounded-xl.border.border-gray-200.bg-white,
+.modern-admin-content > .space-y-5 > .overflow-hidden.rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-5 > .max-w-2xl.rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-6 > .rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-6 > .rounded-xl.border.border-gray-200.bg-white,
+.modern-admin-content > .space-y-6 > .overflow-hidden.rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-6 > .max-w-2xl.rounded-xl.border.bg-white {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.modern-admin-content > .space-y-5 > .overflow-hidden.rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-5 > .overflow-hidden.rounded-xl.border.border-gray-200.bg-white,
+.modern-admin-content > .space-y-6 > .overflow-hidden.rounded-xl.border.bg-white,
+.modern-admin-content > .space-y-6 > .overflow-hidden.rounded-xl.border.border-gray-200.bg-white {
+    overflow: visible;
+}
+
+.modern-admin-shell h1 {
+    letter-spacing: 0;
+}
+
+.modern-admin-shell h1,
+.modern-admin-shell h2,
+.modern-admin-shell h3 {
+    color: var(--admin-text);
+}
+
+.modern-admin-shell .modern-card,
+.modern-admin-shell .rounded-xl.border.bg-white,
+.modern-admin-shell .rounded-2xl.border.bg-white,
+.modern-admin-shell .overflow-hidden.rounded-xl.border.bg-white,
+.modern-admin-shell .min-h-screen.rounded-2xl.border.bg-white,
+.modern-admin-shell .max-w-2xl.rounded-xl.border.bg-white {
+    border-color: var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow-soft);
+}
+
+.modern-admin-shell .rounded-xl.border.bg-white.p-5,
+.modern-admin-shell .rounded-xl.border.border-gray-200.bg-white.p-5 {
+    padding: clamp(1rem, 1.8vw, 1.375rem);
+}
+
+.modern-admin-shell table thead tr {
+    background: var(--admin-surface-muted);
+}
+
+.modern-admin-shell table th {
+    color: var(--admin-muted);
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.modern-admin-shell table tbody tr {
+    transition: background-color 160ms ease;
+}
+
+.modern-admin-shell .divide-y.rounded-lg.border,
+.modern-admin-shell .mt-4.divide-y.divide-gray-100.rounded-lg.border,
+.modern-admin-shell .mt-5.rounded-lg.border {
+    border-color: var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.dark .modern-admin-shell .divide-y.rounded-lg.border,
+.dark .modern-admin-shell .mt-4.divide-y.divide-gray-100.rounded-lg.border,
+.dark .modern-admin-shell .mt-5.rounded-lg.border {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.modern-admin-shell button.rounded-lg,
+.modern-admin-shell a.rounded-lg,
+.modern-admin-shell label.cursor-pointer.rounded-lg {
+    border-radius: var(--admin-radius-sm);
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.modern-admin-shell button.rounded-lg:hover,
+.modern-admin-shell a.rounded-lg:hover,
+.modern-admin-shell label.cursor-pointer.rounded-lg:hover {
+    box-shadow: var(--admin-shadow-control);
+}
+
+.modern-admin-shell label.cursor-pointer.rounded-lg,
+.modern-admin-shell label.cursor-pointer.rounded-lg.border {
+    border-color: var(--admin-border);
+    background: #ffffff;
+    color: #344054;
+    font-weight: 600;
+}
+
+.modern-admin-shell label.cursor-pointer.rounded-lg:hover,
+.modern-admin-shell label.cursor-pointer.rounded-lg.border:hover {
+    border-color: rgba(70, 95, 255, 0.32);
+    background: #f2f7ff;
+    color: #3641f5;
+}
+
+.dark .modern-admin-shell label.cursor-pointer.rounded-lg,
+.dark .modern-admin-shell label.cursor-pointer.rounded-lg.border {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.84);
+}
+
+.modern-form-control {
+    box-shadow: var(--admin-shadow-control);
+}
+
+.modern-form-control:hover:not(:disabled) {
+    border-color: rgba(70, 95, 255, 0.32);
+}
+
+.modern-admin-header,
+.modern-admin-sidebar {
+    color: var(--admin-text);
+}
+
+.modern-admin-sidebar-logo {
+    border-bottom: 1px solid var(--admin-border);
+    margin-bottom: 0.875rem;
+}
+
+.modern-icon-button {
+    box-shadow: var(--admin-shadow-control);
+}
+
 @utility menu-item {
-    @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+    @apply relative flex items-center w-full gap-3 px-3.5 py-2.5 font-medium rounded-2xl text-theme-sm;
 }
 
 @utility menu-item-active {
-    @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+    @apply bg-white text-brand-600 shadow-theme-xs dark:bg-brand-500/[0.14] dark:text-brand-300;
 }
 
 @utility menu-item-inactive {
-    @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
+    @apply text-gray-700 hover:bg-white/80 group-hover:text-gray-800 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-200;
 }
 
 @utility menu-item-icon {
@@ -235,15 +432,15 @@
 }
 
 @utility menu-dropdown-item {
-    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-theme-sm font-medium;
+    @apply relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-theme-sm font-medium;
 }
 
 @utility menu-dropdown-item-active {
-    @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
+    @apply bg-white text-brand-600 shadow-theme-xs dark:bg-brand-500/[0.14] dark:text-brand-300;
 }
 
 @utility menu-dropdown-item-inactive {
-    @apply text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5;
+    @apply text-gray-700 hover:bg-white/80 dark:text-gray-300 dark:hover:bg-white/5;
 }
 
 @utility menu-dropdown-badge {
