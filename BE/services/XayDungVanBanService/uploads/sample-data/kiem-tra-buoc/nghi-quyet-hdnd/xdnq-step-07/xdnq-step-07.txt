@@ -1,0 +1,3 @@
+﻿XDNQ-STEP-07 - Đã thông qua ban hành
+GeneratedAt: 2026-10-11
+Purpose: Ho so mau dung de kiem tra tung buoc va nhanh xu ly quy trinh.

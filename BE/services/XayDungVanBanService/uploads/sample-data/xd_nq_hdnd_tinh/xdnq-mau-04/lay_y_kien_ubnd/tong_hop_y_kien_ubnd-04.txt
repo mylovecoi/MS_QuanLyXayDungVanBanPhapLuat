@@ -1,0 +1,8 @@
+﻿Xay dung van ban QPPL - Nghi quyet HDND tinh - Lay y kien thanh vien UBND - Ho so 4
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: XD_NQ_HDND_TINH
+MaHoSo: XDNQ-MAU-04
+Buoc: LAY_Y_KIEN_UBND
+NoiDung: Tep dinh kem mau cho buoc Lay y kien thanh vien UBND.

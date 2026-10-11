@@ -1,0 +1,8 @@
+﻿Xay dung van ban QPPL - Quyet dinh UBND tinh - Ban hanh Quyet dinh - Ho so 2
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: XD_QD_UBND_TINH
+MaHoSo: XDQD-MAU-02
+Buoc: BAN_HANH
+NoiDung: Tep dinh kem mau cho buoc Ban hanh Quyet dinh.

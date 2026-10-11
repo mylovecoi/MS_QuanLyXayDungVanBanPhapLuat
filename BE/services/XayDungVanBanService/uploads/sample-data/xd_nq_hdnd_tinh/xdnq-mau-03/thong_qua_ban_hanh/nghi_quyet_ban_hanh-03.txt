@@ -1,0 +1,8 @@
+﻿Xay dung van ban QPPL - Nghi quyet HDND tinh - Thong qua va ban hanh - Ho so 3
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: XD_NQ_HDND_TINH
+MaHoSo: XDNQ-MAU-03
+Buoc: THONG_QUA_BAN_HANH
+NoiDung: Tep dinh kem mau cho buoc Thong qua va ban hanh.

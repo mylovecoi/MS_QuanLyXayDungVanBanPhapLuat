@@ -1,0 +1,8 @@
+﻿De xuat danh muc / Dang ky xay dung QPPL - Lap ho so de nghi/dang ky - Ho so 2
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: DXDM_DKXD_QPPL
+MaHoSo: DK-MAU-02
+Buoc: LAP_HO_SO
+NoiDung: Tep dinh kem mau cho buoc Lap ho so de nghi/dang ky.

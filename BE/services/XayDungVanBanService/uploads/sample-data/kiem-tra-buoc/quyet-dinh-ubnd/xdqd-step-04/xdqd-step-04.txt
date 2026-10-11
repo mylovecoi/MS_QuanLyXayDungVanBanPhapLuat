@@ -1,0 +1,3 @@
+﻿XDQD-STEP-04 - Đã thẩm định, chờ trình UBND
+GeneratedAt: 2026-10-11
+Purpose: Ho so mau dung de kiem tra tung buoc va nhanh xu ly quy trinh.

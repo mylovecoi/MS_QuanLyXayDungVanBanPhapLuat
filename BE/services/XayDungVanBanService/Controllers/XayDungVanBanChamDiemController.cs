@@ -22,8 +22,24 @@ public sealed class XayDungVanBanChamDiemController(
         return denied ?? Ok(await service.GetListAsync(request, ct));
     }
 
+    [HttpGet("ho-so-can-cham")]
+    public async Task<ActionResult> GetHoSoCanCham([FromQuery] ChamDiemListRequest request, CancellationToken ct)
+    {
+        var denied = await Check("Index", ct);
+        return denied ?? Ok(await service.GetHoSoCanChamAsync(request, ct));
+    }
+
     [HttpGet("ho-so/{hoSoId:guid}")]
     public async Task<ActionResult> GetByHoSo(Guid hoSoId, CancellationToken ct) { var denied = await Check("Index", ct); return denied ?? Ok(await service.GetByHoSoAsync(hoSoId, ct)); }
+
+    [HttpGet("ket-qua/xuat-excel")]
+    public async Task<ActionResult> ExportKetQua([FromQuery] ChamDiemListRequest request, CancellationToken ct)
+    {
+        var denied = await Check("Index", ct);
+        if (denied is not null) return denied;
+        var file = await service.ExportKetQuaAsync(request, ct);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult> Get(Guid id, CancellationToken ct) { var denied = await Check("Index", ct); if (denied is not null) return denied; return (await service.GetAsync(id, ct)) is { } data ? Ok(data) : NotFound(); }

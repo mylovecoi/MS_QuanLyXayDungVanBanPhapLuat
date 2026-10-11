@@ -1,0 +1,8 @@
+﻿To chuc thi hanh phap luat - Tong hop ket qua - Ho so 2
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: TC_THI_HANH_PHAP_LUAT
+MaHoSo: THPL-MAU-02
+Buoc: TONG_HOP_KET_QUA
+NoiDung: Tep dinh kem mau cho buoc Tong hop ket qua.

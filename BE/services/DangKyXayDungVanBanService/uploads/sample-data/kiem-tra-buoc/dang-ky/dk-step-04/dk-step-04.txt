@@ -1,0 +1,3 @@
+﻿DK-STEP-04 - Chờ cập nhật kết quả
+GeneratedAt: 2026-10-11
+Purpose: Ho so mau dung de kiem tra tung buoc va nhanh xu ly quy trinh.

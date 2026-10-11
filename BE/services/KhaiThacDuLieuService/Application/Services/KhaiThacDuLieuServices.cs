@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KhaiThacDuLieuService.Application.Services;
 
-public sealed class DashboardKhaiThacDuLieuService(KhaiThacDuLieuDbContext dbContext) : IDashboardKhaiThacDuLieuService
+public sealed class DashboardKhaiThacDuLieuService(
+    KhaiThacDuLieuDbContext dbContext,
+    ICurrentUserContext currentUser) : IDashboardKhaiThacDuLieuService
 {
     public async Task<DashboardTongQuanDto> GetTongQuanAsync(CancellationToken cancellationToken = default)
     {
@@ -41,6 +43,428 @@ public sealed class DashboardKhaiThacDuLieuService(KhaiThacDuLieuDbContext dbCon
             theoNhom,
             theoMucDo);
     }
+
+    public async Task<DashboardLayoutDto> GetLayoutAsync(DashboardFilterRequest request, CancellationToken cancellationToken = default)
+    {
+        await EnsureDefaultWidgetsAsync(cancellationToken);
+
+        var widgets = await dbContext.DashboardWidgets
+            .AsNoTracking()
+            .Where(x => !x.IsDeleted && x.TrangThai)
+            .OrderBy(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
+        var widgetIds = widgets.Select(x => x.Id).ToList();
+        var configs = await dbContext.DashboardWidgetCauHinhs
+            .AsNoTracking()
+            .Where(x => !x.IsDeleted && widgetIds.Contains(x.DashboardWidgetId))
+            .ToListAsync(cancellationToken);
+        var effective = widgets.Select((widget, index) =>
+        {
+            var config = ResolveConfig(widget.Id, configs);
+            return ToDto(widget, config, index + 1, null);
+        }).OrderBy(x => x.ThuTu).ToList();
+        var tongQuan = await GetTongQuanAsync(cancellationToken);
+        var xayDungVanBan = await GetXayDungVanBanStatsAsync(request, cancellationToken);
+        var thiHanhPhapLuat = await GetThiHanhPhapLuatStatsAsync(request, cancellationToken);
+        return new DashboardLayoutDto(effective.Select(x => x with { DuLieu = BuildWidgetData(x.MaWidget, tongQuan, xayDungVanBan, thiHanhPhapLuat) }).ToList(), tongQuan);
+    }
+
+    public async Task<DashboardLayoutDto> UpdateLayoutAsync(CapNhatDashboardLayoutRequest request, CancellationToken cancellationToken = default)
+    {
+        var actor = Actor();
+        await EnsureDefaultWidgetsAsync(cancellationToken);
+
+        var widgetIds = request.Widgets.Select(x => x.WidgetId).Distinct().ToList();
+        var existingWidgets = await dbContext.DashboardWidgets
+            .Where(x => widgetIds.Contains(x.Id) && !x.IsDeleted)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+        if (existingWidgets.Count != widgetIds.Count)
+        {
+            throw new InvalidOperationException("Cấu hình dashboard có widget không hợp lệ.");
+        }
+
+        var currentConfigs = await dbContext.DashboardWidgetCauHinhs
+            .Where(x => !x.IsDeleted && x.NguoiDungId == actor.UserId && widgetIds.Contains(x.DashboardWidgetId))
+            .ToListAsync(cancellationToken);
+
+        foreach (var item in request.Widgets)
+        {
+            var config = currentConfigs.FirstOrDefault(x => x.DashboardWidgetId == item.WidgetId);
+            if (config is null)
+            {
+                config = new DashboardWidgetCauHinh
+                {
+                    DashboardWidgetId = item.WidgetId,
+                    NguoiDungId = actor.UserId,
+                    DonViId = actor.DonViId,
+                    NhomQuyenId = actor.GroupPermissionId,
+                    CreatedBy = actor.UserId.ToString()
+                };
+                dbContext.DashboardWidgetCauHinhs.Add(config);
+            }
+
+            config.HienThi = item.HienThi;
+            config.ThuTu = Math.Max(1, item.ThuTu);
+            config.DangHienThi = NormalizeDisplayType(item.DangHienThi);
+            config.KichThuoc = NormalizeSize(item.KichThuoc);
+            config.CauHinhBoLocJson = item.CauHinhBoLocJson;
+            config.TuDongLamMoiPhut = item.TuDongLamMoiPhut is > 0 ? item.TuDongLamMoiPhut : null;
+            config.UpdatedAt = DateTime.UtcNow;
+            config.UpdatedBy = actor.UserId.ToString();
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return await GetLayoutAsync(new DashboardFilterRequest(), cancellationToken);
+    }
+
+    private async Task EnsureDefaultWidgetsAsync(CancellationToken cancellationToken)
+    {
+        var defaults = new[]
+        {
+            new WidgetSeed("TONG_QUAN_DIEU_HANH", "Tổng quan điều hành", "TONG_QUAN", "metric", "Tổng cảnh báo, hồ sơ và nhiệm vụ cần theo dõi."),
+            new WidgetSeed("TIEN_DO_XAY_DUNG_VAN_BAN", "Tiến độ xây dựng văn bản", "XAY_DUNG_VAN_BAN", "bar", "Theo dõi văn bản đúng hạn, sắp hạn và quá hạn."),
+            new WidgetSeed("CANH_BAO_THONG_MINH", "Cảnh báo thông minh", "CANH_BAO", "donut", "Tổng hợp cảnh báo theo trạng thái và mức độ."),
+            new WidgetSeed("TO_CHUC_THI_HANH_PHAP_LUAT", "Tổ chức thi hành pháp luật", "THI_HANH_PHAP_LUAT", "bar", "Theo dõi nhiệm vụ thi hành pháp luật theo tình trạng xử lý."),
+            new WidgetSeed("BAO_CAO_THONG_KE", "Báo cáo thống kê", "BAO_CAO", "table", "Truy cập nhanh số liệu báo cáo thống kê."),
+            new WidgetSeed("HO_SO_SAP_HAN", "Hồ sơ sắp hạn", "CANH_BAO", "list", "Danh sách hồ sơ hoặc nhiệm vụ sắp đến hạn."),
+            new WidgetSeed("HO_SO_QUA_HAN", "Hồ sơ quá hạn", "CANH_BAO", "list", "Danh sách hồ sơ hoặc nhiệm vụ đã quá hạn."),
+            new WidgetSeed("NHIEM_VU_QUA_HAN", "Nhiệm vụ quá hạn", "THI_HANH_PHAP_LUAT", "list", "Nhiệm vụ thi hành pháp luật chưa hoàn thành đúng hạn."),
+            new WidgetSeed("TY_LE_BAN_HANH_THEO_DON_VI", "Tỷ lệ ban hành theo đơn vị", "XAY_DUNG_VAN_BAN", "bar", "So sánh tỷ lệ hoàn thành ban hành văn bản theo đơn vị."),
+            new WidgetSeed("TY_LE_HOAN_THANH_THEO_DON_VI", "Tỷ lệ hoàn thành theo đơn vị", "THI_HANH_PHAP_LUAT", "bar", "So sánh mức độ hoàn thành nhiệm vụ theo đơn vị.")
+        };
+
+        var codes = defaults.Select(x => x.Code).ToList();
+        var existing = await dbContext.DashboardWidgets
+            .Where(x => codes.Contains(x.MaWidget))
+            .Select(x => x.MaWidget)
+            .ToListAsync(cancellationToken);
+        foreach (var item in defaults.Where(x => !existing.Contains(x.Code)))
+        {
+            dbContext.DashboardWidgets.Add(new DashboardWidget
+            {
+                MaWidget = item.Code,
+                TenWidget = item.Name,
+                NhomWidget = item.Group,
+                LoaiWidget = item.Type,
+                MoTa = item.Description,
+                CauHinhMacDinhJson = "{}",
+                CreatedBy = "SYSTEM"
+            });
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private DashboardWidgetCauHinh? ResolveConfig(Guid widgetId, IReadOnlyList<DashboardWidgetCauHinh> configs)
+    {
+        return configs.FirstOrDefault(x => x.DashboardWidgetId == widgetId && x.NguoiDungId == currentUser.UserId)
+            ?? configs.FirstOrDefault(x => x.DashboardWidgetId == widgetId && currentUser.GroupPermissionId.HasValue && x.NhomQuyenId == currentUser.GroupPermissionId)
+            ?? configs.FirstOrDefault(x => x.DashboardWidgetId == widgetId && currentUser.DonViId.HasValue && x.DonViId == currentUser.DonViId);
+    }
+
+    private static DashboardWidgetDto ToDto(DashboardWidget widget, DashboardWidgetCauHinh? config, int defaultOrder, DashboardWidgetDataDto? data) => new(
+        widget.Id,
+        widget.MaWidget,
+        widget.TenWidget,
+        widget.NhomWidget,
+        widget.LoaiWidget,
+        widget.MoTa,
+        config?.HienThi ?? true,
+        config?.ThuTu ?? defaultOrder,
+        config?.DangHienThi ?? widget.LoaiWidget,
+        config?.KichThuoc ?? "medium",
+        config?.CauHinhBoLocJson ?? widget.CauHinhMacDinhJson,
+        config?.TuDongLamMoiPhut,
+        data);
+
+    private async Task<XayDungVanBanDashboardStats> GetXayDungVanBanStatsAsync(DashboardFilterRequest request, CancellationToken cancellationToken)
+    {
+        var today = DateTime.UtcNow.Date;
+        var dueSoonLimit = today.AddDays(5);
+        var dossierQuery = ApplyXayDungVanBanDataScope(dbContext.XayDungVanBanHoSos.AsNoTracking().Where(x => !x.IsDeleted));
+        dossierQuery = ApplyXayDungVanBanFilters(dossierQuery, request);
+        var dossiers = await dossierQuery
+            .Select(x => new
+            {
+                x.Id,
+                x.DanhMucVanBanId,
+                x.QuyTrinhSoanThaoId,
+                x.DonViChuTriSoanThaoId,
+                x.TrangThaiHoSoId,
+                x.NamXayDung,
+                x.ThoiGianDuKienHoanThanh
+            })
+            .ToListAsync(cancellationToken);
+        var ids = dossiers.Select(x => x.Id).ToList();
+        if (ids.Count == 0)
+        {
+            return new XayDungVanBanDashboardStats(0, 0, 0, 0, 0, [], []);
+        }
+
+        var completedIds = await dbContext.XayDungVanBanBoHoSos.AsNoTracking()
+            .Where(x => ids.Contains(x.HoSoXayDungVanBanId) && !x.IsDeleted && x.LoaiBoHoSo == 7 && x.TrangThai == 5)
+            .Select(x => x.HoSoXayDungVanBanId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        var completedSet = completedIds.ToHashSet();
+        var active = dossiers.Where(x => !completedSet.Contains(x.Id)).ToList();
+        var dueSoon = active.Count(x => x.ThoiGianDuKienHoanThanh.HasValue
+            && x.ThoiGianDuKienHoanThanh.Value.Date >= today
+            && x.ThoiGianDuKienHoanThanh.Value.Date <= dueSoonLimit);
+        var overdue = active.Count(x => x.ThoiGianDuKienHoanThanh.HasValue
+            && x.ThoiGianDuKienHoanThanh.Value.Date < today);
+
+        var businessSteps = await dbContext.XayDungVanBanBoHoSos.AsNoTracking()
+            .Where(x => ids.Contains(x.HoSoXayDungVanBanId) && !x.IsDeleted)
+            .GroupBy(x => x.LoaiBoHoSo)
+            .Select(x => new ThongKeTheoNhomDto(StepName(x.Key), x.Count()))
+            .ToListAsync(cancellationToken);
+        var unitNames = await GetDonViNamesAsync(dossiers.Select(x => x.DonViChuTriSoanThaoId), cancellationToken);
+        var byUnit = dossiers
+            .GroupBy(x => x.DonViChuTriSoanThaoId)
+            .Select(x => new ThongKeTheoNhomDto(unitNames.GetValueOrDefault(x.Key, x.Key.ToString()), x.Count()))
+            .OrderByDescending(x => x.SoLuong)
+            .Take(10)
+            .ToList();
+
+        return new XayDungVanBanDashboardStats(
+            dossiers.Count,
+            active.Count,
+            completedSet.Count,
+            dueSoon,
+            overdue,
+            businessSteps,
+            byUnit);
+    }
+
+    private IQueryable<XayDungVanBanHoSoTraCuu> ApplyXayDungVanBanDataScope(IQueryable<XayDungVanBanHoSoTraCuu> query)
+    {
+        if (currentUser.IsSSA) return query;
+
+        var userIdText = currentUser.UserId?.ToString();
+        if (currentUser.DonViId is Guid donViId)
+        {
+            query = query.Where(x => x.DonViChuTriSoanThaoId == donViId || x.CreatedBy == userIdText);
+        }
+        else if (!string.IsNullOrWhiteSpace(userIdText))
+        {
+            query = query.Where(x => x.CreatedBy == userIdText);
+        }
+        else
+        {
+            query = query.Where(_ => false);
+        }
+
+        return query;
+    }
+
+    private static IQueryable<XayDungVanBanHoSoTraCuu> ApplyXayDungVanBanFilters(IQueryable<XayDungVanBanHoSoTraCuu> query, DashboardFilterRequest request)
+    {
+        if (request.Nam is int nam) query = query.Where(x => x.NamXayDung == nam);
+        if (request.DonViId is Guid donViId) query = query.Where(x => x.DonViChuTriSoanThaoId == donViId);
+        if (request.LoaiVanBanId is Guid loaiVanBanId) query = query.Where(x => x.DanhMucVanBanId == loaiVanBanId);
+        if (request.QuyTrinhSoanThaoId is Guid quyTrinhSoanThaoId) query = query.Where(x => x.QuyTrinhSoanThaoId == quyTrinhSoanThaoId);
+        if (request.TrangThaiId is Guid trangThaiId) query = query.Where(x => x.TrangThaiHoSoId == trangThaiId);
+        if (request.TuNgay is DateTime tuNgay) query = query.Where(x => x.CreatedAt >= tuNgay.Date);
+        if (request.DenNgay is DateTime denNgay)
+        {
+            var denNgayExclusive = denNgay.Date.AddDays(1);
+            query = query.Where(x => x.CreatedAt < denNgayExclusive);
+        }
+
+        return query;
+    }
+
+    private async Task<ThiHanhPhapLuatDashboardStats> GetThiHanhPhapLuatStatsAsync(DashboardFilterRequest request, CancellationToken cancellationToken)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var dueSoonLimit = today.AddDays(5);
+        var query =
+            from noiDung in dbContext.ThiHanhPhapLuatNoiDungs.AsNoTracking().Where(x => !x.IsDeleted)
+            join keHoach in dbContext.ThiHanhPhapLuatKeHoachs.AsNoTracking().Where(x => !x.IsDeleted)
+                on noiDung.KeHoachId equals keHoach.Id
+            select new
+            {
+                noiDung.Id,
+                noiDung.KeHoachId,
+                noiDung.HanHoanThanh,
+                noiDung.TrangThaiId,
+                noiDung.TyLeHoanThanh,
+                keHoach.DonViChuTriId,
+                keHoach.Nam,
+                keHoach.CreatedBy
+            };
+
+        if (request.Nam is int nam) query = query.Where(x => x.Nam == nam);
+        if (request.DonViId is Guid filterDonViId) query = query.Where(x =>
+            x.DonViChuTriId == filterDonViId
+            || dbContext.ThiHanhPhapLuatPhanCongs.Any(p => !p.IsDeleted && p.NoiDungKeHoachId == x.Id && p.DonViDuocGiaoId == filterDonViId));
+        if (request.TrangThaiId is Guid trangThaiId) query = query.Where(x => x.TrangThaiId == trangThaiId);
+        if (request.TuNgay is DateTime tuNgay) query = query.Where(x => x.HanHoanThanh >= DateOnly.FromDateTime(tuNgay));
+        if (request.DenNgay is DateTime denNgay) query = query.Where(x => x.HanHoanThanh <= DateOnly.FromDateTime(denNgay));
+
+        if (!currentUser.IsSSA)
+        {
+            var userIdText = currentUser.UserId?.ToString();
+            if (currentUser.DonViId is Guid donViId)
+            {
+                query = query.Where(x =>
+                    x.DonViChuTriId == donViId
+                    || x.CreatedBy == userIdText
+                    || dbContext.ThiHanhPhapLuatPhanCongs.Any(p => !p.IsDeleted
+                        && p.NoiDungKeHoachId == x.Id
+                        && p.DonViDuocGiaoId == donViId));
+            }
+            else if (!string.IsNullOrWhiteSpace(userIdText))
+            {
+                query = query.Where(x => x.CreatedBy == userIdText);
+            }
+            else
+            {
+                query = query.Where(_ => false);
+            }
+        }
+
+        var contents = await query.ToListAsync(cancellationToken);
+        if (contents.Count == 0)
+        {
+            return new ThiHanhPhapLuatDashboardStats(0, 0, 0, 0, 0, [], []);
+        }
+
+        var contentIds = contents.Select(x => x.Id).ToList();
+        var assignments = await dbContext.ThiHanhPhapLuatPhanCongs.AsNoTracking()
+            .Where(x => !x.IsDeleted && contentIds.Contains(x.NoiDungKeHoachId))
+            .Select(x => new { x.NoiDungKeHoachId, x.DonViDuocGiaoId, x.HanThucHien })
+            .ToListAsync(cancellationToken);
+        var unitNames = await GetDonViNamesAsync(assignments.Select(x => x.DonViDuocGiaoId).Concat(contents.Select(x => x.DonViChuTriId)), cancellationToken);
+
+        var active = contents.Where(x => x.TyLeHoanThanh < 100).ToList();
+        var completed = contents.Count(x => x.TyLeHoanThanh >= 100);
+        var dueSoon = active.Count(x => x.HanHoanThanh >= today && x.HanHoanThanh <= dueSoonLimit);
+        var overdue = active.Count(x => x.HanHoanThanh < today);
+        var progressGroups = new[]
+        {
+            new ThongKeTheoNhomDto("Chưa thực hiện", contents.Count(x => x.TyLeHoanThanh <= 0)),
+            new ThongKeTheoNhomDto("Đang thực hiện", contents.Count(x => x.TyLeHoanThanh > 0 && x.TyLeHoanThanh < 100)),
+            new ThongKeTheoNhomDto("Hoàn thành", completed),
+            new ThongKeTheoNhomDto("Quá hạn", overdue)
+        };
+        var byUnit = assignments
+            .GroupBy(x => x.DonViDuocGiaoId)
+            .Select(x => new ThongKeTheoNhomDto(unitNames.GetValueOrDefault(x.Key, x.Key.ToString()), x.Select(y => y.NoiDungKeHoachId).Distinct().Count()))
+            .OrderByDescending(x => x.SoLuong)
+            .Take(10)
+            .ToList();
+
+        return new ThiHanhPhapLuatDashboardStats(
+            contents.Count,
+            active.Count,
+            completed,
+            dueSoon,
+            overdue,
+            progressGroups,
+            byUnit);
+    }
+
+    private async Task<Dictionary<Guid, string>> GetDonViNamesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
+    {
+        var distinctIds = ids.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (distinctIds.Count == 0)
+        {
+            return [];
+        }
+
+        return await dbContext.DanhMucDonVis.AsNoTracking()
+            .Where(x => distinctIds.Contains(x.Id) && !x.IsDeleted)
+            .Select(x => new { x.Id, x.TenDonVi })
+            .ToDictionaryAsync(x => x.Id, x => x.TenDonVi, cancellationToken);
+    }
+
+    private static DashboardWidgetDataDto BuildWidgetData(
+        string code,
+        DashboardTongQuanDto tongQuan,
+        XayDungVanBanDashboardStats xayDungVanBan,
+        ThiHanhPhapLuatDashboardStats thiHanhPhapLuat)
+    {
+        return code switch
+        {
+            "CANH_BAO_THONG_MINH" => new(tongQuan.TongCanhBao, "cảnh báo", tongQuan.TheoMucDo),
+            "TIEN_DO_XAY_DUNG_VAN_BAN" => new(xayDungVanBan.Total, "hồ sơ", new[]
+            {
+                new ThongKeTheoNhomDto("Đang xử lý", xayDungVanBan.Active),
+                new ThongKeTheoNhomDto("Đã ban hành", xayDungVanBan.Completed),
+                new ThongKeTheoNhomDto("Sắp hạn", xayDungVanBan.DueSoon),
+                new ThongKeTheoNhomDto("Quá hạn", xayDungVanBan.Overdue)
+            }),
+            "HO_SO_SAP_HAN" => new(xayDungVanBan.DueSoon, "hồ sơ", xayDungVanBan.StepStats),
+            "HO_SO_QUA_HAN" => new(xayDungVanBan.Overdue, "hồ sơ", xayDungVanBan.StepStats),
+            "TY_LE_BAN_HANH_THEO_DON_VI" => new(xayDungVanBan.Completed, "hồ sơ đã ban hành", xayDungVanBan.ByUnit),
+            "TO_CHUC_THI_HANH_PHAP_LUAT" => new(thiHanhPhapLuat.Total, "nhiệm vụ", thiHanhPhapLuat.ProgressStats),
+            "NHIEM_VU_QUA_HAN" => new(thiHanhPhapLuat.Overdue, "nhiệm vụ", thiHanhPhapLuat.ProgressStats),
+            "TY_LE_HOAN_THANH_THEO_DON_VI" => new(thiHanhPhapLuat.Completed, "nhiệm vụ hoàn thành", thiHanhPhapLuat.ByUnit),
+            "TONG_QUAN_DIEU_HANH" => new(tongQuan.TongCanhBao, "mục cần theo dõi", new[]
+            {
+                new ThongKeTheoNhomDto("Mới", tongQuan.CanhBaoMoi),
+                new ThongKeTheoNhomDto("Đang xử lý", tongQuan.CanhBaoDangXuLy),
+                new ThongKeTheoNhomDto("Đã xử lý", tongQuan.CanhBaoDaXuLy)
+            }),
+            _ => new(0, "đang bổ sung", [])
+        };
+    }
+
+    private static string StepName(int type) => type switch
+    {
+        1 => "Soạn thảo",
+        2 => "Trình thẩm định",
+        3 => "Thẩm định",
+        4 => "Trình UBND",
+        5 => "Ý kiến UBND",
+        6 => "Thẩm tra HĐND",
+        7 => "Ban hành",
+        _ => $"Bước {type}"
+    };
+
+    private CurrentActor Actor()
+    {
+        if (!currentUser.IsAuthenticated || currentUser.UserId is not Guid userId)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        return new CurrentActor(userId, currentUser.DonViId, currentUser.GroupPermissionId);
+    }
+
+    private static string NormalizeDisplayType(string? value)
+    {
+        var type = string.IsNullOrWhiteSpace(value) ? "metric" : value.Trim().ToLowerInvariant();
+        return type is "metric" or "bar" or "line" or "donut" or "table" or "list" ? type : "metric";
+    }
+
+    private static string NormalizeSize(string? value)
+    {
+        var size = string.IsNullOrWhiteSpace(value) ? "medium" : value.Trim().ToLowerInvariant();
+        return size is "small" or "medium" or "large" or "full" ? size : "medium";
+    }
+
+    private sealed record WidgetSeed(string Code, string Name, string Group, string Type, string Description);
+    private sealed record CurrentActor(Guid UserId, Guid? DonViId, Guid? GroupPermissionId);
+    private sealed record XayDungVanBanDashboardStats(
+        int Total,
+        int Active,
+        int Completed,
+        int DueSoon,
+        int Overdue,
+        IReadOnlyList<ThongKeTheoNhomDto> StepStats,
+        IReadOnlyList<ThongKeTheoNhomDto> ByUnit);
+    private sealed record ThiHanhPhapLuatDashboardStats(
+        int Total,
+        int Active,
+        int Completed,
+        int DueSoon,
+        int Overdue,
+        IReadOnlyList<ThongKeTheoNhomDto> ProgressStats,
+        IReadOnlyList<ThongKeTheoNhomDto> ByUnit);
 }
 
 public sealed class CanhBaoKhaiThacDuLieuService(
@@ -827,10 +1251,315 @@ public sealed class TraCuuKhaiThacDuLieuService(
     }
 }
 
-public sealed class BaoCaoKhaiThacDuLieuService : IBaoCaoKhaiThacDuLieuService
+public sealed class BaoCaoKhaiThacDuLieuService(
+    KhaiThacDuLieuDbContext dbContext,
+    ICurrentUserContext currentUser) : IBaoCaoKhaiThacDuLieuService
 {
-    public Task<BaoCaoTongHopDto> GetBaoCaoAsync(string loaiBaoCao, BaoCaoRequest request, CancellationToken cancellationToken = default)
+    private static readonly IReadOnlyList<BaoCaoDanhMucDto> Reports =
+    [
+        new("DANG_KY_BAN_HANH", "Báo cáo đăng ký ban hành văn bản QPPL", "Tổng hợp hồ sơ đăng ký ban hành văn bản theo đơn vị, loại văn bản, trạng thái và thời gian.", "Xây dựng văn bản", "/khai-thac-du-lieu/bao-cao/DANG_KY_BAN_HANH", true),
+        new("DANH_MUC_VAN_BAN_QUY_DINH_CHI_TIET", "Báo cáo danh mục văn bản quy định chi tiết", "Theo dõi danh mục văn bản quy định chi tiết theo loại văn bản, lĩnh vực và trạng thái.", "Văn bản pháp luật", "/khai-thac-du-lieu/bao-cao/DANH_MUC_VAN_BAN_QUY_DINH_CHI_TIET", false),
+        new("VAN_BAN_BAN_HANH", "Báo cáo văn bản do HĐND, UBND ban hành", "Tổng hợp văn bản đã ban hành, phân loại theo hình thức nghị quyết, quyết định và đơn vị.", "Xây dựng văn bản", "/khai-thac-du-lieu/bao-cao/VAN_BAN_BAN_HANH", true),
+        new("THEO_GIAI_DOAN", "Báo cáo theo giai đoạn", "Tổng hợp hồ sơ, văn bản phát sinh, hoàn thành và chậm tiến độ theo khoảng thời gian.", "Tổng hợp", "/khai-thac-du-lieu/bao-cao/THEO_GIAI_DOAN", true),
+        new("THI_HANH_PHAP_LUAT", "Báo cáo tổ chức thi hành pháp luật", "Tổng hợp kết quả tổ chức thi hành pháp luật theo kế hoạch, nhiệm vụ, đơn vị và tiến độ.", "Thi hành pháp luật", "/khai-thac-du-lieu/bao-cao/THI_HANH_PHAP_LUAT", true),
+        new("MUC_DO_HOAN_THANH_DON_VI", "Báo cáo mức độ hoàn thành nhiệm vụ theo đơn vị", "Đánh giá số lượng nhiệm vụ được giao và tỷ lệ hoàn thành của từng đơn vị.", "Thi hành pháp luật", "/khai-thac-du-lieu/bao-cao/MUC_DO_HOAN_THANH_DON_VI", true)
+    ];
+
+    public Task<IReadOnlyList<BaoCaoDanhMucDto>> GetDanhMucAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(new BaoCaoTongHopDto(loaiBaoCao, DateTime.UtcNow, []));
+        return Task.FromResult(Reports);
+    }
+
+    public async Task<BaoCaoTongHopDto> GetBaoCaoAsync(string loaiBaoCao, BaoCaoRequest request, CancellationToken cancellationToken = default)
+    {
+        var reportCode = NormalizeReportCode(loaiBaoCao);
+        return reportCode switch
+        {
+            "DANG_KY_BAN_HANH" => await GetDangKyBanHanhAsync(reportCode, request, cancellationToken),
+            "VAN_BAN_BAN_HANH" => await GetVanBanBanHanhAsync(reportCode, request, cancellationToken),
+            "THEO_GIAI_DOAN" => await GetVanBanBanHanhAsync(reportCode, request, cancellationToken),
+            "THI_HANH_PHAP_LUAT" => await GetThiHanhPhapLuatAsync(reportCode, request, cancellationToken),
+            "MUC_DO_HOAN_THANH_DON_VI" => await GetThiHanhPhapLuatAsync(reportCode, request, cancellationToken),
+            _ => EmptyReport(reportCode)
+        };
+    }
+
+    private async Task<BaoCaoTongHopDto> GetDangKyBanHanhAsync(string reportCode, BaoCaoRequest request, CancellationToken cancellationToken)
+    {
+        var query =
+            from hoSo in ApplyDangKyDataScope(dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted))
+            join trangThai in dbContext.DangKyTrangThaiHoSos.AsNoTracking().Where(x => !x.IsDeleted)
+                on hoSo.TrangThaiHoSoId equals trangThai.Id into trangThaiJoin
+            from trangThai in trangThaiJoin.DefaultIfEmpty()
+            select new
+            {
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenVanBanDuKien,
+                hoSo.LoaiVanBanId,
+                hoSo.QuyTrinhSoanThaoId,
+                hoSo.TrangThaiHoSoId,
+                hoSo.DonViSoanThaoId,
+                hoSo.NamDangKy,
+                hoSo.CreatedAt,
+                hoSo.DuKienThoiGianTrinh,
+                hoSo.DaKhoiTaoQuyTrinhXayDung,
+                TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
+                MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
+                LaTrangThaiKetThuc = trangThai != null && trangThai.LaTrangThaiKetThuc
+            };
+
+        if (request.DonViId is Guid donViId) query = query.Where(x => x.DonViSoanThaoId == donViId);
+        if (request.LoaiVanBanId is Guid loaiVanBanId) query = query.Where(x => x.LoaiVanBanId == loaiVanBanId);
+        if (request.QuyTrinhSoanThaoId is Guid quyTrinhSoanThaoId) query = query.Where(x => x.QuyTrinhSoanThaoId == quyTrinhSoanThaoId);
+        if (request.TrangThaiId is Guid trangThaiId) query = query.Where(x => x.TrangThaiHoSoId == trangThaiId);
+        if (request.Nam is int nam) query = query.Where(x => x.NamDangKy == nam);
+        if (request.TuNgay is DateTime tuNgay) query = query.Where(x => x.CreatedAt >= tuNgay.Date);
+        if (request.DenNgay is DateTime denNgay)
+        {
+            var denNgayExclusive = denNgay.Date.AddDays(1);
+            query = query.Where(x => x.CreatedAt < denNgayExclusive);
+        }
+
+        var rows = await query.OrderByDescending(x => x.CreatedAt).Take(500).ToListAsync(cancellationToken);
+        var unitNames = await GetDonViNamesAsync(rows.Select(x => x.DonViSoanThaoId), cancellationToken);
+        var today = DateTime.UtcNow.Date;
+        var completed = rows.Count(x => x.LaTrangThaiKetThuc || x.DaKhoiTaoQuyTrinhXayDung);
+        var overdue = rows.Count(x => !x.LaTrangThaiKetThuc && x.DuKienThoiGianTrinh.HasValue && x.DuKienThoiGianTrinh.Value.Date < today);
+
+        return new BaoCaoTongHopDto(
+            reportCode,
+            ReportName(reportCode),
+            DateTime.UtcNow,
+            [
+                new("Tổng hồ sơ", rows.Count),
+                new("Đã khởi tạo quy trình/hoàn thành", completed),
+                new("Đang xử lý", rows.Count - completed),
+                new("Quá hạn", overdue)
+            ],
+            rows.GroupBy(x => x.TenTrangThai ?? x.MaTrangThai ?? "Chưa xác định")
+                .Select(x => new ThongKeTheoNhomDto(x.Key, x.Count()))
+                .OrderByDescending(x => x.SoLuong)
+                .ToList(),
+            rows.GroupBy(x => x.DonViSoanThaoId)
+                .Select(x => new ThongKeTheoNhomDto(unitNames.GetValueOrDefault(x.Key, x.Key.ToString()), x.Count()))
+                .OrderByDescending(x => x.SoLuong)
+                .ToList(),
+            rows.Select(x => new BaoCaoChiTietDto(
+                x.Id,
+                x.MaHoSo,
+                x.TenHoSo,
+                x.TenVanBanDuKien,
+                x.DonViSoanThaoId,
+                unitNames.GetValueOrDefault(x.DonViSoanThaoId, x.DonViSoanThaoId.ToString()),
+                x.TrangThaiHoSoId,
+                x.TenTrangThai ?? x.MaTrangThai,
+                x.CreatedAt,
+                x.DuKienThoiGianTrinh,
+                x.DaKhoiTaoQuyTrinhXayDung ? "Đã khởi tạo quy trình xây dựng" : null))
+                .ToList());
+    }
+
+    private async Task<BaoCaoTongHopDto> GetVanBanBanHanhAsync(string reportCode, BaoCaoRequest request, CancellationToken cancellationToken)
+    {
+        var query = ApplyXayDungDataScope(dbContext.XayDungVanBanHoSos.AsNoTracking().Where(x => !x.IsDeleted));
+        if (request.DonViId is Guid donViId) query = query.Where(x => x.DonViChuTriSoanThaoId == donViId);
+        if (request.LoaiVanBanId is Guid loaiVanBanId) query = query.Where(x => x.DanhMucVanBanId == loaiVanBanId);
+        if (request.QuyTrinhSoanThaoId is Guid quyTrinhSoanThaoId) query = query.Where(x => x.QuyTrinhSoanThaoId == quyTrinhSoanThaoId);
+        if (request.TrangThaiId is Guid trangThaiId) query = query.Where(x => x.TrangThaiHoSoId == trangThaiId);
+        if (request.Nam is int nam) query = query.Where(x => x.NamXayDung == nam);
+        if (request.TuNgay is DateTime tuNgay) query = query.Where(x => x.CreatedAt >= tuNgay.Date);
+        if (request.DenNgay is DateTime denNgay)
+        {
+            var denNgayExclusive = denNgay.Date.AddDays(1);
+            query = query.Where(x => x.CreatedAt < denNgayExclusive);
+        }
+
+        var rows = await query.OrderByDescending(x => x.CreatedAt).Take(500).ToListAsync(cancellationToken);
+        var ids = rows.Select(x => x.Id).ToList();
+        var completedIds = await dbContext.XayDungVanBanBoHoSos.AsNoTracking()
+            .Where(x => ids.Contains(x.HoSoXayDungVanBanId) && !x.IsDeleted && x.LoaiBoHoSo == 7 && x.TrangThai == 5)
+            .Select(x => x.HoSoXayDungVanBanId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+        var completedSet = completedIds.ToHashSet();
+        var unitNames = await GetDonViNamesAsync(rows.Select(x => x.DonViChuTriSoanThaoId), cancellationToken);
+        var today = DateTime.UtcNow.Date;
+        var completed = rows.Count(x => completedSet.Contains(x.Id));
+        var overdue = rows.Count(x => !completedSet.Contains(x.Id) && x.ThoiGianDuKienHoanThanh.HasValue && x.ThoiGianDuKienHoanThanh.Value.Date < today);
+
+        return new BaoCaoTongHopDto(
+            reportCode,
+            ReportName(reportCode),
+            DateTime.UtcNow,
+            [
+                new("Tổng hồ sơ xây dựng", rows.Count),
+                new("Đã ban hành", completed),
+                new("Đang xử lý", rows.Count - completed),
+                new("Chậm tiến độ", overdue)
+            ],
+            [
+                new("Đã ban hành", completed),
+                new("Đang xử lý", rows.Count - completed),
+                new("Chậm tiến độ", overdue)
+            ],
+            rows.GroupBy(x => x.DonViChuTriSoanThaoId)
+                .Select(x => new ThongKeTheoNhomDto(unitNames.GetValueOrDefault(x.Key, x.Key.ToString()), x.Count()))
+                .OrderByDescending(x => x.SoLuong)
+                .ToList(),
+            rows.Select(x => new BaoCaoChiTietDto(
+                x.Id,
+                x.MaHoSo,
+                x.TenHoSo,
+                x.TenDuThaoVanBan,
+                x.DonViChuTriSoanThaoId,
+                unitNames.GetValueOrDefault(x.DonViChuTriSoanThaoId, x.DonViChuTriSoanThaoId.ToString()),
+                x.TrangThaiHoSoId,
+                completedSet.Contains(x.Id) ? "Đã ban hành" : "Đang xử lý",
+                x.CreatedAt,
+                x.ThoiGianDuKienHoanThanh,
+                null))
+                .ToList());
+    }
+
+    private async Task<BaoCaoTongHopDto> GetThiHanhPhapLuatAsync(string reportCode, BaoCaoRequest request, CancellationToken cancellationToken)
+    {
+        var query =
+            from noiDung in dbContext.ThiHanhPhapLuatNoiDungs.AsNoTracking().Where(x => !x.IsDeleted)
+            join keHoach in dbContext.ThiHanhPhapLuatKeHoachs.AsNoTracking().Where(x => !x.IsDeleted)
+                on noiDung.KeHoachId equals keHoach.Id
+            select new
+            {
+                noiDung.Id,
+                noiDung.MaNoiDung,
+                noiDung.TenNoiDung,
+                noiDung.TrangThaiId,
+                noiDung.HanHoanThanh,
+                noiDung.TyLeHoanThanh,
+                keHoach.DonViChuTriId,
+                keHoach.Nam,
+                keHoach.CreatedBy,
+                keHoach.TenKeHoach
+            };
+
+        if (!currentUser.IsSSA)
+        {
+            var userIdText = currentUser.UserId?.ToString();
+            if (currentUser.DonViId is Guid scopeDonViId)
+            {
+                query = query.Where(x =>
+                    x.DonViChuTriId == scopeDonViId
+                    || x.CreatedBy == userIdText
+                    || dbContext.ThiHanhPhapLuatPhanCongs.Any(p => !p.IsDeleted && p.NoiDungKeHoachId == x.Id && p.DonViDuocGiaoId == scopeDonViId));
+            }
+            else if (!string.IsNullOrWhiteSpace(userIdText))
+            {
+                query = query.Where(x => x.CreatedBy == userIdText);
+            }
+            else
+            {
+                query = query.Where(_ => false);
+            }
+        }
+
+        if (request.Nam is int nam) query = query.Where(x => x.Nam == nam);
+        if (request.DonViId is Guid donViId) query = query.Where(x =>
+            x.DonViChuTriId == donViId
+            || dbContext.ThiHanhPhapLuatPhanCongs.Any(p => !p.IsDeleted && p.NoiDungKeHoachId == x.Id && p.DonViDuocGiaoId == donViId));
+        if (request.TrangThaiId is Guid trangThaiId) query = query.Where(x => x.TrangThaiId == trangThaiId);
+        if (request.TuNgay is DateTime tuNgay) query = query.Where(x => x.HanHoanThanh >= DateOnly.FromDateTime(tuNgay));
+        if (request.DenNgay is DateTime denNgay) query = query.Where(x => x.HanHoanThanh <= DateOnly.FromDateTime(denNgay));
+
+        var rows = await query.OrderBy(x => x.HanHoanThanh).Take(500).ToListAsync(cancellationToken);
+        var ids = rows.Select(x => x.Id).ToList();
+        var assignments = await dbContext.ThiHanhPhapLuatPhanCongs.AsNoTracking()
+            .Where(x => !x.IsDeleted && ids.Contains(x.NoiDungKeHoachId))
+            .ToListAsync(cancellationToken);
+        var unitNames = await GetDonViNamesAsync(assignments.Select(x => x.DonViDuocGiaoId).Concat(rows.Select(x => x.DonViChuTriId)), cancellationToken);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var completed = rows.Count(x => x.TyLeHoanThanh >= 100);
+        var overdue = rows.Count(x => x.TyLeHoanThanh < 100 && x.HanHoanThanh < today);
+
+        return new BaoCaoTongHopDto(
+            reportCode,
+            ReportName(reportCode),
+            DateTime.UtcNow,
+            [
+                new("Tổng nhiệm vụ", rows.Count),
+                new("Hoàn thành", completed),
+                new("Đang thực hiện", rows.Count - completed),
+                new("Quá hạn", overdue)
+            ],
+            [
+                new("Chưa thực hiện", rows.Count(x => x.TyLeHoanThanh <= 0)),
+                new("Đang thực hiện", rows.Count(x => x.TyLeHoanThanh > 0 && x.TyLeHoanThanh < 100)),
+                new("Hoàn thành", completed),
+                new("Quá hạn", overdue)
+            ],
+            assignments.GroupBy(x => x.DonViDuocGiaoId)
+                .Select(x => new ThongKeTheoNhomDto(unitNames.GetValueOrDefault(x.Key, x.Key.ToString()), x.Select(y => y.NoiDungKeHoachId).Distinct().Count()))
+                .OrderByDescending(x => x.SoLuong)
+                .ToList(),
+            rows.Select(x => new BaoCaoChiTietDto(
+                x.Id,
+                x.MaNoiDung,
+                x.TenNoiDung,
+                x.TenKeHoach,
+                x.DonViChuTriId,
+                unitNames.GetValueOrDefault(x.DonViChuTriId, x.DonViChuTriId.ToString()),
+                x.TrangThaiId,
+                x.TyLeHoanThanh >= 100 ? "Hoàn thành" : "Đang thực hiện",
+                null,
+                x.HanHoanThanh.ToDateTime(TimeOnly.MinValue),
+                $"Tỷ lệ hoàn thành {x.TyLeHoanThanh:0.##}%"))
+                .ToList());
+    }
+
+    private IQueryable<DangKyXayDungVanBanTraCuu> ApplyDangKyDataScope(IQueryable<DangKyXayDungVanBanTraCuu> query)
+    {
+        if (currentUser.IsSSA) return query;
+        if (!currentUser.IsAuthenticated || currentUser.UserId is null) return query.Where(_ => false);
+
+        var userIdText = currentUser.UserId.Value.ToString();
+        if (currentUser.DonViId is not Guid donViId) return query.Where(x => x.CreatedBy == userIdText);
+
+        return query.Where(x => x.DonViSoanThaoId == donViId || x.DonViPheDuyetId == donViId || x.CreatedBy == userIdText);
+    }
+
+    private IQueryable<XayDungVanBanHoSoTraCuu> ApplyXayDungDataScope(IQueryable<XayDungVanBanHoSoTraCuu> query)
+    {
+        if (currentUser.IsSSA) return query;
+
+        var userIdText = currentUser.UserId?.ToString();
+        if (currentUser.DonViId is Guid donViId) return query.Where(x => x.DonViChuTriSoanThaoId == donViId || x.CreatedBy == userIdText);
+        if (!string.IsNullOrWhiteSpace(userIdText)) return query.Where(x => x.CreatedBy == userIdText);
+        return query.Where(_ => false);
+    }
+
+    private async Task<Dictionary<Guid, string>> GetDonViNamesAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
+    {
+        var distinctIds = ids.Where(x => x != Guid.Empty).Distinct().ToList();
+        if (distinctIds.Count == 0) return [];
+
+        return await dbContext.DanhMucDonVis.AsNoTracking()
+            .Where(x => !x.IsDeleted && distinctIds.Contains(x.Id))
+            .Select(x => new { x.Id, x.TenDonVi })
+            .ToDictionaryAsync(x => x.Id, x => x.TenDonVi, cancellationToken);
+    }
+
+    private static string NormalizeReportCode(string loaiBaoCao)
+    {
+        return loaiBaoCao.Trim().Replace('-', '_').ToUpperInvariant();
+    }
+
+    private static string ReportName(string reportCode)
+    {
+        return Reports.FirstOrDefault(x => x.MaBaoCao == reportCode)?.TenBaoCao ?? reportCode;
+    }
+
+    private static BaoCaoTongHopDto EmptyReport(string reportCode)
+    {
+        return new BaoCaoTongHopDto(reportCode, ReportName(reportCode), DateTime.UtcNow, [], [], [], []);
     }
 }

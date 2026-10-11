@@ -5,6 +5,8 @@ namespace KhaiThacDuLieuService.Application.Abstractions;
 public interface IDashboardKhaiThacDuLieuService
 {
     Task<DashboardTongQuanDto> GetTongQuanAsync(CancellationToken cancellationToken = default);
+    Task<DashboardLayoutDto> GetLayoutAsync(DashboardFilterRequest request, CancellationToken cancellationToken = default);
+    Task<DashboardLayoutDto> UpdateLayoutAsync(CapNhatDashboardLayoutRequest request, CancellationToken cancellationToken = default);
 }
 
 public interface ICanhBaoKhaiThacDuLieuService
@@ -37,5 +39,6 @@ public interface ITraCuuKhaiThacDuLieuService
 
 public interface IBaoCaoKhaiThacDuLieuService
 {
+    Task<IReadOnlyList<BaoCaoDanhMucDto>> GetDanhMucAsync(CancellationToken cancellationToken = default);
     Task<BaoCaoTongHopDto> GetBaoCaoAsync(string loaiBaoCao, BaoCaoRequest request, CancellationToken cancellationToken = default);
 }
