@@ -41,11 +41,11 @@ const AppHeader = () => {
     }, []);
 
     return (
-        <header className="relative z-50 flex w-full px-3 pt-3 lg:px-6 lg:pt-5">
-            <div className="modern-admin-header flex grow flex-col items-center justify-between rounded-[var(--admin-radius-lg)] border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[var(--admin-shadow-soft)] backdrop-blur lg:flex-row lg:px-4">
+        <header className="sticky top-0 z-50 w-full">
+            <div className="modern-admin-header flex w-full flex-col items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[var(--admin-shadow-soft)] backdrop-blur lg:flex-row lg:px-4">
                 <div className="flex w-full items-center justify-between gap-2 border-b border-[var(--admin-border)] px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0">
                     <button
-                        className="modern-icon-button z-99999 flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--admin-border)] bg-white text-gray-500 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:bg-white/[0.04] dark:text-gray-400 lg:h-11 lg:w-11"
+                        className="modern-icon-button z-99999 flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--admin-border)] bg-white text-gray-500 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 dark:bg-white/[0.04] dark:text-gray-400 lg:h-11 lg:w-11"
                         onClick={handleToggle}
                         aria-label="Toggle Sidebar"
                     >

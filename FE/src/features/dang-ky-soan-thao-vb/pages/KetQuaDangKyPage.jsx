@@ -6,8 +6,18 @@ import {getKetQuaDangKyXayDungVanBan} from "../api/dangKyXayDungVanBanApi.js";
 
 const resultColor = (value) => {
     const normalized = (value || "").toLowerCase();
-    if (normalized.includes("không") || normalized.includes("khong")) return "error";
-    if (normalized.includes("phê duyệt") || normalized.includes("phe duyet")) return "success";
+
+    if (normalized.includes("không") || normalized.includes("khong")) {
+        return "error";
+    }
+
+    if (
+        normalized.includes("phê duyệt") ||
+        normalized.includes("phe duyet")
+    ) {
+        return "success";
+    }
+
     return "info";
 };
 
@@ -18,17 +28,26 @@ export default function KetQuaDangKyPage() {
 
     useEffect(() => {
         let mounted = true;
+
         const load = async () => {
             try {
                 setLoading(true);
                 setError("");
-                const result = await getKetQuaDangKyXayDungVanBan({pageSize: 200});
+
+                const result = await getKetQuaDangKyXayDungVanBan({
+                    pageSize: 200,
+                });
+
                 if (mounted) {
                     setData(result.items || []);
                 }
             } catch (err) {
                 if (mounted) {
-                    setError(err?.response?.data?.message || err?.message || "Không thể tải kết quả đăng ký.");
+                    setError(
+                        err?.response?.data?.message ||
+                        err?.message ||
+                        "Không thể tải kết quả đăng ký."
+                    );
                 }
             } finally {
                 if (mounted) {
@@ -36,7 +55,9 @@ export default function KetQuaDangKyPage() {
                 }
             }
         };
+
         void load();
+
         return () => {
             mounted = false;
         };
@@ -96,13 +117,9 @@ export default function KetQuaDangKyPage() {
                 header: "Kết quả",
                 headerClassName:
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
-                cellClassName:
-                    "px-5 py-4 text-center",
+                cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
-                    <Badge
-                        size="sm"
-                        color={resultColor(item.ketQua)}
-                    >
+                    <Badge size="sm" color={resultColor(item.ketQua)}>
                         {item.ketQua || "-"}
                     </Badge>
                 ),
@@ -123,8 +140,7 @@ export default function KetQuaDangKyPage() {
                 header: "Thao tác",
                 headerClassName:
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
-                cellClassName:
-                    "px-5 py-4 text-center",
+                cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
                     <div className="flex items-center justify-center gap-2">
                         <button
@@ -141,22 +157,39 @@ export default function KetQuaDangKyPage() {
     );
 
     return (
-        <div className="space-y-5">
-            <div>
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
+        <div>
+            {/* Tiêu đề trang */}
+            <div className="mb-5">
+                <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
                     Kết quả đăng ký
-                </h3>
+                </h1>
 
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Theo dõi kết quả đăng ký xây dựng văn bản
                 </p>
             </div>
 
+            {/* Thông báo lỗi */}
+            {error && (
+                <div className="mb-5">
+                    <Alert
+                        variant="error"
+                        title="Không thể tải dữ liệu"
+                        message={error}
+                    />
+                </div>
+            )}
+
+            {/* Bảng danh sách kết quả */}
             <BasicTableTwo
                 data={data}
                 columns={columns}
                 searchPlaceholder="Tìm kiếm kết quả..."
-                emptyText={loading ? "Đang tải dữ liệu..." : "Không có hồ sơ đã chuyển sang bước cập nhật kết quả."}
+                emptyText={
+                    loading
+                        ? "Đang tải dữ liệu..."
+                        : "Không có hồ sơ đã chuyển sang bước cập nhật kết quả."
+                }
                 searchFields={[
                     (item) => item.maHoSo,
                     (item) => item.tenHoSo,
@@ -165,7 +198,7 @@ export default function KetQuaDangKyPage() {
                     (item) => item.ketQua,
                 ]}
             />
-            {error && <div className="mt-4"><Alert variant="error" title="Không thể tải dữ liệu" message={error}/></div>}
         </div>
     );
 }
+

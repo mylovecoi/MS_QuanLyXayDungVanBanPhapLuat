@@ -13,7 +13,11 @@ import {useSidebar} from "../context/SidebarContext";
 import {getFrontendMenu} from "../shared/api/systemApi.js";
 
 const normalizePath = (path = "") => {
-    const normalized = path.split("?")[0].split("#")[0].replace(/\/+$/, "");
+    const normalized = path
+        .split("?")[0]
+        .split("#")[0]
+        .replace(/\/+$/, "");
+
     return normalized || "/";
 };
 
@@ -27,10 +31,9 @@ const AppSidebar = () => {
 
     const [menuItems, setMenuItems] = useState([]);
     const [menuLoading, setMenuLoading] = useState(true);
+    const [openSubmenu, setOpenSubmenu] = useState({});
 
     const location = useLocation();
-
-    const [openSubmenu, setOpenSubmenu] = useState({});
 
     const isActive = useCallback(
         (path) => {
@@ -41,8 +44,10 @@ const AppSidebar = () => {
                 return currentPath === "/";
             }
 
-            return currentPath === targetPath ||
-                currentPath.startsWith(`${targetPath}/`);
+            return (
+                currentPath === targetPath ||
+                currentPath.startsWith(`${targetPath}/`)
+            );
         },
         [location.pathname]
     );
@@ -133,9 +138,8 @@ const AppSidebar = () => {
                     >
                         {hasChildren ? (
                             <button
-                                onClick={() =>
-                                    handleSubmenuToggle(key)
-                                }
+                                type="button"
+                                onClick={() => handleSubmenuToggle(key)}
                                 className={`menu-item group w-full ${
                                     isOpen
                                         ? "menu-item-active"
@@ -192,9 +196,7 @@ const AppSidebar = () => {
                                                 ? "menu-item-icon-active"
                                                 : "menu-item-icon-inactive"
                                         }`}
-                                    >
-                                        {/* Menu con không có icon */}
-                                    </span>
+                                    />
 
                                     {(isExpanded ||
                                         isHovered ||
@@ -244,13 +246,9 @@ const AppSidebar = () => {
                                                                 )
                                                             ) : child.url ? (
                                                                 <Link
-                                                                    to={
-                                                                        child.url
-                                                                    }
+                                                                    to={child.url}
                                                                     className={`menu-dropdown-item !justify-start text-left w-full ${
-                                                                        isActive(
-                                                                            child.url
-                                                                        )
+                                                                        isActive(child.url)
                                                                             ? "menu-dropdown-item-active"
                                                                             : "menu-dropdown-item-inactive"
                                                                     }`}
@@ -260,23 +258,18 @@ const AppSidebar = () => {
                                                                     </span>
 
                                                                     <span className="text-left">
-                                                                        {
-                                                                            child.title
-                                                                        }
+                                                                        {child.title}
                                                                     </span>
                                                                 </Link>
                                                             ) : (
                                                                 <div
-                                                                    className="menu-dropdown-item !justify-start text-left w-full"
-                                                                >
+                                                                    className="menu-dropdown-item !justify-start text-left w-full">
                                                                     <span className="mr-2 w-3 shrink-0">
                                                                         -
                                                                     </span>
 
                                                                     <span className="text-left">
-                                                                        {
-                                                                            child.title
-                                                                        }
+                                                                        {child.title}
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -296,11 +289,11 @@ const AppSidebar = () => {
 
     return (
         <aside
-            className={`modern-admin-sidebar fixed left-0 top-0 z-50 mt-16 flex h-[calc(100vh-1rem)] flex-col rounded-r-[var(--admin-radius-xl)] border border-l-0 border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-gray-900 shadow-[var(--admin-shadow-panel)] transition-all duration-300 ease-in-out dark:bg-gray-900 lg:bottom-4 lg:left-4 lg:top-4 lg:mt-0 lg:h-[calc(100vh-2rem)] lg:rounded-[var(--admin-radius-xl)] lg:border ${
+            className={`modern-admin-sidebar fixed left-0 top-0 z-50 mt-16 flex h-[calc(100vh-4rem)] flex-col border border-l-0 border-gray-200 bg-[var(--admin-surface)] px-4 text-gray-900 shadow-none transition-all duration-300 ease-in-out dark:border-gray-800 dark:!bg-gray-900 lg:bottom-0 lg:left-0 lg:top-0 lg:mt-0 lg:h-screen lg:border ${
                 isExpanded || isMobileOpen
                     ? "w-[300px]"
                     : isHovered
-                        ? "w-[290px]"
+                        ? "w-[300px]"
                         : "w-[90px]"
             } ${
                 isMobileOpen
@@ -351,7 +344,7 @@ const AppSidebar = () => {
 
             <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
                 <nav className="mb-6">
-                    <div className="flex flex-col gap-4 rounded-[var(--admin-radius-md)] bg-gray-50/80 p-2 dark:bg-white/[0.03]">
+                    <div className="flex flex-col gap-4 p-0">
                         <div>
                             <h2
                                 className={`mb-3 flex px-2 text-xs font-semibold uppercase leading-[20px] tracking-[0.08em] text-gray-400 ${

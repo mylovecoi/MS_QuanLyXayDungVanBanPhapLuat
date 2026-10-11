@@ -19,7 +19,12 @@ const SidebarLayout = () => {
             </div>
 
             <div
-                className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ease-in-out ${
+                className={` 
+                    min-h-screen min-w-0
+                    flex-1 flex flex-col
+                    transition-all duration-300 ease-in-out
+                    lg:ml-[90px] 
+                    ${
                     isExpanded || isHovered
                         ? "lg:ml-[300px]"
                         : "lg:ml-[90px]"

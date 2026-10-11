@@ -128,18 +128,19 @@ export default function BasicTableTwo({
             <div
                 className="
                     grid
+                    w-full
                     grid-cols-1
                     gap-4
                     border-b
                     border-gray-100
                     px-5
-                    py-4
-                    sm:grid-cols-12
+                    py-3
                     dark:border-white/[0.05]
+                    sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]
                 "
             >
                 {/* Page size */}
-                <div className="w-full sm:col-span-3">
+                <div className="min-w-0 w-full">
                     <label
                         className="
                             mb-2
@@ -166,7 +167,7 @@ export default function BasicTableTwo({
                 </div>
 
                 {/* Search */}
-                <div className="w-full sm:col-span-9">
+                <div className="min-w-0 w-full">
                     <label
                         className="
                             mb-2
@@ -205,7 +206,7 @@ export default function BasicTableTwo({
                                     cy="11"
                                     r="8"
                                 />
-                                <path d="m21 21-4.3-4.3" />
+                                <path d="m21 21-4.3-4.3"/>
                             </svg>
                         }
                         suffix={
@@ -242,8 +243,8 @@ export default function BasicTableTwo({
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                     >
-                                        <path d="M18 6 6 18" />
-                                        <path d="m6 6 12 12" />
+                                        <path d="M18 6 6 18"/>
+                                        <path d="m6 6 12 12"/>
                                     </svg>
                                 </button>
                             )

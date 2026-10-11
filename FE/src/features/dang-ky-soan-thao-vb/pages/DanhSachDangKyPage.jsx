@@ -14,6 +14,15 @@ const badgeColor = (color) => ({
     gray: "light",
 }[color] || "primary");
 
+const toError = (error) =>
+    error?.response?.data?.message ||
+    error?.response?.data?.title ||
+    (typeof error?.response?.data === "string"
+        ? error.response.data
+        : null) ||
+    error?.message ||
+    "Không thể tải danh sách đăng ký.";
+
 export default function DanhSachDangKyPage() {
     const [data, setData] = useState([]);
     const [error, setError] = useState("");
@@ -21,17 +30,22 @@ export default function DanhSachDangKyPage() {
 
     useEffect(() => {
         let mounted = true;
+
         const load = async () => {
             try {
                 setLoading(true);
                 setError("");
-                const result = await getDanhSachDangKyXayDungVanBan({pageSize: 200});
+
+                const result = await getDanhSachDangKyXayDungVanBan({
+                    pageSize: 200,
+                });
+
                 if (mounted) {
-                    setData(result.items || []);
+                    setData(result?.items || []);
                 }
             } catch (err) {
                 if (mounted) {
-                    setError(err?.response?.data?.message || err?.message || "Không thể tải danh sách đăng ký.");
+                    setError(toError(err));
                 }
             } finally {
                 if (mounted) {
@@ -39,7 +53,9 @@ export default function DanhSachDangKyPage() {
                 }
             }
         };
+
         void load();
+
         return () => {
             mounted = false;
         };
@@ -56,7 +72,6 @@ export default function DanhSachDangKyPage() {
                     "px-5 py-4 text-center text-sm text-gray-500 dark:text-gray-400",
                 render: (item, rowIndex) => rowIndex + 1,
             },
-
             {
                 key: "maHoSo",
                 header: "Mã hồ sơ",
@@ -66,7 +81,6 @@ export default function DanhSachDangKyPage() {
                     </div>
                 ),
             },
-
             {
                 key: "tenHoSo",
                 header: "Tên hồ sơ",
@@ -76,7 +90,6 @@ export default function DanhSachDangKyPage() {
                     </div>
                 ),
             },
-
             {
                 key: "tenVanBanDuKien",
                 header: "Tên dự thảo văn bản",
@@ -86,7 +99,6 @@ export default function DanhSachDangKyPage() {
                     </div>
                 ),
             },
-
             {
                 key: "namDangKy",
                 header: "Năm xây dựng",
@@ -98,48 +110,45 @@ export default function DanhSachDangKyPage() {
                     <span>{item.namDangKy || "-"}</span>
                 ),
             },
-
             {
                 key: "trangThai",
                 header: "Trạng thái",
                 headerClassName:
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
-                cellClassName:
-                    "px-5 py-4 text-center",
+                cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
                     <Badge
                         size="sm"
                         color={badgeColor(item.mauTrangThaiHoSo)}
                     >
-                        {item.tenTrangThaiHoSo || item.maTrangThaiHoSo || "-"}
+                        {item.tenTrangThaiHoSo ||
+                            item.maTrangThaiHoSo ||
+                            "-"}
                     </Badge>
                 ),
             },
-
             {
                 key: "createdAt",
                 header: "Ngày tạo",
                 render: (item) => (
                     <span className="text-sm text-gray-600 dark:text-gray-300">
                         {item.createdAt
-                            ? new Date(
-                                item.createdAt
-                            ).toLocaleDateString("vi-VN")
+                            ? new Date(item.createdAt).toLocaleDateString(
+                                "vi-VN"
+                            )
                             : "-"}
                     </span>
                 ),
             },
-
             {
                 key: "actions",
                 header: "Thao tác",
                 headerClassName:
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
-                cellClassName:
-                    "px-5 py-4 text-center",
+                cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
                     <div className="flex items-center justify-center gap-2">
-                        {/* Xem */}
+                        {/* Xem chi tiết */}
                         <button
                             type="button"
                             title="Xem chi tiết"
@@ -156,11 +165,7 @@ export default function DanhSachDangKyPage() {
                                 strokeLinejoin="round"
                             >
                                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
-                                <circle
-                                    cx="12"
-                                    cy="12"
-                                    r="3"
-                                />
+                                <circle cx="12" cy="12" r="3"/>
                             </svg>
                         </button>
 
@@ -215,36 +220,58 @@ export default function DanhSachDangKyPage() {
         []
     );
 
-    return (
-        <div className="space-y-5">
-            {/* Page header */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h3 className="text-xl font-semibold text-gray-800 dark:text-white/90">
-                        Danh sách đăng ký
-                    </h3>
+    const searchFields = useMemo(
+        () => [
+            (item) => item.maHoSo,
+            (item) => item.tenHoSo,
+            (item) => item.tenVanBanDuKien,
+            (item) => item.namDangKy,
+            (item) => item.tenTrangThaiHoSo,
+        ],
+        []
+    );
 
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Quản lý danh sách đăng ký xây dựng văn bản
-                    </p>
-                </div>
+    return (
+        <div>
+            {/* Tiêu đề trang */}
+            <div className="mb-5">
+                <h1 className="text-2xl font-semibold text-gray-800 dark:text-white/90">
+                    Danh sách đăng ký
+                </h1>
+
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Quản lý danh sách đăng ký xây dựng văn bản
+                </p>
             </div>
 
-            {/* Table */}
-            <BasicTableTwo
-                data={data}
-                columns={columns}
-                searchPlaceholder="Tìm kiếm hồ sơ..."
-                emptyText={loading ? "Đang tải dữ liệu..." : "Không có hồ sơ đăng ký."}
-                searchFields={[
-                    (item) => item.maHoSo,
-                    (item) => item.tenHoSo,
-                    (item) => item.tenVanBanDuKien,
-                    (item) => item.namDangKy,
-                    (item) => item.tenTrangThaiHoSo,
-                ]}
-            />
-            {error && <div className="mt-4"><Alert variant="error" title="Không thể tải dữ liệu" message={error}/></div>}
+            {/* Lỗi API */}
+            {error && (
+                <div className="mb-5">
+                    <Alert
+                        variant="error"
+                        title="Không thể tải dữ liệu"
+                        message={error}
+                    />
+                </div>
+            )}
+
+            {/* Bảng danh sách */}
+            {loading ? (
+                <div
+                    className="rounded-xl border border-gray-200 bg-white px-5 py-12 text-center text-sm text-gray-500 dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400">
+                    Đang tải dữ liệu đăng ký...
+                </div>
+            ) : (
+                <BasicTableTwo
+                    data={data}
+                    columns={columns}
+                    searchPlaceholder="Tìm kiếm hồ sơ..."
+                    searchFields={searchFields}
+                    pageSizeOptions={[5, 10, 20, 100]}
+                    emptyText="Không có hồ sơ đăng ký."
+                />
+            )}
         </div>
     );
 }
+

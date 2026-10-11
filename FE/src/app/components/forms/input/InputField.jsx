@@ -16,7 +16,7 @@ const Input = ({
                    prefix,
                    suffix,
                }) => {
-    let inputClasses = `modern-form-control h-11 w-full appearance-none rounded-2xl border px-4 py-2.5 text-sm shadow-none transition placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${className}`;
+    let inputClasses = `modern-form-control h-11 w-full appearance-none rounded-lg border px-4 py-2.5 text-sm shadow-none transition placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 ${className}`;
 
     if (disabled) {
         inputClasses += ` cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500 opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400`;

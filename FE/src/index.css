@@ -176,7 +176,7 @@
 @layer base {
     :root {
         --admin-bg: #eef3f8;
-        --admin-surface: rgba(255, 255, 255, 0.94);
+        --admin-surface: rgba(255, 255, 255);
         --admin-surface-muted: #f8fafc;
         --admin-text: #162033;
         --admin-muted: #667085;
@@ -381,7 +381,7 @@
 }
 
 .modern-admin-sidebar-logo {
-    border-bottom: 1px solid var(--admin-border);
+    border-bottom: none;
     margin-bottom: 0.875rem;
 }
 
@@ -394,11 +394,11 @@
 }
 
 @utility menu-item-active {
-    @apply bg-white text-brand-600 shadow-theme-xs dark:bg-brand-500/[0.14] dark:text-brand-300;
+    @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
 }
 
 @utility menu-item-inactive {
-    @apply text-gray-700 hover:bg-white/80 group-hover:text-gray-800 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-200;
+    @apply text-gray-700 group-hover:text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
 }
 
 @utility menu-item-icon {
@@ -436,7 +436,7 @@
 }
 
 @utility menu-dropdown-item-active {
-    @apply bg-white text-brand-600 shadow-theme-xs dark:bg-brand-500/[0.14] dark:text-brand-300;
+    @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
 }
 
 @utility menu-dropdown-item-inactive {
