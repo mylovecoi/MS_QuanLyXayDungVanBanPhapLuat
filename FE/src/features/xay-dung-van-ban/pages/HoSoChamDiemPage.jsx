@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Alert from "../../../app/components/ui/alert/Alert";
 import Badge from "../../../app/components/ui/badge/Badge";
 import Input from "../../../app/components/forms/input/InputField";
 import TextArea from "../../../app/components/forms/input/TextArea";
 import Label from "../../../app/components/forms/Label";
 import Select from "../../../app/components/forms/Select";
+import { Modal } from "../../../app/components/ui/modal";
 import { getTrangThais } from "../../danh-muc/api/trangThaiApi";
 import {
   chotChamDiem,
@@ -12,14 +13,14 @@ import {
   deleteChamDiem,
   dieuChinhChamDiem,
   getChamDiem,
-  getDanhSachChamDiem,
+  getHoSoCanChamDiem,
   getLichSuChamDiem,
   huyChotChamDiem,
   tinhLaiChamDiem,
 } from "../api/xayDungVanBanApi";
 
 const ALL_VALUE = "__ALL__";
-const STATUS_GROUP = "CHAM_DIEM_XAY_DUNG_VAN_BAN";
+const STATUS_GROUP = "CHAM_DIEM_HO_SO";
 
 function message(error) {
   return error?.response?.data?.message || error?.message || "Không thể xử lý yêu cầu.";
@@ -45,9 +46,18 @@ export default function HoSoChamDiemPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [adjustTarget, setAdjustTarget] = useState(null);
+  const [adjustForm, setAdjustForm] = useState({ diemDieuChinh: 0, lyDoDieuChinh: "" });
+  const [statusDialog, setStatusDialog] = useState(null);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const statusMap = useMemo(() => new Map(statuses.map((item) => [item.id, item])), [statuses]);
   const statusOptions = [{ value: ALL_VALUE, label: "Tất cả trạng thái" }, ...statuses.map((item) => ({ value: item.id, label: item.tenTrangThai || item.maTrangThai }))];
+  const selectedStatus = selected?.trangThaiId ? statusMap.get(selected.trangThaiId) : null;
+  const selectedStatusCode = `${selectedStatus?.maTrangThai || ""}`.toUpperCase();
+  const canEditSelected = selectedStatusCode === "NHAP";
+  const canCancelSelected = selectedStatusCode === "DA_CHOT";
+  const getStatusLabel = (id) => id ? (statusMap.get(id)?.tenTrangThai || statusMap.get(id)?.maTrangThai || "-") : "Chưa chấm";
 
   const loadStatuses = async () => {
     try {
@@ -62,7 +72,7 @@ export default function HoSoChamDiemPage() {
     try {
       setLoading(true);
       setError("");
-      const response = await getDanhSachChamDiem({
+      const response = await getHoSoCanChamDiem({
         search: search.trim() || undefined,
         trangThaiId: trangThaiId || undefined,
         pageCurrent,
@@ -104,7 +114,7 @@ export default function HoSoChamDiemPage() {
   };
 
   const createForRecord = async (item) => {
-    const trangThaiNhapId = statuses[0]?.id;
+    const trangThaiNhapId = statuses.find((status) => `${status.maTrangThai || ""}`.toUpperCase() === "NHAP")?.id || statuses[0]?.id;
     if (!trangThaiNhapId) {
       setError("Chưa có trạng thái chấm điểm để tạo lượt chấm.");
       return;
@@ -141,20 +151,28 @@ export default function HoSoChamDiemPage() {
     }
   };
 
-  const adjustScore = async (detail, row) => {
-    const diemDieuChinh = window.prompt("Điểm điều chỉnh:", row.diemDieuChinh ?? 0);
-    if (diemDieuChinh === null) return;
-    const lyDoDieuChinh = window.prompt("Lý do điều chỉnh:", row.lyDoDieuChinh || "");
-    if (lyDoDieuChinh === null) return;
+  const openAdjust = (row) => {
+    setAdjustTarget(row);
+    setAdjustForm({ diemDieuChinh: row.diemDieuChinh ?? 0, lyDoDieuChinh: row.lyDoDieuChinh || "" });
+    setError("");
+  };
+
+  const submitAdjust = async () => {
+    if (!selected || !adjustTarget) return;
+    if (!adjustForm.lyDoDieuChinh.trim()) {
+      setError("Nhập lý do điều chỉnh điểm.");
+      return;
+    }
 
     try {
       setSaving(true);
-      const updated = await dieuChinhChamDiem(detail.id, row.id, {
-        diemDieuChinh: Number(diemDieuChinh) || 0,
-        lyDoDieuChinh,
+      const updated = await dieuChinhChamDiem(selected.id, adjustTarget.id, {
+        diemDieuChinh: Number(adjustForm.diemDieuChinh) || 0,
+        lyDoDieuChinh: adjustForm.lyDoDieuChinh.trim(),
       });
       setSelected(updated);
-      setHistory(await getLichSuChamDiem(detail.id).catch(() => []));
+      setHistory(await getLichSuChamDiem(selected.id).catch(() => []));
+      setAdjustTarget(null);
       setSuccess("Đã điều chỉnh điểm.");
       await load();
     } catch (e) {
@@ -164,27 +182,31 @@ export default function HoSoChamDiemPage() {
     }
   };
 
-  const changeStatus = async (mode) => {
+  const openStatusDialog = (mode) => {
     if (!selected) return;
     const trangThai = statuses.find((item) => {
       const code = `${item.maTrangThai || ""}`.toUpperCase();
-      return mode === "chot" ? code.includes("CHOT") : code.includes("HUY");
+      return mode === "chot" ? code === "DA_CHOT" : code === "DA_HUY";
     }) || statuses[0];
     if (!trangThai) {
       setError("Chưa có trạng thái phù hợp để chuyển chấm điểm.");
       return;
     }
-    const ghiChu = window.prompt(mode === "chot" ? "Ghi chú chốt điểm:" : "Ghi chú hủy chốt:", "");
-    if (ghiChu === null) return;
+    setStatusDialog({ mode, trangThaiId: trangThai.id, ghiChu: "" });
+  };
+
+  const submitStatus = async () => {
+    if (!selected || !statusDialog) return;
 
     try {
       setSaving(true);
-      const updated = mode === "chot"
-        ? await chotChamDiem(selected.id, { trangThaiId: trangThai.id, ghiChu })
-        : await huyChotChamDiem(selected.id, { trangThaiId: trangThai.id, ghiChu });
+      const updated = statusDialog.mode === "chot"
+        ? await chotChamDiem(selected.id, { trangThaiId: statusDialog.trangThaiId, ghiChu: statusDialog.ghiChu })
+        : await huyChotChamDiem(selected.id, { trangThaiId: statusDialog.trangThaiId, ghiChu: statusDialog.ghiChu });
       setSelected(updated);
       setHistory(await getLichSuChamDiem(selected.id).catch(() => []));
-      setSuccess(mode === "chot" ? "Đã chốt điểm." : "Đã hủy chốt điểm.");
+      setStatusDialog(null);
+      setSuccess(statusDialog.mode === "chot" ? "Đã chốt điểm." : "Đã hủy chốt điểm.");
       await load();
     } catch (e) {
       setError(message(e));
@@ -198,8 +220,8 @@ export default function HoSoChamDiemPage() {
 
     try {
       setSaving(true);
-      await deleteChamDiem(item.id);
-      if (selected?.id === item.id) {
+      await deleteChamDiem(item.chamDiemId || item.id);
+      if (selected?.id === (item.chamDiemId || item.id)) {
         setSelected(null);
         setHistory([]);
       }
@@ -248,34 +270,40 @@ export default function HoSoChamDiemPage() {
                 <th className="px-5 py-3 text-left text-xs font-medium text-gray-500">Hồ sơ</th>
                 <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Lần chấm</th>
                 <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Tổng điểm</th>
-                <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Ngày chấm</th>
+                  <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Ngày chấm</th>
                 <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Ngày chốt</th>
+                  <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Quy trình</th>
                 <th className="px-5 py-3 text-center text-xs font-medium text-gray-500">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {loading ? (
-                <tr><td colSpan="6" className="px-5 py-10 text-center text-sm text-gray-500">Đang tải dữ liệu...</td></tr>
+                <tr><td colSpan="7" className="px-5 py-10 text-center text-sm text-gray-500">Đang tải dữ liệu...</td></tr>
               ) : items.length ? items.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <tr key={item.hoSoId} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                   <td className="px-5 py-4">
                     <div className="font-medium text-gray-800 dark:text-white/90">{item.tenHoSo}</div>
                     <div className="mt-1 text-xs text-gray-500">{item.maHoSo} · {item.tenDuThaoVanBan}</div>
+                    <div className="mt-1 text-xs text-gray-500">Năm {item.namXayDung}</div>
                   </td>
-                  <td className="px-5 py-4 text-center"><Badge size="sm" color="light">Lần {item.lanCham}</Badge></td>
-                  <td className="px-5 py-4 text-center font-medium text-gray-800 dark:text-white/90">{item.tongDiemChinhThuc}</td>
+                  <td className="px-5 py-4 text-center">
+                    <div>{item.lanCham ? <Badge size="sm" color="light">Lần {item.lanCham}</Badge> : <span className="text-xs text-gray-500">Chưa chấm</span>}</div>
+                    {item.trangThaiId && <div className="mt-1 text-xs text-gray-500">{getStatusLabel(item.trangThaiId)}</div>}
+                  </td>
+                  <td className="px-5 py-4 text-center font-medium text-gray-800 dark:text-white/90">{item.tongDiemChinhThuc ?? "-"}</td>
                   <td className="px-5 py-4 text-center text-sm text-gray-600 dark:text-gray-300">{formatDate(item.ngayCham)}</td>
                   <td className="px-5 py-4 text-center text-sm text-gray-600 dark:text-gray-300">{formatDate(item.ngayChot)}</td>
+                  <td className="px-5 py-4 text-center"><Badge size="sm" color={item.daHoanThanhQuyTrinh ? "success" : "warning"}>{item.daHoanThanhQuyTrinh ? "Đã hoàn thành" : "Đang xử lý"}</Badge></td>
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap justify-center gap-1">
-                      <button type="button" onClick={() => openDetail(item)} className="rounded-lg px-3 py-2 text-xs font-medium text-brand-500 hover:bg-brand-50">Chi tiết</button>
+                      {item.chamDiemId && <button type="button" onClick={() => openDetail({ id: item.chamDiemId })} className="rounded-lg px-3 py-2 text-xs font-medium text-brand-500 hover:bg-brand-50">Chi tiết</button>}
                       <button type="button" onClick={() => createForRecord(item)} disabled={saving} className="rounded-lg px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50">Chấm mới</button>
-                      <button type="button" onClick={() => removeScore(item)} disabled={saving} className="rounded-lg px-3 py-2 text-xs font-medium text-error-600 hover:bg-error-50 disabled:opacity-50">Xóa</button>
+                      {item.chamDiemId && <button type="button" onClick={() => removeScore(item)} disabled={saving} className="rounded-lg px-3 py-2 text-xs font-medium text-error-600 hover:bg-error-50 disabled:opacity-50">Xóa</button>}
                     </div>
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="6" className="px-5 py-10 text-center text-sm text-gray-500">Không có lượt chấm điểm.</td></tr>
+                <tr><td colSpan="7" className="px-5 py-10 text-center text-sm text-gray-500">Không có hồ sơ để chấm điểm.</td></tr>
               )}
             </tbody>
           </table>
@@ -298,11 +326,12 @@ export default function HoSoChamDiemPage() {
               <div>
                 <h2 className="font-semibold text-gray-800 dark:text-white/90">Chi tiết chấm điểm</h2>
                 <p className="mt-1 text-sm text-gray-500">Lần {selected.lanCham} · Tổng điểm chính thức {selected.tongDiemChinhThuc}</p>
+                {selectedStatus && <div className="mt-2"><Badge size="sm" color={selectedStatusCode === "DA_CHOT" ? "success" : selectedStatusCode === "DA_HUY" ? "error" : "light"}>{selectedStatus.tenTrangThai || selectedStatus.maTrangThai}</Badge></div>}
               </div>
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={() => recalculate(selected.id)} disabled={saving || detailLoading} className="rounded-lg border px-3 py-2 text-xs font-medium disabled:opacity-50">Tính lại</button>
-                <button type="button" onClick={() => changeStatus("chot")} disabled={saving || detailLoading} className="rounded-lg bg-brand-500 px-3 py-2 text-xs font-medium text-white disabled:opacity-50">Chốt điểm</button>
-                <button type="button" onClick={() => changeStatus("huy")} disabled={saving || detailLoading} className="rounded-lg border px-3 py-2 text-xs font-medium disabled:opacity-50">Hủy chốt</button>
+                <button type="button" onClick={() => recalculate(selected.id)} disabled={saving || detailLoading || !canEditSelected} className="rounded-lg border px-3 py-2 text-xs font-medium disabled:opacity-50">Tính lại</button>
+                <button type="button" onClick={() => openStatusDialog("chot")} disabled={saving || detailLoading || !canEditSelected} className="rounded-lg bg-brand-500 px-3 py-2 text-xs font-medium text-white disabled:opacity-50">Chốt điểm</button>
+                <button type="button" onClick={() => openStatusDialog("huy")} disabled={saving || detailLoading || !canCancelSelected} className="rounded-lg border px-3 py-2 text-xs font-medium disabled:opacity-50">Hủy chốt</button>
               </div>
             </div>
             <div className="max-w-full overflow-x-auto">
@@ -325,6 +354,7 @@ export default function HoSoChamDiemPage() {
                       <td className="px-5 py-4">
                         <div className="font-medium text-gray-800 dark:text-white/90">{row.tenTieuChi}</div>
                         <div className="mt-1 text-xs text-gray-500">{row.maTieuChi} · {row.nhanMucDiem || "-"}</div>
+                        {row.giaiThichDiem && <div className="mt-2 text-xs text-gray-500">{row.giaiThichDiem}</div>}
                         {row.lyDoDieuChinh && <div className="mt-2 text-xs text-warning-600">Lý do: {row.lyDoDieuChinh}</div>}
                       </td>
                       <td className="px-5 py-4 text-center text-sm">{row.giaTriDauVao}</td>
@@ -332,7 +362,7 @@ export default function HoSoChamDiemPage() {
                       <td className="px-5 py-4 text-center text-sm">{row.diemDieuChinh}</td>
                       <td className="px-5 py-4 text-center font-medium">{row.diemChinhThuc}/{row.diemToiDa}</td>
                       <td className="px-5 py-4 text-center">
-                        <button type="button" onClick={() => adjustScore(selected, row)} disabled={saving} className="rounded-lg px-3 py-2 text-xs font-medium text-brand-500 hover:bg-brand-50 disabled:opacity-50">Điều chỉnh</button>
+                        <button type="button" onClick={() => openAdjust(row)} disabled={saving || !canEditSelected} className="rounded-lg px-3 py-2 text-xs font-medium text-brand-500 hover:bg-brand-50 disabled:opacity-50">Điều chỉnh</button>
                       </td>
                     </tr>
                   )) : (
@@ -364,6 +394,48 @@ export default function HoSoChamDiemPage() {
           </div>
         </div>
       )}
+
+      <Modal isOpen={!!adjustTarget} onClose={() => !saving && setAdjustTarget(null)} className="max-w-xl p-6">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">Điều chỉnh điểm</h2>
+            <p className="mt-1 text-sm text-gray-500">{adjustTarget?.tenTieuChi}</p>
+          </div>
+          <div>
+            <Label>Điểm điều chỉnh *</Label>
+            <Input type="number" step="0.01" value={adjustForm.diemDieuChinh} onChange={(event) => setAdjustForm((current) => ({ ...current, diemDieuChinh: event.target.value }))} />
+          </div>
+          <div>
+            <Label>Lý do điều chỉnh *</Label>
+            <TextArea rows={4} value={adjustForm.lyDoDieuChinh} onChange={(value) => setAdjustForm((current) => ({ ...current, lyDoDieuChinh: value }))} />
+          </div>
+          <div className="flex justify-end gap-3 border-t pt-4">
+            <button type="button" onClick={() => setAdjustTarget(null)} disabled={saving} className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-50">Hủy</button>
+            <button type="button" onClick={submitAdjust} disabled={saving} className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Lưu điều chỉnh</button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={!!statusDialog} onClose={() => !saving && setStatusDialog(null)} className="max-w-xl p-6">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90">{statusDialog?.mode === "chot" ? "Chốt điểm" : "Hủy chốt điểm"}</h2>
+            <p className="mt-1 text-sm text-gray-500">Lần {selected?.lanCham} · Tổng điểm {selected?.tongDiemChinhThuc}</p>
+          </div>
+          <div>
+            <Label>Trạng thái sau xử lý</Label>
+            <Select value={statusDialog?.trangThaiId || ""} onChange={(value) => setStatusDialog((current) => ({ ...current, trangThaiId: value }))} options={statuses.map((item) => ({ value: item.id, label: item.tenTrangThai || item.maTrangThai }))} />
+          </div>
+          <div>
+            <Label>Ghi chú</Label>
+            <TextArea rows={4} value={statusDialog?.ghiChu || ""} onChange={(value) => setStatusDialog((current) => ({ ...current, ghiChu: value }))} />
+          </div>
+          <div className="flex justify-end gap-3 border-t pt-4">
+            <button type="button" onClick={() => setStatusDialog(null)} disabled={saving} className="rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-50">Hủy</button>
+            <button type="button" onClick={submitStatus} disabled={saving || !statusDialog?.trangThaiId} className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{statusDialog?.mode === "chot" ? "Chốt điểm" : "Hủy chốt"}</button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

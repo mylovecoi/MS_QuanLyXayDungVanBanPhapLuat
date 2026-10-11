@@ -259,6 +259,26 @@ VanBanWorkflowTabs.jsx
 - Trình HĐND thẩm tra.
 - Ban hành Nghị quyết.
 
+## 13. Giai đoạn 12: Chấm điểm và kết quả chấm điểm
+
+### Route
+
+- `/xay-dung-van-ban/cham-diem`
+- `/xay-dung-van-ban/ket-qua-cham-diem`
+
+### Chức năng đã xây dựng
+
+- Màn chấm điểm hồ sơ: hiển thị hồ sơ đủ điều kiện chấm, tạo lượt chấm, tính lại điểm, điều chỉnh điểm, chốt điểm và hủy chốt.
+- Chuẩn hóa giải thích điểm theo từng tiêu chí để người dùng hiểu căn cứ tính điểm.
+- Màn kết quả chấm điểm: chỉ hiển thị các lượt chấm đã chốt, tra cứu theo mã hồ sơ/tên hồ sơ/dự thảo, phân trang, xem chi tiết tiêu chí và giải thích điểm.
+- Xuất dữ liệu kết quả chấm điểm ra file Excel `.xlsx`, bao gồm thông tin hồ sơ, tổng điểm, xếp loại và chi tiết từng tiêu chí.
+- Bổ sung menu nghiệp vụ cho màn Chấm điểm và Kết quả chấm điểm dưới nhóm Xây dựng văn bản QPPL.
+
+### Việc cần theo dõi tiếp
+
+- Rà lại phân quyền cho các nhóm người dùng không phải tài khoản quản trị sau khi áp dụng migration menu.
+- Bổ sung định dạng/bố cục nâng cao cho file Excel nếu cần in ấn chính thức.
+
 ### Kiểm tra phân quyền
 
 - Cơ quan chủ trì.

@@ -1,6 +1,5 @@
 import TraCuuPage from "./pages/TraCuuPage.jsx";
 import CanhBaoThongMinhPage from "./pages/CanhBaoThongMinhPage.jsx";
-
 export const khaiThacDuLieuRoutes = [
   { path: "canh-bao/thong-minh", element: <CanhBaoThongMinhPage /> },
   { path: "tra-cuu/tong-hop", element: <TraCuuPage source="tong-hop" /> },

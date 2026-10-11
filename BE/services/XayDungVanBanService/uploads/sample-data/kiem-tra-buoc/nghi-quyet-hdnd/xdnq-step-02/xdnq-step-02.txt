@@ -1,0 +1,3 @@
+﻿XDNQ-STEP-02 - Đã gửi thẩm định
+GeneratedAt: 2026-10-11
+Purpose: Ho so mau dung de kiem tra tung buoc va nhanh xu ly quy trinh.

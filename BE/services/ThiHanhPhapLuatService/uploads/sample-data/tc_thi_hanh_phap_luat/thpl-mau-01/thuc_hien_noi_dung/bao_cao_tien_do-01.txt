@@ -1,0 +1,8 @@
+﻿To chuc thi hanh phap luat - Thuc hien noi dung - Ho so 1
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: TC_THI_HANH_PHAP_LUAT
+MaHoSo: THPL-MAU-01
+Buoc: THUC_HIEN_NOI_DUNG
+NoiDung: Tep dinh kem mau cho buoc Thuc hien noi dung.
