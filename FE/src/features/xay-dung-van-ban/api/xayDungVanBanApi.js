@@ -308,6 +308,8 @@ export async function xacNhanXuLyNhacNhoTienDo(hoSoId, nhacNhoId, input) { retur
 
 const CHAM_DIEM_PATH = "/api/xay-dung-van-ban/cham-diem";
 export async function getDanhSachChamDiem(params = {}) { return (await axiosClient.get(CHAM_DIEM_PATH, { baseURL: "", params })).data; }
+export async function getHoSoCanChamDiem(params = {}) { return (await axiosClient.get(`${CHAM_DIEM_PATH}/ho-so-can-cham`, { baseURL: "", params })).data; }
+export async function xuatKetQuaChamDiemExcel(params = {}, fileName = "ket-qua-cham-diem.xlsx") { const response = await axiosClient.get(`${CHAM_DIEM_PATH}/ket-qua/xuat-excel`, { baseURL: "", params, responseType: "blob" }); downloadBlob(response, fileName); }
 export async function getChamDiemByHoSo(hoSoId) { return (await axiosClient.get(`${CHAM_DIEM_PATH}/ho-so/${hoSoId}`, { baseURL: "" })).data; }
 export async function getChamDiem(id) { return (await axiosClient.get(`${CHAM_DIEM_PATH}/${id}`, { baseURL: "" })).data; }
 export async function getLichSuChamDiem(id) { return (await axiosClient.get(`${CHAM_DIEM_PATH}/${id}/lich-su`, { baseURL: "" })).data; }

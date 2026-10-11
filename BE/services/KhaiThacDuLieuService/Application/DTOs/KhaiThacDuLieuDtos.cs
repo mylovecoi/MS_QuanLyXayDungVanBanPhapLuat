@@ -130,6 +130,53 @@ public sealed record DashboardTongQuanDto(
 
 public sealed record ThongKeTheoNhomDto(string Nhom, int SoLuong);
 
+public sealed record DashboardWidgetDto(
+    Guid Id,
+    string MaWidget,
+    string TenWidget,
+    string NhomWidget,
+    string LoaiWidget,
+    string? MoTa,
+    bool HienThi,
+    int ThuTu,
+    string DangHienThi,
+    string KichThuoc,
+    string? CauHinhBoLocJson,
+    int? TuDongLamMoiPhut,
+    DashboardWidgetDataDto? DuLieu);
+
+public sealed record DashboardWidgetDataDto(
+    int GiaTri,
+    string? DonViTinh,
+    IReadOnlyList<ThongKeTheoNhomDto> NhomSoLieu);
+
+public sealed record DashboardLayoutDto(
+    IReadOnlyList<DashboardWidgetDto> Widgets,
+    DashboardTongQuanDto TongQuan);
+
+public sealed class DashboardFilterRequest
+{
+    public int? Nam { get; init; }
+    public Guid? DonViId { get; init; }
+    public Guid? LoaiVanBanId { get; init; }
+    public Guid? QuyTrinhSoanThaoId { get; init; }
+    public Guid? TrangThaiId { get; init; }
+    public DateTime? TuNgay { get; init; }
+    public DateTime? DenNgay { get; init; }
+}
+
+public sealed record DashboardWidgetCauHinhRequest(
+    Guid WidgetId,
+    bool HienThi,
+    int ThuTu,
+    string DangHienThi,
+    string KichThuoc,
+    string? CauHinhBoLocJson,
+    int? TuDongLamMoiPhut);
+
+public sealed record CapNhatDashboardLayoutRequest(
+    IReadOnlyList<DashboardWidgetCauHinhRequest> Widgets);
+
 public sealed class TraCuuRequest
 {
     public string? Search { get; init; }
@@ -159,12 +206,39 @@ public sealed class BaoCaoRequest
 {
     public Guid? DonViId { get; init; }
     public Guid? LoaiVanBanId { get; init; }
+    public Guid? QuyTrinhSoanThaoId { get; init; }
+    public Guid? TrangThaiId { get; init; }
     public DateTime? TuNgay { get; init; }
     public DateTime? DenNgay { get; init; }
     public int? Nam { get; init; }
 }
 
+public sealed record BaoCaoDanhMucDto(
+    string MaBaoCao,
+    string TenBaoCao,
+    string MoTa,
+    string NhomBaoCao,
+    string Route,
+    bool DaCoDuLieu);
+
 public sealed record BaoCaoTongHopDto(
     string LoaiBaoCao,
+    string TenBaoCao,
     DateTime NgayTongHop,
-    IReadOnlyList<ThongKeTheoNhomDto> SoLieu);
+    IReadOnlyList<ThongKeTheoNhomDto> SoLieu,
+    IReadOnlyList<ThongKeTheoNhomDto> TheoTrangThai,
+    IReadOnlyList<ThongKeTheoNhomDto> TheoDonVi,
+    IReadOnlyList<BaoCaoChiTietDto> ChiTiet);
+
+public sealed record BaoCaoChiTietDto(
+    Guid Id,
+    string MaDoiTuong,
+    string TenDoiTuong,
+    string? NoiDung,
+    Guid? DonViId,
+    string? TenDonVi,
+    Guid? TrangThaiId,
+    string? TrangThai,
+    DateTime? NgayPhatSinh,
+    DateTime? HanHoanThanh,
+    string? GhiChu);

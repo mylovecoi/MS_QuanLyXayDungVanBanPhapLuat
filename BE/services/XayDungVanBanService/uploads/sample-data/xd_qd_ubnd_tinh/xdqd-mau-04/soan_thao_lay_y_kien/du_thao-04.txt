@@ -1,0 +1,8 @@
+﻿Xay dung van ban QPPL - Quyet dinh UBND tinh - Soan thao, lay y kien - Ho so 4
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: XD_QD_UBND_TINH
+MaHoSo: XDQD-MAU-04
+Buoc: SOAN_THAO_LAY_Y_KIEN
+NoiDung: Tep dinh kem mau cho buoc Soan thao, lay y kien.

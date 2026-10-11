@@ -1,0 +1,8 @@
+﻿Khao sat tinh hinh thi hanh phap luat - Danh gia ket qua - Ho so 5
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: KS_THI_HANH_PHAP_LUAT
+MaHoSo: KSTHPL-MAU-05
+Buoc: DANH_GIA_KET_QUA
+NoiDung: Tep dinh kem mau cho buoc Danh gia ket qua.

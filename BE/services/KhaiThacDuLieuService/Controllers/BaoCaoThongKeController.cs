@@ -13,6 +13,21 @@ public sealed class BaoCaoThongKeController(
     IQuanTriHeThongPermissionClient permissionClient,
     IBaoCaoKhaiThacDuLieuService baoCaoService) : KhaiThacDuLieuControllerBase(user, permissionClient)
 {
+    [HttpGet("danh-muc")]
+    public async Task<ActionResult<IReadOnlyList<BaoCaoDanhMucDto>>> DanhMuc(CancellationToken cancellationToken)
+    {
+        if (!CurrentUser.IsAuthenticated || CurrentUser.UserId is null)
+        {
+            return Unauthorized();
+        }
+
+        return Ok(await baoCaoService.GetDanhMucAsync(cancellationToken));
+    }
+
+    [HttpGet("{maBaoCao}")]
+    public Task<ActionResult<BaoCaoTongHopDto>> GetByCode(string maBaoCao, [FromQuery] BaoCaoRequest request, CancellationToken cancellationToken) =>
+        GetBaoCaoAsync(maBaoCao, request, cancellationToken);
+
     [HttpGet("dang-ky-ban-hanh")]
     public Task<ActionResult<BaoCaoTongHopDto>> DangKyBanHanh([FromQuery] BaoCaoRequest request, CancellationToken cancellationToken) =>
         GetBaoCaoAsync("DANG_KY_BAN_HANH", request, cancellationToken);

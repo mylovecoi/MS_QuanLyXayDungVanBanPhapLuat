@@ -55,7 +55,11 @@ VALUES
 (N'91000000-0000-0000-0000-000000000009', 208, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.BanHanh', @XayDungVanBanGroupId,
  N'Ban hành hoặc thông qua văn bản', N'XayDungVanBanBanHanh', N'Index', N'HoSoXayDungVanBanKetQuaBanHanhs', N'/xay-dung-van-ban/ban-hanh', N'Ban hành', N'badge-check'),
 (N'91000000-0000-0000-0000-000000000010', 209, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.TienDo', @XayDungVanBanGroupId,
- N'Nhắc nhở tiến độ thực hiện soạn thảo', N'XayDungVanBanTienDo', N'Index', N'HoSoXayDungVanBanNhacTienDos', N'/xay-dung-van-ban/tien-do', N'Nhắc tiến độ', N'clock-alert');
+ N'Nhắc nhở tiến độ thực hiện soạn thảo', N'XayDungVanBanTienDo', N'Index', N'HoSoXayDungVanBanNhacTienDos', N'/xay-dung-van-ban/tien-do', N'Nhắc tiến độ', N'clock-alert'),
+(N'91000000-0000-0000-0000-000000000011', 210, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.ChamDiem', @XayDungVanBanGroupId,
+ N'Chấm điểm hồ sơ xây dựng văn bản', N'XayDungVanBanChamDiem', N'Index', N'HoSoXayDungVanBanChamDiems', N'/xay-dung-van-ban/cham-diem', N'Chấm điểm', N'star'),
+(N'91000000-0000-0000-0000-000000000012', 211, N'Detail', 1, N'VanBanQPPL.XayDungVanBan.KetQuaChamDiem', @XayDungVanBanGroupId,
+ N'Kết quả chấm điểm hồ sơ xây dựng văn bản', N'XayDungVanBanChamDiem', N'Index', N'HoSoXayDungVanBanChamDiems', N'/xay-dung-van-ban/ket-qua-cham-diem', N'Kết quả chấm điểm', N'file-spreadsheet');
 
 /* Them moi neu RoleAction chua ton tai. */
 INSERT INTO [qtht].[RoleActions]

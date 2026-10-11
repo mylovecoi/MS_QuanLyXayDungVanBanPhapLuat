@@ -47,9 +47,9 @@ DECLARE @RoleActions TABLE
 INSERT INTO @RoleActions
 VALUES
 (@DashboardGroupId, 400, N'Group', 0, N'VanBanQPPL.Dashboard', @VanBanQpplGroupId,
- N'Dashboard điều hành', NULL, NULL, NULL, N'/dashboard', N'Dashboard', N'layout-dashboard'),
+ N'Dashboard điều hành', NULL, NULL, NULL, N'/dashboard/tong-quan', N'Dashboard', N'layout-dashboard'),
 (@CanhBaoGroupId, 410, N'Group', 0, N'VanBanQPPL.CanhBao', @VanBanQpplGroupId,
- N'Cảnh báo thông minh', NULL, NULL, NULL, N'/canh-bao', N'Cảnh báo', N'bell-ring'),
+ N'Cảnh báo thông minh', NULL, NULL, NULL, N'/canh-bao/thong-minh', N'Cảnh báo', N'bell-ring'),
 (@TraCuuGroupId, 420, N'Group', 0, N'VanBanQPPL.TraCuu', @VanBanQpplGroupId,
  N'Tra cứu', NULL, NULL, NULL, N'/tra-cuu', N'Tra cứu', N'search'),
 (@BaoCaoGroupId, 430, N'Group', 0, N'VanBanQPPL.BaoCaoThongKe', @VanBanQpplGroupId,
@@ -57,6 +57,8 @@ VALUES
 
 (N'94000000-0000-0000-0000-000000000101', 401, N'Detail', 1, N'VanBanQPPL.Dashboard.TongQuan', @DashboardGroupId,
  N'Dashboard tổng quan điều hành', N'DashboardTongQuan', N'Index', N'CanhBaoKhaiThacDuLieus', N'/dashboard/tong-quan', N'Tổng quan', N'layout-dashboard'),
+(N'94000000-0000-0000-0000-000000000102', 402, N'Detail', 1, N'VanBanQPPL.Dashboard.CauHinh', @DashboardGroupId,
+ N'Cấu hình Dashboard', N'DashboardTongQuan', N'Edit', N'DashboardWidgetCauHinhs', N'/dashboard/cau-hinh', N'Cấu hình Dashboard', N'sliders-horizontal'),
 
 (N'94000000-0000-0000-0000-000000000201', 411, N'Detail', 1, N'VanBanQPPL.CanhBao.ThongMinh', @CanhBaoGroupId,
  N'Cảnh báo thông minh', N'CanhBaoThongMinh', N'Index', N'CanhBaoKhaiThacDuLieus', N'/canh-bao/thong-minh', N'Cảnh báo thông minh', N'bell-ring'),
@@ -71,7 +73,7 @@ VALUES
  N'Tra cứu thi hành pháp luật', N'TraCuuThiHanhPhapLuat', N'Index', NULL, N'/tra-cuu/thi-hanh-phap-luat', N'Thi hành pháp luật', N'search'),
 
 (N'94000000-0000-0000-0000-000000000401', 431, N'Detail', 1, N'VanBanQPPL.BaoCaoThongKe.TongHop', @BaoCaoGroupId,
- N'Báo cáo thống kê tổng hợp', N'BaoCaoThongKe', N'Index', NULL, N'/bao-cao-thong-ke/tong-hop', N'Tổng hợp', N'file-chart-column');
+ N'Báo cáo thống kê tổng hợp', N'BaoCaoThongKe', N'Index', NULL, N'/bao-cao-thong-ke', N'Danh mục báo cáo', N'file-chart-column');
 
 INSERT INTO [qtht].[RoleActions]
 (

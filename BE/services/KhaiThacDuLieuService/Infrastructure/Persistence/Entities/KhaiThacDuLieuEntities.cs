@@ -141,6 +141,55 @@ public sealed class DongBoKhaiThacDuLieuLog : BaseEntity
     public string? Loi { get; set; }
 }
 
+public sealed class DashboardWidget : BaseEntity
+{
+    [Required, MaxLength(100)]
+    public string MaWidget { get; set; } = string.Empty;
+
+    [Required, MaxLength(250)]
+    public string TenWidget { get; set; } = string.Empty;
+
+    [Required, MaxLength(100)]
+    public string NhomWidget { get; set; } = string.Empty;
+
+    [Required, MaxLength(50)]
+    public string LoaiWidget { get; set; } = "metric";
+
+    [MaxLength(1000)]
+    public string? MoTa { get; set; }
+
+    public bool TrangThai { get; set; } = true;
+
+    [MaxLength(4000)]
+    public string? CauHinhMacDinhJson { get; set; }
+
+    public ICollection<DashboardWidgetCauHinh> CauHinhs { get; set; } = new List<DashboardWidgetCauHinh>();
+}
+
+public sealed class DashboardWidgetCauHinh : BaseEntity
+{
+    public Guid DashboardWidgetId { get; set; }
+    public DashboardWidget? DashboardWidget { get; set; }
+
+    public Guid? NguoiDungId { get; set; }
+    public Guid? NhomQuyenId { get; set; }
+    public Guid? DonViId { get; set; }
+
+    public int ThuTu { get; set; }
+    public bool HienThi { get; set; } = true;
+
+    [Required, MaxLength(50)]
+    public string DangHienThi { get; set; } = "metric";
+
+    [Required, MaxLength(50)]
+    public string KichThuoc { get; set; } = "medium";
+
+    [MaxLength(4000)]
+    public string? CauHinhBoLocJson { get; set; }
+
+    public int? TuDongLamMoiPhut { get; set; }
+}
+
 public sealed class DangKyXayDungVanBanTraCuu : BaseEntity
 {
     [Required, MaxLength(50)]
@@ -178,4 +227,93 @@ public sealed class DangKyTrangThaiHoSoTraCuu : BaseEntity
     public int ThuTuSapXep { get; set; }
     public bool LaTrangThaiKetThuc { get; set; }
     public bool TrangThai { get; set; } = true;
+}
+
+public sealed class XayDungVanBanHoSoTraCuu : BaseEntity
+{
+    [Required, MaxLength(50)]
+    public string MaHoSo { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenHoSo { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenDuThaoVanBan { get; set; } = string.Empty;
+
+    public Guid DanhMucVanBanId { get; set; }
+    public Guid QuyTrinhSoanThaoId { get; set; }
+    public Guid BuocHienTaiId { get; set; }
+    public Guid TrangThaiHoSoId { get; set; }
+    public Guid DonViChuTriSoanThaoId { get; set; }
+    public Guid? NguoiPhuTrachId { get; set; }
+    public int NamXayDung { get; set; }
+    public DateTime? ThoiGianDuKienBatDau { get; set; }
+    public DateTime? ThoiGianDuKienHoanThanh { get; set; }
+    public string? MoTa { get; set; }
+    public Guid? HoSoDangKyXayDungVanBanId { get; set; }
+}
+
+public sealed class XayDungVanBanBoHoSoTraCuu : BaseEntity
+{
+    public Guid HoSoXayDungVanBanId { get; set; }
+    public Guid BuocQuyTrinhId { get; set; }
+    public int LoaiBoHoSo { get; set; }
+    public int TrangThai { get; set; }
+    public int LanXuLy { get; set; }
+    public Guid? BoHoSoNguonId { get; set; }
+    public DateTime NgayTao { get; set; }
+    public DateTime? NgayGui { get; set; }
+    public DateTime? NgayHoanThanh { get; set; }
+    public Guid NguoiLapId { get; set; }
+    public Guid DonViLapId { get; set; }
+    public string? LyDoTraLai { get; set; }
+    public string? NoiDungGhiChu { get; set; }
+}
+
+public sealed class DanhMucDonViTraCuu : BaseEntity
+{
+    [Required, MaxLength(500)]
+    public string TenDonVi { get; set; } = string.Empty;
+}
+
+public sealed class ThiHanhPhapLuatKeHoachTraCuu : BaseEntity
+{
+    [Required, MaxLength(50)]
+    public string MaKeHoach { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenKeHoach { get; set; } = string.Empty;
+
+    public int Nam { get; set; }
+    public Guid DonViChuTriId { get; set; }
+    public Guid? NguoiPhuTrachId { get; set; }
+    public Guid TrangThaiId { get; set; }
+}
+
+public sealed class ThiHanhPhapLuatNoiDungTraCuu : BaseEntity
+{
+    public Guid KeHoachId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string MaNoiDung { get; set; } = string.Empty;
+
+    [Required, MaxLength(500)]
+    public string TenNoiDung { get; set; } = string.Empty;
+
+    public DateOnly HanHoanThanh { get; set; }
+    public Guid TrangThaiId { get; set; }
+    public decimal TyLeHoanThanh { get; set; }
+}
+
+public sealed class ThiHanhPhapLuatPhanCongTraCuu : BaseEntity
+{
+    public Guid NoiDungKeHoachId { get; set; }
+    public Guid DonViDuocGiaoId { get; set; }
+    public Guid? CanBoDuocGiaoId { get; set; }
+
+    [Required, MaxLength(100)]
+    public string VaiTro { get; set; } = string.Empty;
+
+    public DateOnly HanThucHien { get; set; }
+    public int MucDoUuTien { get; set; }
 }

@@ -1,0 +1,8 @@
+﻿De xuat danh muc / Dang ky xay dung QPPL - Trinh ho so - Ho so 4
+GeneratedAt: 2026-10-11
+Purpose: Du lieu mau phuc vu kiem thu quy trinh nghiep vu.
+
+MaQuyTrinh: DXDM_DKXD_QPPL
+MaHoSo: DK-MAU-04
+Buoc: TRINH_HO_SO
+NoiDung: Tep dinh kem mau cho buoc Trinh ho so.
