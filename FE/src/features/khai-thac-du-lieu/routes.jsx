@@ -1,5 +1,9 @@
 import TraCuuPage from "./pages/TraCuuPage.jsx";
 import CanhBaoThongMinhPage from "./pages/CanhBaoThongMinhPage.jsx";
+import DashboardKhaiThacDuLieuPage from "./pages/DashboardKhaiThacDuLieuPage.jsx";
+import DashboardCauHinhPage from "./pages/DashboardCauHinhPage.jsx";
+import BaoCaoListPage from "./pages/BaoCaoListPage.jsx";
+import BaoCaoKetQuaPage from "./pages/BaoCaoKetQuaPage.jsx";
 export const khaiThacDuLieuRoutes = [
   { path: "canh-bao/thong-minh", element: <CanhBaoThongMinhPage /> },
   { path: "tra-cuu/tong-hop", element: <TraCuuPage source="tong-hop" /> },
