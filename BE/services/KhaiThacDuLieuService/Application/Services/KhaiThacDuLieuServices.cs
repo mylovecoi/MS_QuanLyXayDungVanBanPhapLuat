@@ -376,7 +376,7 @@ public sealed class DashboardKhaiThacDuLieuService(
         }
 
         return await dbContext.DanhMucDonVis.AsNoTracking()
-            .Where(x => distinctIds.Contains(x.Id) && !x.IsDeleted)
+            .Where(x => distinctIds.Contains(x.Id))
             .Select(x => new { x.Id, x.TenDonVi })
             .ToDictionaryAsync(x => x.Id, x => x.TenDonVi, cancellationToken);
     }
@@ -1543,7 +1543,7 @@ public sealed class BaoCaoKhaiThacDuLieuService(
         if (distinctIds.Count == 0) return [];
 
         return await dbContext.DanhMucDonVis.AsNoTracking()
-            .Where(x => !x.IsDeleted && distinctIds.Contains(x.Id))
+            .Where(x => distinctIds.Contains(x.Id))
             .Select(x => new { x.Id, x.TenDonVi })
             .ToDictionaryAsync(x => x.Id, x => x.TenDonVi, cancellationToken);
     }

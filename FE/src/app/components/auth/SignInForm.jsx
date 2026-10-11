@@ -71,8 +71,8 @@ export default function SignInForm() {
                 })
             );
 
-            // Chuyển vào trang chủ
-            navigate("/");
+            // Chuyển vào dashboard điều hành sau khi xác thực.
+            navigate("/trang-chu");
         } catch (error) {
             console.error("Login error:", error);
 

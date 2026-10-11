@@ -1,18 +1,8 @@
-import Badge from "../../../app/components/ui/badge/Badge.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
 import {useEffect, useMemo, useState} from "react";
 import Alert from "../../../app/components/ui/alert/Alert.jsx";
+import TrangThaiBadge from "../../../shared/components/TrangThaiBadge.jsx";
 import {getDanhSachDangKyXayDungVanBan} from "../api/dangKyXayDungVanBanApi.js";
-
-const badgeColor = (color) => ({
-    blue: "primary",
-    green: "success",
-    red: "error",
-    orange: "warning",
-    cyan: "info",
-    purple: "primary",
-    gray: "light",
-}[color] || "primary");
 
 const toError = (error) =>
     error?.response?.data?.message ||
@@ -117,14 +107,10 @@ export default function DanhSachDangKyPage() {
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
                 cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
-                    <Badge
-                        size="sm"
-                        color={badgeColor(item.mauTrangThaiHoSo)}
-                    >
-                        {item.tenTrangThaiHoSo ||
-                            item.maTrangThaiHoSo ||
-                            "-"}
-                    </Badge>
+                    <TrangThaiBadge
+                        tenTrangThai={item.tenTrangThaiHoSo}
+                        maMauHex={item.mauTrangThaiHoSo}
+                    />
                 ),
             },
             {

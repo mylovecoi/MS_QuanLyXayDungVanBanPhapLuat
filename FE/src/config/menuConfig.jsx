@@ -17,8 +17,8 @@ import {
 export const navItems = [
     {
         icon: <HouseIcon />,
-        name: "Trang chủ",
-        path: "/",
+        name: "Tổng quan",
+        path: "/trang-chu",
     },
     {
         icon: <FolderNghiepVu />,
@@ -27,6 +27,26 @@ export const navItems = [
             {
                 name: "Hệ thống văn bản",
                 path: "/HeThongVanBan",
+                pro: false,
+            },
+            {
+                name: "Thi hành pháp luật",
+                path: "/thi-hanh-phap-luat/danh-sach",
+                pro: false,
+            },
+            {
+                name: "Việc được giao",
+                path: "/thi-hanh-phap-luat/viec-duoc-giao",
+                pro: false,
+            },
+            {
+                name: "Đánh giá báo cáo",
+                path: "/thi-hanh-phap-luat/danh-gia",
+                pro: false,
+            },
+            {
+                name: "Báo cáo tổng hợp",
+                path: "/thi-hanh-phap-luat/tong-hop",
                 pro: false,
             },
         ],

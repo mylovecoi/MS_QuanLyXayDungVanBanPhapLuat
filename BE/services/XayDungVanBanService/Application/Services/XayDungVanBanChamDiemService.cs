@@ -162,10 +162,11 @@ public sealed class XayDungVanBanChamDiemService(
         if (item is null) return null;
         await EnsureStatusAsync(request.TrangThaiId, expectedCode, ct);
         if (expectedCode == "DA_CHOT") await EnsureCurrentStatusAsync(item.TrangThaiId, "NHAP", ct);
-        if (expectedCode == "DA_HUY") await EnsureCurrentStatusAsync(item.TrangThaiId, "DA_CHOT", ct);
+        if (expectedCode == "NHAP") await EnsureCurrentStatusAsync(item.TrangThaiId, "DA_CHOT", ct);
         item.TrangThaiId = request.TrangThaiId; item.GhiChu = request.GhiChu?.Trim() ?? item.GhiChu; item.UpdatedBy = actor.ToString();
         if (expectedCode == "DA_CHOT") { item.NgayChot = DateTime.UtcNow; item.NguoiChotId = actor; }
-        AddHistory(id, null, expectedCode == "DA_CHOT" ? "CHOT" : "HUY", expectedCode == "DA_CHOT" ? "Chốt kết quả chấm điểm." : "Hủy bảng điểm đã chốt.", actor);
+        else { item.NgayChot = null; item.NguoiChotId = null; }
+        AddHistory(id, null, expectedCode == "DA_CHOT" ? "CHOT" : "BO_CHOT", expectedCode == "DA_CHOT" ? "Chốt kết quả chấm điểm." : "Bỏ chốt kết quả chấm điểm để tiếp tục điều chỉnh.", actor);
         await db.SaveChangesAsync(ct); return await GetAsync(id, ct);
     }
 

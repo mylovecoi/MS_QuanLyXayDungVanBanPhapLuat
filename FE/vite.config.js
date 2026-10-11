@@ -42,8 +42,6 @@ export default defineConfig({
             '/api/he-thong': {
                 target: 'http://localhost:5131',
                 changeOrigin: true,
-                rewrite: (path) =>
-                    path.replace(/^\/api\/he-thong/, '/api'),
 
                 configure: (proxy) => {
                     proxy.on('proxyReq', (proxyReq) => {

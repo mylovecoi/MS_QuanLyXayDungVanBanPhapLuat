@@ -70,7 +70,7 @@ public class DanhMucTieuChiDiemRepository(DanhMucDbContext dbContext) : IDanhMuc
 
     public async Task<IReadOnlyList<DanhMucTieuChiDiemEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbContext.DanhMucTieuChiDiems.AsNoTracking()
+        var items = await _dbContext.DanhMucTieuChiDiems.AsNoTracking()
             .OrderBy(x => x.ThuTuSapXep)
             .ThenBy(x => x.TenTieuChi)
             .Select(x => new DanhMucTieuChiDiemEntity
@@ -88,6 +88,43 @@ public class DanhMucTieuChiDiemRepository(DanhMucDbContext dbContext) : IDanhMuc
                 GhiChu = x.GhiChu
             })
             .ToListAsync(cancellationToken);
+
+        if (items.Count == 0)
+        {
+            return items;
+        }
+
+        var criterionIds = items.Select(x => x.Id).ToList();
+        var bands = await _dbContext.DanhMucTieuChiDiemMucs.AsNoTracking()
+            .Where(x => criterionIds.Contains(x.DanhMucTieuChiDiemId))
+            .OrderBy(x => x.ThuTuSapXep)
+            .ThenBy(x => x.TuGiaTri)
+            .Select(x => new DanhMucTieuChiDiemMucEntity
+            {
+                Id = x.Id,
+                DanhMucTieuChiDiemId = x.DanhMucTieuChiDiemId,
+                TuGiaTri = x.TuGiaTri,
+                DenGiaTri = x.DenGiaTri,
+                BaoGomTuGiaTri = x.BaoGomTuGiaTri,
+                BaoGomDenGiaTri = x.BaoGomDenGiaTri,
+                Diem = x.Diem,
+                NhanHienThi = x.NhanHienThi,
+                ThuTuSapXep = x.ThuTuSapXep,
+                TrangThai = x.TrangThai,
+                GhiChu = x.GhiChu
+            })
+            .ToListAsync(cancellationToken);
+
+        var bandsByCriterion = bands
+            .GroupBy(x => x.DanhMucTieuChiDiemId)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        foreach (var item in items)
+        {
+            item.Mucs = bandsByCriterion.GetValueOrDefault(item.Id) ?? [];
+        }
+
+        return items;
     }
 
     public async Task<DanhMucTieuChiDiemEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

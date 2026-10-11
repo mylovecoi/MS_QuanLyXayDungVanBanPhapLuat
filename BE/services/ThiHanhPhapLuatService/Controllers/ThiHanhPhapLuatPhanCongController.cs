@@ -22,7 +22,12 @@ public sealed class ThiHanhPhapLuatPhanCongController(
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatPhanCong", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
         if (await GetScopedContentAsync(noiDungKeHoachId, cancellationToken) is null) return NotFound();
-        return Ok(await dbContext.PhanCongThiHanhs.AsNoTracking().Where(x => x.NoiDungKeHoachId == noiDungKeHoachId && !x.IsDeleted).OrderBy(x => x.CreatedAt).ToListAsync(cancellationToken));
+        var items = await dbContext.PhanCongThiHanhs.AsNoTracking()
+            .Where(x => x.NoiDungKeHoachId == noiDungKeHoachId && !x.IsDeleted)
+            .OrderBy(x => x.CreatedAt)
+            .Select(x => new PhanCongResponse(x.Id, x.NoiDungKeHoachId, x.DonViDuocGiaoId, x.CanBoDuocGiaoId, x.VaiTro, x.HanThucHien, x.MucDoUuTien))
+            .ToListAsync(cancellationToken);
+        return Ok(items);
     }
 
     [HttpPost]
@@ -44,7 +49,7 @@ public sealed class ThiHanhPhapLuatPhanCongController(
     {
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatPhanCong", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
-        var entity = await GetScopedAssignmentAsync(id, cancellationToken); return entity is null ? NotFound() : Ok(entity);
+        var entity = await GetScopedAssignmentAsync(id, cancellationToken); return entity is null ? NotFound() : Ok(ToResponse(entity));
     }
 
     [HttpPut("{id:guid}")]
@@ -56,7 +61,7 @@ public sealed class ThiHanhPhapLuatPhanCongController(
         var content = await GetDraftContentAsync(entity.NoiDungKeHoachId, cancellationToken); if (content is null) return BadRequest("Chỉ được sửa phân công thuộc kế hoạch NHAP.");
         if (request.HanThucHien > content.HanHoanThanh) return BadRequest("Hạn phân công không được sau hạn đầu việc.");
         entity.DonViDuocGiaoId = request.DonViDuocGiaoId; entity.CanBoDuocGiaoId = request.CanBoDuocGiaoId; entity.VaiTro = request.VaiTro.Trim(); entity.HanThucHien = request.HanThucHien; entity.MucDoUuTien = request.MucDoUuTien; entity.UpdatedAt = DateTime.UtcNow; entity.UpdatedBy = CurrentUser.UserId!.Value.ToString();
-        AddHistory(content.KeHoachId, content.Id, "CAP_NHAT_PHAN_CONG", "Cập nhật phân công thực hiện."); await dbContext.SaveChangesAsync(cancellationToken); return Ok(entity);
+        AddHistory(content.KeHoachId, content.Id, "CAP_NHAT_PHAN_CONG", "Cập nhật phân công thực hiện."); await dbContext.SaveChangesAsync(cancellationToken); return Ok(ToResponse(entity));
     }
 
     [HttpDelete("{id:guid}")]
@@ -85,8 +90,10 @@ public sealed class ThiHanhPhapLuatPhanCongController(
         var planStatus = await dbContext.KeHoachThiHanhPhapLuats.Where(x => x.Id == content.KeHoachId).Select(x => x.TrangThaiId).SingleAsync(cancellationToken);
         var status = await trangThaiClient.GetAsync(planStatus, cancellationToken); return status is { TrangThai: true, NhomTrangThai: "KE_HOACH_THI_HANH_PHAP_LUAT", MaTrangThai: "NHAP" } ? content : null;
     }
+    private static PhanCongResponse ToResponse(PhanCongThiHanh entity) => new(entity.Id, entity.NoiDungKeHoachId, entity.DonViDuocGiaoId, entity.CanBoDuocGiaoId, entity.VaiTro, entity.HanThucHien, entity.MucDoUuTien);
     private void AddHistory(Guid planId, Guid contentId, string action, string message) => dbContext.LichSuXuLyThiHanhs.Add(new LichSuXuLyThiHanh { KeHoachId = planId, NoiDungKeHoachId = contentId, HanhDong = action, NoiDung = message, NguoiXuLyId = CurrentUser.UserId!.Value, DonViXuLyId = CurrentUser.DonViId });
 }
 
+public sealed record PhanCongResponse(Guid Id, Guid NoiDungKeHoachId, Guid DonViDuocGiaoId, Guid? CanBoDuocGiaoId, string VaiTro, DateOnly HanThucHien, int MucDoUuTien);
 public sealed record CreatePhanCongRequest(Guid NoiDungKeHoachId, Guid DonViDuocGiaoId, Guid? CanBoDuocGiaoId, string VaiTro, DateOnly HanThucHien, int MucDoUuTien);
 public sealed record UpdatePhanCongRequest(Guid DonViDuocGiaoId, Guid? CanBoDuocGiaoId, string VaiTro, DateOnly HanThucHien, int MucDoUuTien);
