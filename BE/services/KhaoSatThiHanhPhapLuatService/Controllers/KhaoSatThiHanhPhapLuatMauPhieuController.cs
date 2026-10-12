@@ -20,10 +20,11 @@ public sealed class KhaoSatThiHanhPhapLuatMauPhieuController(
 
     [HttpPost("upload")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<ActionResult> Upload(Guid cuocKhaoSatId, Guid nhomDoiTuongId, int phienBan, IFormFile file, CancellationToken cancellationToken)
+    public async Task<ActionResult> Upload([FromForm] Guid cuocKhaoSatId, [FromForm] Guid nhomDoiTuongId, [FromForm] int phienBan, [FromForm] IFormFile file, CancellationToken cancellationToken)
     {
         if (file.Length == 0 || !string.Equals(Path.GetExtension(file.FileName), ".docx", StringComparison.OrdinalIgnoreCase)) return BadRequest("Chỉ nhận file Word định dạng .docx.");
-        if (!await dbContext.CuocKhaoSats.AnyAsync(x => x.Id == cuocKhaoSatId && !x.IsDeleted, cancellationToken) || !await dbContext.NhomDoiTuongKhaoSats.AnyAsync(x => x.Id == nhomDoiTuongId && x.CuocKhaoSatId == cuocKhaoSatId && !x.IsDeleted, cancellationToken)) return NotFound("Không tìm thấy cuộc khảo sát hoặc nhóm đối tượng.");
+        var groupInfo = await dbContext.NhomDoiTuongKhaoSats.AsNoTracking().SingleOrDefaultAsync(x => x.Id == nhomDoiTuongId && x.CuocKhaoSatId == cuocKhaoSatId && !x.IsDeleted, cancellationToken);
+        if (!await dbContext.CuocKhaoSats.AnyAsync(x => x.Id == cuocKhaoSatId && !x.IsDeleted, cancellationToken) || groupInfo is null) return NotFound("Không tìm thấy cuộc khảo sát hoặc nhóm đối tượng.");
         if (await dbContext.MauPhieuKhaoSats.AnyAsync(x => x.NhomDoiTuongKhaoSatId == nhomDoiTuongId && x.PhienBan == phienBan && !x.IsDeleted, cancellationToken)) return Conflict("Phiên bản mẫu phiếu đã tồn tại.");
 
         await using var input = file.OpenReadStream();
@@ -53,10 +54,11 @@ public sealed class KhaoSatThiHanhPhapLuatMauPhieuController(
             var mauSoTyLe = ChuanHoaMauSoTyLe(first.MauSoTyLe);
             if (!MauSoTyLeHopLe.Contains(mauSoTyLe)) return BadRequest($"Câu hỏi {first.MaCauHoi} có mẫu số tỷ lệ không hợp lệ.");
             if (group.Any(x => x.ChoPhepNhieuLuaChon != first.ChoPhepNhieuLuaChon || ChuanHoaMauSoTyLe(x.MauSoTyLe) != mauSoTyLe || x.CoYKienTuDo != first.CoYKienTuDo)) return BadRequest($"Câu hỏi {first.MaCauHoi} có cấu hình không thống nhất giữa các dòng đáp án.");
-            var standard = await dbContext.CauHoiThongKes.SingleOrDefaultAsync(x => x.CuocKhaoSatId == cuocKhaoSatId && x.MaCauHoiThongKe == first.MaCauHoi && !x.IsDeleted, cancellationToken);
+            var statisticalCode = BuildStatisticalQuestionCode(groupInfo.MaNhom, first.MaCauHoi);
+            var standard = await FindStandardQuestionAsync(cuocKhaoSatId, nhomDoiTuongId, statisticalCode, first.MaCauHoi, cancellationToken);
             if (standard is null)
             {
-                standard = new CauHoiThongKe { CuocKhaoSatId = cuocKhaoSatId, MaCauHoiThongKe = first.MaCauHoi, NoiDung = first.NoiDung, LoaiCauHoi = first.LoaiCauHoi, ChoPhepNhieuLuaChon = first.ChoPhepNhieuLuaChon, MauSoTyLe = mauSoTyLe, CoYKienTuDo = first.CoYKienTuDo };
+                standard = new CauHoiThongKe { CuocKhaoSatId = cuocKhaoSatId, MaCauHoiThongKe = statisticalCode, NoiDung = first.NoiDung, LoaiCauHoi = first.LoaiCauHoi, ChoPhepNhieuLuaChon = first.ChoPhepNhieuLuaChon, MauSoTyLe = mauSoTyLe, CoYKienTuDo = first.CoYKienTuDo };
                 dbContext.CauHoiThongKes.Add(standard);
             }
             else if (!string.Equals(standard.LoaiCauHoi, first.LoaiCauHoi, StringComparison.OrdinalIgnoreCase) || standard.ChoPhepNhieuLuaChon != first.ChoPhepNhieuLuaChon || standard.CoYKienTuDo != first.CoYKienTuDo || !string.Equals(standard.MauSoTyLe, mauSoTyLe, StringComparison.OrdinalIgnoreCase)) return BadRequest($"Câu hỏi {first.MaCauHoi} có cấu hình khác với mẫu đã tồn tại.");
@@ -91,7 +93,7 @@ public sealed class KhaoSatThiHanhPhapLuatMauPhieuController(
             if (question is null) return BadRequest($"Không tìm thấy câu hỏi {configured.MaCauHoi} trong mẫu phiếu.");
             var mauSoTyLe = ChuanHoaMauSoTyLe(configured.MauSoTyLe);
             if (!MauSoTyLeHopLe.Contains(mauSoTyLe)) return BadRequest($"Câu hỏi {configured.MaCauHoi} có mẫu số tỷ lệ không hợp lệ.");
-            var otherQuestion = await dbContext.CauHoiMauPhieus.AsNoTracking().FirstOrDefaultAsync(x => x.CauHoiThongKeId == question.CauHoiThongKeId && x.Id != question.Id && !x.IsDeleted, cancellationToken);
+            var otherQuestion = await dbContext.CauHoiMauPhieus.AsNoTracking().FirstOrDefaultAsync(x => x.CauHoiThongKeId == question.CauHoiThongKeId && x.MauPhieuKhaoSatId == question.MauPhieuKhaoSatId && x.Id != question.Id && !x.IsDeleted, cancellationToken);
             if (otherQuestion is not null && (otherQuestion.ChoPhepNhieuLuaChon != configured.ChoPhepNhieuLuaChon || otherQuestion.CoYKienTuDo != configured.CoYKienTuDo || !string.Equals(otherQuestion.MauSoTyLe, mauSoTyLe, StringComparison.OrdinalIgnoreCase))) return Conflict($"Câu hỏi {configured.MaCauHoi} đã được dùng trong mẫu phiếu khác với cấu hình khác.");
             question.BatBuoc = configured.BatBuoc;
             question.ChoPhepNhieuLuaChon = configured.ChoPhepNhieuLuaChon;
@@ -107,6 +109,26 @@ public sealed class KhaoSatThiHanhPhapLuatMauPhieuController(
     }
 
     private static string ChuanHoaMauSoTyLe(string? value) => string.IsNullOrWhiteSpace(value) ? "PHIEU_HOP_LE" : value.Trim().ToUpperInvariant();
+    private static string BuildStatisticalQuestionCode(string groupCode, string questionCode) => $"{groupCode.Trim().ToUpperInvariant()}::{questionCode.Trim()}";
+
+    private async Task<CauHoiThongKe?> FindStandardQuestionAsync(Guid cuocKhaoSatId, Guid nhomDoiTuongId, string statisticalCode, string questionCode, CancellationToken cancellationToken)
+    {
+        var scoped = await dbContext.CauHoiThongKes.SingleOrDefaultAsync(x => x.CuocKhaoSatId == cuocKhaoSatId && x.MaCauHoiThongKe == statisticalCode && !x.IsDeleted, cancellationToken);
+        if (scoped is not null) return scoped;
+
+        var existingStandardId = await (from template in dbContext.MauPhieuKhaoSats.AsNoTracking()
+                                        join question in dbContext.CauHoiMauPhieus.AsNoTracking() on template.Id equals question.MauPhieuKhaoSatId
+                                        where template.CuocKhaoSatId == cuocKhaoSatId
+                                              && template.NhomDoiTuongKhaoSatId == nhomDoiTuongId
+                                              && !template.IsDeleted
+                                              && !question.IsDeleted
+                                              && question.MaCauHoi == questionCode
+                                        select question.CauHoiThongKeId).FirstOrDefaultAsync(cancellationToken);
+
+        return existingStandardId == Guid.Empty
+            ? null
+            : await dbContext.CauHoiThongKes.SingleOrDefaultAsync(x => x.Id == existingStandardId && !x.IsDeleted, cancellationToken);
+    }
 }
 
 public sealed record ConfigureSurveyQuestionsRequest(IReadOnlyList<ConfigureSurveyQuestionRequest> CauHoi);

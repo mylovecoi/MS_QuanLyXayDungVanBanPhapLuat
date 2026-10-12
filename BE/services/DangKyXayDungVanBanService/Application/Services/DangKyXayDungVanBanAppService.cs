@@ -55,6 +55,10 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
                 hoSo.DonViSoanThaoId,
                 hoSo.DonViPheDuyetId,
                 hoSo.NamDangKy,
+                hoSo.CanCuDeXuat,
+                hoSo.SuCanThiet,
+                hoSo.NoiDungChinhSach,
+                hoSo.DuKienThoiGianTrinh,
                 hoSo.DaKhoiTaoQuyTrinhXayDung,
                 hoSo.HoSoXayDungVanBanId,
                 hoSo.CreatedAt,
@@ -103,10 +107,12 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             ApplyDataScope(_dbContext.DangKyXayDungVanBans.AsNoTracking().Where(x => !x.IsDeleted)),
             request);
 
-        query = query.Where(hoSo => _dbContext.DangKyXayDungVanBanLichSuXuLys.Any(lichSu =>
-            lichSu.DangKyXayDungVanBanId == hoSo.Id
-            && !lichSu.IsDeleted
-            && lichSu.ChuyenBuocId == DangKySeedIds.DanhMucChuyenBuocDangKyXayDungQppl.PheDuyetToCapNhatKetQua));
+        query = query.Where(hoSo =>
+            hoSo.TrangThaiHoSoId == DangKySeedIds.TrangThai.DaTrinhPheDuyet
+            || hoSo.TrangThaiHoSoId == DangKySeedIds.TrangThai.DaPheDuyet
+            || hoSo.TrangThaiHoSoId == DangKySeedIds.TrangThai.DaCapNhatKetQua
+            || hoSo.TrangThaiHoSoId == DangKySeedIds.TrangThai.HoanThanh
+            || hoSo.TrangThaiHoSoId == DangKySeedIds.TrangThai.DaChuyenQuyTrinhXayDung);
 
         var totalCount = await query.CountAsync(cancellationToken);
         var rows = await (
@@ -183,6 +189,10 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
                 hoSo.DonViSoanThaoId,
                 hoSo.DonViPheDuyetId,
                 hoSo.NamDangKy,
+                hoSo.CanCuDeXuat,
+                hoSo.SuCanThiet,
+                hoSo.NoiDungChinhSach,
+                hoSo.DuKienThoiGianTrinh,
                 hoSo.DaKhoiTaoQuyTrinhXayDung,
                 hoSo.HoSoXayDungVanBanId,
                 hoSo.CreatedAt,
@@ -210,7 +220,11 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             row.TenTrangThaiHoSo,
             row.MauTrangThaiHoSo,
             GetMaBuocHienTai(row.BuocHienTaiId),
-            GetTenBuocHienTai(row.BuocHienTaiId));
+            GetTenBuocHienTai(row.BuocHienTaiId),
+            row.CanCuDeXuat,
+            row.SuCanThiet,
+            row.NoiDungChinhSach,
+            row.DuKienThoiGianTrinh);
     }
 
     public async Task<DangKyXayDungVanBanDto> CreateAsync(TaoDangKyXayDungVanBanRequest request, CancellationToken cancellationToken)
@@ -330,6 +344,8 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             .Select(x => new DangKyXayDungVanBanTimelineDto(
                 x.Id,
                 x.DangKyXayDungVanBanId,
+                x.TuBuocId,
+                x.DenBuocId,
                 x.MaHanhDongSnapshot,
                 x.TenHanhDongSnapshot,
                 x.TenBuocTu,
@@ -608,10 +624,37 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
 
         _dbContext.DangKyXayDungVanBanKetQuaPheDuyets.Add(ketQua);
         hoSo.KetQuaPheDuyetId = ketQua.Id;
+        var trangThaiTruoc = hoSo.TrangThaiHoSoId;
         hoSo.TrangThaiHoSoId = DangKySeedIds.TrangThai.DaCapNhatKetQua;
-        hoSo.BuocHienTaiId = DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua;
+        hoSo.BuocHienTaiId = DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyetCapNhatKetQua;
         hoSo.UpdatedAt = DateTime.UtcNow;
         hoSo.UpdatedBy = CurrentUserIdText();
+
+        var hanhDong = await _dbContext.DangKyHanhDongXuLys
+            .AsNoTracking()
+            .FirstAsync(x => x.Id == DangKySeedIds.HanhDong.CapNhatKetQua, cancellationToken);
+
+        _dbContext.DangKyXayDungVanBanLichSuXuLys.Add(new DangKyXayDungVanBanLichSuXuLy
+        {
+            DangKyXayDungVanBanId = hoSo.Id,
+            TuBuocId = DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyetCapNhatKetQua,
+            DenBuocId = DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyetCapNhatKetQua,
+            HanhDongId = hanhDong.Id,
+            MaHanhDongSnapshot = hanhDong.MaHanhDong,
+            TenHanhDongSnapshot = hanhDong.TenHanhDong,
+            TenBuocTu = "Phê duyệt và cập nhật kết quả",
+            TenBuocDen = "Phê duyệt và cập nhật kết quả",
+            TrangThaiTruocId = trangThaiTruoc,
+            TrangThaiSauId = DangKySeedIds.TrangThai.DaCapNhatKetQua,
+            TenTrangThaiTruocSnapshot = "Đã phê duyệt",
+            TenTrangThaiSauSnapshot = "Đã cập nhật kết quả",
+            NoiDungXuLy = "Cập nhật quyết định/kết quả phê duyệt",
+            NguoiXuLyId = CurrentUserId(),
+            TenNguoiXuLy = ResolveUserDisplayName(null),
+            DonViXuLyId = CurrentDonViIdOrRequest(request.CoQuanPheDuyetId),
+            TenDonViXuLy = request.TenCoQuanPheDuyet,
+            CreatedBy = CurrentUserIdText()
+        });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -901,21 +944,21 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
 
     private static string? GetMaBuocHienTai(Guid buocId)
     {
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.LapHoSo) return "LAP_HO_SO";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "TRINH_HO_SO";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyet) return "PHE_DUYET";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "CAP_NHAT_KET_QUA";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "HOAN_THANH";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.DeXuatDangKy) return "DE_XUAT_DANG_KY";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "DE_XUAT_DANG_KY";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyetCapNhatKetQua) return "PHE_DUYET_CAP_NHAT_KET_QUA";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "PHE_DUYET_CAP_NHAT_KET_QUA";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "PHE_DUYET_CAP_NHAT_KET_QUA";
         return null;
     }
 
     private static string? GetTenBuocHienTai(Guid buocId)
     {
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.LapHoSo) return "Lập hồ sơ đề nghị/đăng ký";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "Trình hồ sơ";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyet) return "Phê duyệt";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "Cập nhật kết quả";
-        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "Hoàn thành";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.DeXuatDangKy) return "Đề xuất danh mục/Đăng ký xây dựng văn bản QPPL";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.TrinhHoSo) return "Đề xuất danh mục/Đăng ký xây dựng văn bản QPPL";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.PheDuyetCapNhatKetQua) return "Phê duyệt và cập nhật kết quả";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.CapNhatKetQua) return "Phê duyệt và cập nhật kết quả";
+        if (buocId == DangKySeedIds.DanhMucBuocDangKyXayDungQppl.HoanThanh) return "Phê duyệt và cập nhật kết quả";
         return null;
     }
 
@@ -940,7 +983,11 @@ public class DangKyXayDungVanBanAppService : IDangKyXayDungVanBanAppService
             null,
             null,
             GetMaBuocHienTai(entity.BuocHienTaiId),
-            GetTenBuocHienTai(entity.BuocHienTaiId));
+            GetTenBuocHienTai(entity.BuocHienTaiId),
+            entity.CanCuDeXuat,
+            entity.SuCanThiet,
+            entity.NoiDungChinhSach,
+            entity.DuKienThoiGianTrinh);
     }
 
     private sealed record CurrentUserInfo(Guid UserId, Guid? DonViId, bool IsSSA);

@@ -12,3 +12,4 @@ dist/
 *.user
 *.suo
 *.tsbuildinfo
+BE/services/*/uploads/

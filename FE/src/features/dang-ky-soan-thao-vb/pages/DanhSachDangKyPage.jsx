@@ -1,8 +1,13 @@
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import {useNavigate} from "react-router";
 import Alert from "../../../app/components/ui/alert/Alert.jsx";
 import TrangThaiBadge from "../../../shared/components/TrangThaiBadge.jsx";
-import {getDanhSachDangKyXayDungVanBan} from "../api/dangKyXayDungVanBanApi.js";
+import {
+    getDanhSachDangKyXayDungVanBan,
+} from "../api/dangKyXayDungVanBanApi.js";
+
+const COMPLETED_STATUS_CODE = "HOAN_THANH";
 
 const toError = (error) =>
     error?.response?.data?.message ||
@@ -14,42 +19,36 @@ const toError = (error) =>
     "Không thể tải danh sách đăng ký.";
 
 export default function DanhSachDangKyPage() {
+    const navigate = useNavigate();
+
     const [data, setData] = useState([]);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        let mounted = true;
+    const loadData = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError("");
 
-        const load = async () => {
-            try {
-                setLoading(true);
-                setError("");
+            const result = await getDanhSachDangKyXayDungVanBan({
+                pageSize: 200,
+            });
 
-                const result = await getDanhSachDangKyXayDungVanBan({
-                    pageSize: 200,
-                });
-
-                if (mounted) {
-                    setData(result?.items || []);
-                }
-            } catch (err) {
-                if (mounted) {
-                    setError(toError(err));
-                }
-            } finally {
-                if (mounted) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        void load();
-
-        return () => {
-            mounted = false;
-        };
+            setData(
+                (result?.items || []).filter(
+                    (item) => item.maTrangThaiHoSo === COMPLETED_STATUS_CODE
+                )
+            );
+        } catch (err) {
+            setError(toError(err));
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        void loadData();
+    }, [loadData]);
 
     const columns = useMemo(
         () => [
@@ -134,10 +133,14 @@ export default function DanhSachDangKyPage() {
                 cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
                     <div className="flex items-center justify-center gap-2">
-                        {/* Xem chi tiết */}
                         <button
                             type="button"
                             title="Xem chi tiết"
+                            onClick={() =>
+                                navigate(
+                                    `/dang-ky-xay-dung-van-ban/ho-so/${item.id}?mode=view`
+                                )
+                            }
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
                         >
                             <svg
@@ -154,56 +157,11 @@ export default function DanhSachDangKyPage() {
                                 <circle cx="12" cy="12" r="3"/>
                             </svg>
                         </button>
-
-                        {/* Chỉnh sửa */}
-                        <button
-                            type="button"
-                            title="Chỉnh sửa"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-brand-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
-                        >
-                            <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M12 20h9"/>
-                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-                            </svg>
-                        </button>
-
-                        {/* Xóa */}
-                        <button
-                            type="button"
-                            title="Xóa"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-error-500 dark:text-gray-400 dark:hover:bg-white/[0.05]"
-                        >
-                            <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <path d="M3 6h18"/>
-                                <path d="M8 6V4h8v2"/>
-                                <path d="M19 6v14H5V6"/>
-                                <path d="M10 11v5"/>
-                                <path d="M14 11v5"/>
-                            </svg>
-                        </button>
                     </div>
                 ),
             },
         ],
-        []
+        [navigate]
     );
 
     const searchFields = useMemo(
@@ -226,7 +184,7 @@ export default function DanhSachDangKyPage() {
                 </h1>
 
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Quản lý danh sách đăng ký xây dựng văn bản
+                    Chỉ hiển thị các hồ sơ đăng ký đã hoàn thành.
                 </p>
             </div>
 
@@ -254,7 +212,7 @@ export default function DanhSachDangKyPage() {
                     searchPlaceholder="Tìm kiếm hồ sơ..."
                     searchFields={searchFields}
                     pageSizeOptions={[5, 10, 20, 100]}
-                    emptyText="Không có hồ sơ đăng ký."
+                    emptyText="Không có hồ sơ đăng ký đã hoàn thành."
                 />
             )}
         </div>

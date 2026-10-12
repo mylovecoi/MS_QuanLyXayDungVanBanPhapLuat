@@ -19,7 +19,11 @@ public record DangKyXayDungVanBanDto(
     string? TenTrangThaiHoSo = null,
     string? MauTrangThaiHoSo = null,
     string? MaBuocHienTai = null,
-    string? TenBuocHienTai = null);
+    string? TenBuocHienTai = null,
+    string? CanCuDeXuat = null,
+    string? SuCanThiet = null,
+    string? NoiDungChinhSach = null,
+    DateTime? DuKienThoiGianTrinh = null);
 
 public class DangKyXayDungVanBanListRequest
 {
@@ -121,6 +125,8 @@ public record KhoiTaoQuyTrinhXayDungRequest(
 public record DangKyXayDungVanBanTimelineDto(
     Guid Id,
     Guid DangKyXayDungVanBanId,
+    Guid? TuBuocId,
+    Guid? DenBuocId,
     string MaHanhDong,
     string TenHanhDong,
     string? TenBuocTu,

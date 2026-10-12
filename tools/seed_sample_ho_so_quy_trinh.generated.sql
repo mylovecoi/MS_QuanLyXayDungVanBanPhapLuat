@@ -14,8 +14,8 @@ DECLARE @DonViPheDuyet uniqueidentifier = '00000000-0000-0000-0000-000000000102'
 DECLARE @CanBo uniqueidentifier = '00000000-0000-0000-0000-000000000201';
 DECLARE @LoaiVanBan uniqueidentifier = '00000000-0000-0000-0000-000000000301';
 DECLARE @LinhVuc uniqueidentifier = '00000000-0000-0000-0000-000000000401';
-SELECT TOP (1) @DonViSoanThao = [Id] FROM [dm].[DanhMucDonVis] ORDER BY [CreatedDate], [Id];
-SELECT TOP (1) @DonViPheDuyet = [Id] FROM [dm].[DanhMucDonVis] WHERE [Id] <> @DonViSoanThao ORDER BY [CreatedDate], [Id];
+SELECT TOP (1) @DonViSoanThao = [Id] FROM [dm].[DanhMucDonVis] WHERE [Id] <> '00000000-0000-0000-0000-000000000000' ORDER BY [CreatedDate], [Id];
+SELECT TOP (1) @DonViPheDuyet = [Id] FROM [dm].[DanhMucDonVis] WHERE [Id] <> '00000000-0000-0000-0000-000000000000' AND [Id] <> @DonViSoanThao ORDER BY [CreatedDate], [Id];
 SET @DonViPheDuyet = COALESCE(@DonViPheDuyet, @DonViSoanThao);
 SELECT TOP (1) @CanBo = [Id] FROM [dm].[DanhMucCanBos] ORDER BY [CreatedDate], [Id];
 SELECT TOP (1) @LoaiVanBan = [Id] FROM [dm].[DanhMucVanBans] WHERE [TrangThai] = 1 ORDER BY [CreatedDate], [Id];
