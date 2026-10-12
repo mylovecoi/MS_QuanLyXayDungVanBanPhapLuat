@@ -13,6 +13,9 @@ export const searchTraCuu = async (source, filters) => {
     if (!endpoint) {
         throw new Error(`Không tìm thấy API tra cứu cho nguồn: ${source}`);
     }
-    const response = await axiosClient.get(endpoint, {params: filters,});
+    const response = await axiosClient.get(endpoint, {
+        baseURL: "",
+        params: filters,
+    });
     return response.data;
 }

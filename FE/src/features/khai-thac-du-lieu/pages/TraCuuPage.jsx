@@ -1,5 +1,5 @@
-import {useMemo, useState} from "react";
-import Input from "../../../app/components/forms/input/InputField.jsx";
+import {useMemo, useState,useEffect} from "react";
+import { getDonViOptions } from "../../danh-muc/api/donViApi";
 import Label from "../../../app/components/forms/Label.jsx";
 import Select from "../../../app/components/forms/Select.jsx";
 import Alert from "../../../app/components/ui/alert/Alert.jsx";
@@ -28,6 +28,10 @@ const configs = {
 
 const createEmptyFilters = () => ({
     search: "",
+    donViId: "",
+    nguoiPhuTrachId: "",
+    loaiVanBanId: "",
+    trangThaiId: "",
     tuNgay: "",
     denNgay: "",
     nam: "",
@@ -54,6 +58,30 @@ export default function TraCuuPage({source}) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [hasSearched, setHasSearched] = useState(false);
+    // Phân trang phía server
+    const [pageCurrent, setPageCurrent] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+
+    const [donViOptions, setDonViOptions] = useState([]);
+    const [loadingDanhMuc, setLoadingDanhMuc] = useState(false);
+
+    useEffect(() => {
+        const loadDanhMuc = async () => {
+            try {
+                setLoadingDanhMuc(true);
+                const result = await getDonViOptions();
+                setDonViOptions(
+                    Array.isArray(result) ? result : []
+                );
+            } catch (error) {
+                console.error("Không thể tải danh sách đơn vị:", error);
+            } finally {
+                setLoadingDanhMuc(false);
+            }
+        };
+
+        void loadDanhMuc();
+    }, []);
 
     const columns = useMemo(
         () => [
@@ -142,34 +170,64 @@ export default function TraCuuPage({source}) {
         }));
     };
 
+    useEffect(() => {
+        setFilters(createEmptyFilters());
+        setItems([]);
+        setTotal(0);
+        setPageCurrent(1);
+        setPageSize(20);
+        setError("");
+        setHasSearched(false);
+        setLoading(false);
+    }, [source]);
+
     // Chỉ gọi API khi nhấn Tìm kiếm hoặc Xóa bộ lọc
-    const loadData = async (filterValues = filters) => {
+    const loadData = async (
+        filterValues = filters,
+        currentPage = pageCurrent,
+        currentPageSize = pageSize
+    ) => {
         try {
             setLoading(true);
             setError("");
             setHasSearched(true);
 
             const params = {
-                search: filterValues.search.trim() || undefined,
-                tuNgay: filterValues.tuNgay || undefined,
-                denNgay: filterValues.denNgay || undefined,
-                nam: filterValues.nam
+                Search: filterValues.search.trim() || undefined,
+                DonViId: filterValues.donViId || undefined,
+                NguoiPhuTrachId:
+                    filterValues.nguoiPhuTrachId || undefined,
+                LoaiVanBanId:
+                    filterValues.loaiVanBanId || undefined,
+                TrangThaiId: filterValues.trangThaiId || undefined,
+                TuNgay: filterValues.tuNgay || undefined,
+                DenNgay: filterValues.denNgay || undefined,
+                Nam: filterValues.nam
                     ? Number(filterValues.nam)
                     : undefined,
-                pageSize: 100,
-                pageCurrent: 1,
+                PageSize: currentPageSize,
+                PageCurrent: currentPage,
             };
 
             const result = await searchTraCuu(source, params);
-            const resultItems = result?.items ?? result?.data ?? [];
 
-            setItems(Array.isArray(resultItems) ? resultItems : []);
-            setTotal(
-                result?.totalCount ??
-                result?.total ??
-                result?.totalRecords ??
-                resultItems.length
+            // Đọc dữ liệu phân trang từ API
+            const resultItems = Array.isArray(result?.items)
+                ? result.items
+                : [];
+
+            const resultTotal = Number(result?.totalCount ?? 0);
+            const resultPageSize = Number(
+                result?.pageSize ?? currentPageSize
             );
+            const resultPageCurrent = Number(
+                result?.pageCurrent ?? currentPage
+            );
+
+            setItems(resultItems);
+            setTotal(resultTotal);
+            setPageSize(resultPageSize);
+            setPageCurrent(resultPageCurrent);
         } catch (requestError) {
             setItems([]);
             setTotal(0);
@@ -181,14 +239,15 @@ export default function TraCuuPage({source}) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        loadData();
+        setPageCurrent(1);
+        void loadData(filters, 1, pageSize);
     };
 
     const handleClear = () => {
         const emptyFilters = createEmptyFilters();
-
         setFilters(emptyFilters);
-        loadData(emptyFilters);
+        setPageCurrent(1);
+        void loadData(emptyFilters, 1, pageSize);
     };
 
     return (
@@ -209,24 +268,70 @@ export default function TraCuuPage({source}) {
                 className="mb-6 rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 xl:grid-cols-5">
-                        {/* Từ khóa */}
-                        <div className="xl:col-span-2">
-                            <Label>Từ khóa</Label>
-                            <Input
-                                value={filters.search}
-                                onChange={(event) =>
-                                    handleFilterChange(
-                                        "search",
-                                        event.target.value
-                                    )
+                        {/* Đơn vị */}
+                        <div>
+                            <Label>Đơn vị</Label>
+                            <Select
+                                value={filters.donViId}
+                                onChange={(value) =>
+                                    handleFilterChange("donViId", value)
                                 }
-                                placeholder="Mã, tên hồ sơ hoặc nội dung..."
+                                options={[
+                                    { value: "", label: "Tất cả đơn vị" },
+                                    ...donViOptions.map((item) => ({
+                                        value: item.id,
+                                        label: item.tenDonVi,
+                                    })),
+                                ]}
+                            />
+                        </div>
+
+                        {/* Người phụ trách */}
+                        <div>
+                            <Label>Người phụ trách</Label>
+                            <Select
+                                value={filters.nguoiPhuTrachId}
+                                onChange={(value) =>
+                                    handleFilterChange("nguoiPhuTrachId", value)
+                                }
+                                options={[
+                                    { value: "", label: "Tất cả người phụ trách" },
+                                ]}
+                            />
+                        </div>
+
+                        {/* Loại văn bản */}
+                        <div>
+                            <Label>Loại văn bản</Label>
+                            <Select
+                                value={filters.loaiVanBanId}
+                                onChange={(value) =>
+                                    handleFilterChange("loaiVanBanId", value)
+                                }
+                                options={[
+                                    { value: "", label: "Tất cả loại văn bản" },
+                                ]}
+                            />
+                        </div>
+
+                        {/* Trạng thái */}
+                        <div>
+                            <Label>Trạng thái</Label>
+                            <Select
+                                value={filters.trangThaiId}
+                                onChange={(value) =>
+                                    handleFilterChange("trangThaiId", value)
+                                }
+                                options={[
+                                    { value: "", label: "Tất cả trạng thái" },
+                                ]}
                             />
                         </div>
 
                         <div>
                             <DatePicker
                                 id="tuNgay"
+                                key={`${source}-tuNgay`}
                                 label="Từ ngày"
                                 placeholder="Chọn ngày bắt đầu"
                                 defaultDate={filters.tuNgay || undefined}
@@ -240,6 +345,7 @@ export default function TraCuuPage({source}) {
                         <div>
                             <DatePicker
                                 id="denNgay"
+                                key={`${source}-denNgay`}
                                 label="Đến ngày"
                                 placeholder="Chọn ngày kết thúc"
                                 defaultDate={filters.denNgay || undefined}
@@ -389,11 +495,20 @@ export default function TraCuuPage({source}) {
                         searchPlaceholder="Tìm kiếm trong kết quả..."
                         searchFields={searchFields}
                         pageSizeOptions={[5, 10, 20, 100]}
-                        emptyText={
-                            hasSearched
-                                ? "Không tìm thấy dữ liệu phù hợp."
-                                : "Chưa có dữ liệu. Vui lòng thực hiện tra cứu."
-                        }
+                        emptyText="Không tìm thấy dữ liệu phù hợp."
+                        serverPagination
+                        totalCount={total}
+                        pageCurrent={pageCurrent}
+                        pageSize={pageSize}
+                        onPageChange={(nextPage) => {
+                            void loadData(filters, nextPage, pageSize);
+                        }}
+                        onPageSizeChange={(nextPageSize) => {
+                            setPageCurrent(1);
+                            setPageSize(nextPageSize);
+
+                            void loadData(filters, 1, nextPageSize);
+                        }}
                     />
                 )}
             </div>

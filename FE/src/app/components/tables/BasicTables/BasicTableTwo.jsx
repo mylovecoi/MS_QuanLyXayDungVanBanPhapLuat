@@ -18,28 +18,43 @@ export default function BasicTableTwo({
                                           searchFields = [],
                                           pageSizeOptions = [5, 10, 20, 100],
                                           emptyText = "Không tìm thấy dữ liệu",
+
+                                          // Server-side pagination
+                                          serverPagination = false,
+                                          totalCount = 0,
+                                          pageCurrent: externalPageCurrent = 1,
+                                          pageSize: externalPageSize = 10,
+                                          onPageChange,
+                                          onPageSizeChange,
                                       }) {
     const [search, setSearch] = useState("");
-    const [pageCurrent, setPageCurrent] = useState(1);
-    const [pageSize, setPageSize] = useState(pageSizeOptions[0] ?? 5);
+    const [localPageCurrent, setLocalPageCurrent] = useState(1);
+    const [localPageSize, setLocalPageSize] = useState(
+        pageSizeOptions[0] ?? 5
+    );
+
+    const pageCurrent = serverPagination
+        ? externalPageCurrent
+        : localPageCurrent;
+
+    const pageSize = serverPagination
+        ? externalPageSize
+        : localPageSize;
 
     /*
      * Search
      *
-     * searchFields:
-     * [
-     *   (item) => item.name,
-     *   (item) => item.code
-     * ]
+     * Client-side: tìm kiếm trong toàn bộ data được truyền vào.
+     * Server-side: không lọc lại data tại frontend.
      */
     const filteredData = useMemo(() => {
-        const keyword = search.trim().toLowerCase();
-
-        if (!keyword) {
+        if (serverPagination) {
             return data;
         }
 
-        if (!searchFields.length) {
+        const keyword = search.trim().toLowerCase();
+
+        if (!keyword || !searchFields.length) {
             return data;
         }
 
@@ -50,18 +65,18 @@ export default function BasicTableTwo({
                 return (
                     value !== null &&
                     value !== undefined &&
-                    String(value)
-                        .toLowerCase()
-                        .includes(keyword)
+                    String(value).toLowerCase().includes(keyword)
                 );
             })
         );
-    }, [data, search, searchFields]);
+    }, [data, search, searchFields, serverPagination]);
 
     /*
      * Pagination
      */
-    const totalRecord = filteredData.length;
+    const totalRecord = serverPagination
+        ? totalCount
+        : filteredData.length;
 
     const totalPages = Math.max(
         1,
@@ -74,17 +89,22 @@ export default function BasicTableTwo({
     );
 
     const paginatedData = useMemo(() => {
-        const startIndex =
-            (currentPage - 1) * pageSize;
+        if (serverPagination) {
+            return data;
+        }
+
+        const startIndex = (currentPage - 1) * pageSize;
 
         return filteredData.slice(
             startIndex,
             startIndex + pageSize
         );
     }, [
+        data,
         filteredData,
         currentPage,
         pageSize,
+        serverPagination,
     ]);
 
     /*
@@ -92,24 +112,61 @@ export default function BasicTableTwo({
      */
     const handleSearch = (value) => {
         setSearch(value);
-        setPageCurrent(1);
+
+        if (!serverPagination) {
+            setLocalPageCurrent(1);
+        }
     };
 
     const handlePageSizeChange = (value) => {
-        setPageSize(Number(value));
-        setPageCurrent(1);
+        const nextPageSize = Number(value);
+
+        if (serverPagination) {
+            onPageSizeChange?.(nextPageSize);
+            return;
+        }
+
+        setLocalPageSize(nextPageSize);
+        setLocalPageCurrent(1);
     };
 
     const handlePrevious = () => {
-        if (currentPage > 1) {
-            setPageCurrent((prev) => prev - 1);
+        if (currentPage <= 1) {
+            return;
         }
+
+        if (serverPagination) {
+            onPageChange?.(currentPage - 1);
+            return;
+        }
+
+        setLocalPageCurrent((prev) => prev - 1);
     };
 
     const handleNext = () => {
-        if (currentPage < totalPages) {
-            setPageCurrent((prev) => prev + 1);
+        if (currentPage >= totalPages) {
+            return;
         }
+
+        if (serverPagination) {
+            onPageChange?.(currentPage + 1);
+            return;
+        }
+
+        setLocalPageCurrent((prev) => prev + 1);
+    };
+
+    const handleGoToPage = (page) => {
+        if (page < 1 || page > totalPages || page === currentPage) {
+            return;
+        }
+
+        if (serverPagination) {
+            onPageChange?.(page);
+            return;
+        }
+
+        setLocalPageCurrent(page);
     };
 
     return (
@@ -157,12 +214,10 @@ export default function BasicTableTwo({
                     <Select
                         value={pageSize}
                         onChange={handlePageSizeChange}
-                        options={pageSizeOptions.map(
-                            (value) => ({
-                                value,
-                                label: `${value} thông tin`,
-                            })
-                        )}
+                        options={pageSizeOptions.map((value) => ({
+                            value,
+                            label: `${value} thông tin`,
+                        }))}
                     />
                 </div>
 
@@ -184,9 +239,7 @@ export default function BasicTableTwo({
                     <Input
                         value={search}
                         onChange={(event) =>
-                            handleSearch(
-                                event.target.value
-                            )
+                            handleSearch(event.target.value)
                         }
                         placeholder={searchPlaceholder}
                         prefix={
@@ -201,11 +254,7 @@ export default function BasicTableTwo({
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             >
-                                <circle
-                                    cx="11"
-                                    cy="11"
-                                    r="8"
-                                />
+                                <circle cx="11" cy="11" r="8"/>
                                 <path d="m21 21-4.3-4.3"/>
                             </svg>
                         }
@@ -213,9 +262,7 @@ export default function BasicTableTwo({
                             search && (
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleSearch("")
-                                    }
+                                    onClick={() => handleSearch("")}
                                     className="
                                         flex
                                         h-6
@@ -264,81 +311,71 @@ export default function BasicTableTwo({
                         "
                     >
                         <TableRow>
-                            {columns.map(
-                                (column) => (
-                                    <TableCell
-                                        key={column.key}
-                                        isHeader
-                                        className={
-                                            column.headerClassName ||
-                                            `
-                                                px-5
-                                                py-3
-                                                font-medium
-                                                text-gray-500
-                                                text-start
-                                                text-theme-xs
-                                                dark:text-gray-400
-                                            `
-                                        }
-                                    >
-                                        {column.header}
-                                    </TableCell>
-                                )
-                            )}
+                            {columns.map((column) => (
+                                <TableCell
+                                    key={column.key}
+                                    isHeader
+                                    className={
+                                        column.headerClassName ||
+                                        `
+px-5
+py-3
+font-medium
+text-gray-500
+text-start
+text-theme-xs
+dark:text-gray-400
+    `
+                                    }
+                                >
+                                    {column.header}
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHeader>
 
                     <TableBody
                         className="
-        divide-y
-        divide-gray-100
-        dark:divide-white/[0.05]
-    "
+                            divide-y
+                            divide-gray-100
+                            dark:divide-white/[0.05]
+                        "
                     >
                         {paginatedData.length > 0 &&
-                            paginatedData.map(
-                                (item, rowIndex) => (
-                                    <TableRow
-                                        key={
-                                            item.id ??
-                                            rowIndex
-                                        }
-                                    >
-                                        {columns.map(
-                                            (column) => (
-                                                <TableCell
-                                                    key={column.key}
-                                                    className={
-                                                        column.cellClassName ||
-                                                        `
-                                                            px-4
-                                                            py-3
-                                                            text-gray-500
-                                                            text-start
-                                                            text-theme-sm
-                                                            dark:text-gray-400
-                                                        `
-                                                    }
-                                                >
-                                                    {column.render
-                                                        ? column.render(
-                                                            item,
-                                                            rowIndex,
-                                                            currentPage,
-                                                            pageSize
-                                                        )
-                                                        : item[
-                                                            column.key
-                                                            ]}
-                                                </TableCell>
-                                            )
-                                        )}
-                                    </TableRow>
-                                )
-                            )}
+                            paginatedData.map((item, rowIndex) => (
+                                <TableRow
+                                    key={item.id ?? item.doiTuongId ?? rowIndex}
+                                >
+                                    {columns.map((column) => (
+                                        <TableCell
+                                            key={column.key}
+                                            className={
+                                                column.cellClassName ||
+                                                `
+px-4
+py-3
+text-gray-500
+text-start
+text-theme-sm
+dark:text-gray-400
+    `
+                                            }
+                                        >
+                                            {column.render
+                                                ? column.render(
+                                                    item,
+                                                    rowIndex,
+                                                    currentPage,
+                                                    pageSize
+                                                )
+                                                : item[column.key]}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
                     </TableBody>
                 </Table>
+
                 {paginatedData.length === 0 && (
                     <div
                         className="
@@ -379,14 +416,9 @@ export default function BasicTableTwo({
                     Showing{" "}
                     {totalRecord === 0
                         ? 0
-                        : (currentPage - 1) *
-                        pageSize +
-                        1}{" "}
+                        : (currentPage - 1) * pageSize + 1}{" "}
                     to{" "}
-                    {Math.min(
-                        currentPage * pageSize,
-                        totalRecord
-                    )}{" "}
+                    {Math.min(currentPage * pageSize, totalRecord)}{" "}
                     of {totalRecord} entries
                 </div>
 
@@ -418,34 +450,26 @@ export default function BasicTableTwo({
 
                     <div className="flex items-center gap-1">
                         {Array.from(
-                            {
-                                length: totalPages,
-                            },
-                            (_, index) =>
-                                index + 1
+                            {length: totalPages},
+                            (_, index) => index + 1
                         ).map((page) => (
                             <button
                                 key={page}
                                 type="button"
-                                onClick={() =>
-                                    setPageCurrent(
-                                        page
-                                    )
-                                }
+                                onClick={() => handleGoToPage(page)}
                                 className={`
-                                    h-9
-                                    min-w-9
-                                    rounded-lg
-                                    px-3
-                                    text-sm
-                                    font-medium
-                                    ${
-                                    currentPage ===
-                                    page
+h-9
+min-w-9
+rounded-lg
+px-3
+text-sm
+font-medium
+${
+                                    currentPage === page
                                         ? "bg-brand-500 text-white"
                                         : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/[0.05]"
                                 }
-                                `}
+`}
                             >
                                 {page}
                             </button>
@@ -455,10 +479,7 @@ export default function BasicTableTwo({
                     <button
                         type="button"
                         onClick={handleNext}
-                        disabled={
-                            currentPage ===
-                            totalPages
-                        }
+                        disabled={currentPage === totalPages}
                         className="
                             rounded-lg
                             border
