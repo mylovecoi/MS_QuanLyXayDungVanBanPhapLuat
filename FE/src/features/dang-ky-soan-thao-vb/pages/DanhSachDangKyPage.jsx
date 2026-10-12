@@ -107,14 +107,10 @@ export default function DanhSachDangKyPage() {
                     "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
                 cellClassName: "px-5 py-4 text-center",
                 render: (item) => (
-                    <Badge
-                        size="sm"
-                        color={badgeColor(item.mauTrangThaiHoSo)}
-                    >
-                        {item.tenTrangThaiHoSo ||
-                            item.maTrangThaiHoSo ||
-                            "-"}
-                    </Badge>
+                    <TrangThaiBadge
+                        tenTrangThai={item.tenTrangThaiHoSo}
+                        maMauHex={item.mauTrangThaiHoSo}
+                    />
                 ),
             },
             {

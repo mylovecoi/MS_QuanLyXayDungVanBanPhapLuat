@@ -5,7 +5,6 @@ import AppLayout from "../layouts/AppLayout.jsx";
 import SignIn from "../pages/AuthPage/SignIn.jsx";
 import SignUp from "../pages/AuthPage/SignUp";
 import NotFound from "../pages/OtherPage/NotFound.jsx";
-import TrangChu from "../pages/Dashboard/TrangChu/TrangChu.jsx";
 import Home from "../pages/Dashboard/Home.jsx";
 import UserProfiles from "../pages/UserProfiles.jsx";
 import Calendar from "../pages/Calendar.jsx";
@@ -26,6 +25,8 @@ import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import DanhSachDangKyPage from "../features/dang-ky-soan-thao-vb/pages/DanhSachDangKyPage.jsx";
 import HoSoDangKyPage from "../features/dang-ky-soan-thao-vb/pages/HoSoDangKyPage.jsx";
 import KetQuaDangKyPage from "../features/dang-ky-soan-thao-vb/pages/KetQuaDangKyPage.jsx";
+import TinTuc from "../pages/Public/TinTuc.jsx";
+import DashboardKhaiThacDuLieuPage from "../features/khai-thac-du-lieu/pages/DashboardKhaiThacDuLieuPage.jsx";
 
 export function App() {
   return (
