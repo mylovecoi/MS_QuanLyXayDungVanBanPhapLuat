@@ -22,7 +22,12 @@ public sealed class ThiHanhPhapLuatNoiDungKeHoachController(
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatNoiDungKeHoach", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
         if (!await CanAccessPlanAsync(keHoachId, cancellationToken)) return NotFound();
-        return Ok(await dbContext.NoiDungKeHoachs.AsNoTracking().Where(x => x.KeHoachId == keHoachId && !x.IsDeleted).OrderBy(x => x.ThuTu).ToListAsync(cancellationToken));
+        var items = await dbContext.NoiDungKeHoachs.AsNoTracking()
+            .Where(x => x.KeHoachId == keHoachId && !x.IsDeleted)
+            .OrderBy(x => x.ThuTu)
+            .Select(x => new NoiDungKeHoachResponse(x.Id, x.KeHoachId, x.MaNoiDung, x.TenNoiDung, x.NoiDung, x.ChiTieu, x.DonViTinh, x.HanHoanThanh, x.ThuTu, x.TrangThaiId, x.TyLeHoanThanh))
+            .ToListAsync(cancellationToken);
+        return Ok(items);
     }
 
     [HttpPost]
@@ -54,7 +59,7 @@ public sealed class ThiHanhPhapLuatNoiDungKeHoachController(
         var denied = await EnsurePermissionAsync("ThiHanhPhapLuatNoiDungKeHoach", "Index", "Index", cancellationToken);
         if (denied is not null) return denied;
         var entity = await GetScopedAsync(id, cancellationToken);
-        return entity is null ? NotFound() : Ok(entity);
+        return entity is null ? NotFound() : Ok(ToResponse(entity));
     }
 
     [HttpPut("{id:guid}")]
@@ -71,7 +76,7 @@ public sealed class ThiHanhPhapLuatNoiDungKeHoachController(
         entity.UpdatedAt = DateTime.UtcNow; entity.UpdatedBy = CurrentUser.UserId!.Value.ToString();
         AddHistory(plan.Id, entity.Id, "CAP_NHAT_NOI_DUNG_KE_HOACH", entity.TrangThaiId, entity.TrangThaiId, "Cập nhật nội dung kế hoạch.");
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Ok(entity);
+        return Ok(ToResponse(entity));
     }
 
     [HttpDelete("{id:guid}")]
@@ -111,8 +116,10 @@ public sealed class ThiHanhPhapLuatNoiDungKeHoachController(
     }
     private async Task<bool> IsPlanStatusAsync(Guid id, string code, CancellationToken cancellationToken) { var status = await trangThaiClient.GetAsync(id, cancellationToken); return status is { TrangThai: true, NhomTrangThai: "KE_HOACH_THI_HANH_PHAP_LUAT" } && status.MaTrangThai == code; }
     private async Task<bool> IsStatusAsync(Guid id, string code, CancellationToken cancellationToken) { var status = await trangThaiClient.GetAsync(id, cancellationToken); return status is { TrangThai: true, NhomTrangThai: "NOI_DUNG_THI_HANH_PHAP_LUAT" } && status.MaTrangThai == code; }
+    private static NoiDungKeHoachResponse ToResponse(NoiDungKeHoach entity) => new(entity.Id, entity.KeHoachId, entity.MaNoiDung, entity.TenNoiDung, entity.NoiDung, entity.ChiTieu, entity.DonViTinh, entity.HanHoanThanh, entity.ThuTu, entity.TrangThaiId, entity.TyLeHoanThanh);
     private void AddHistory(Guid planId, Guid contentId, string action, Guid? before, Guid? after, string content) => dbContext.LichSuXuLyThiHanhs.Add(new LichSuXuLyThiHanh { KeHoachId = planId, NoiDungKeHoachId = contentId, HanhDong = action, TrangThaiTruocId = before, TrangThaiSauId = after, NoiDung = content, NguoiXuLyId = CurrentUser.UserId!.Value, DonViXuLyId = CurrentUser.DonViId });
 }
 
+public sealed record NoiDungKeHoachResponse(Guid Id, Guid KeHoachId, string MaNoiDung, string TenNoiDung, string? NoiDung, decimal? ChiTieu, string? DonViTinh, DateOnly HanHoanThanh, int ThuTu, Guid TrangThaiId, decimal TyLeHoanThanh);
 public sealed record CreateNoiDungKeHoachRequest(Guid KeHoachId, string MaNoiDung, string TenNoiDung, string? NoiDung, decimal? ChiTieu, string? DonViTinh, DateOnly HanHoanThanh, int ThuTu, Guid TrangThaiId);
 public sealed record UpdateNoiDungKeHoachRequest(string TenNoiDung, string? NoiDung, decimal? ChiTieu, string? DonViTinh, DateOnly HanHoanThanh, int ThuTu);

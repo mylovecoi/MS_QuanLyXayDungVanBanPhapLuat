@@ -3,7 +3,7 @@ import axios from "axios";
 const qthtApiBaseUrl =
     import.meta.env.VITE_QTHT_API_URL ||
     import.meta.env.VITE_API_URL ||
-    "/api/qtht";
+    "/api";
 
 const axiosClient = axios.create({
     baseURL: qthtApiBaseUrl,

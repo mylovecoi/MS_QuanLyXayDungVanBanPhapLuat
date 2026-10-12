@@ -1,18 +1,8 @@
-import Badge from "../../../app/components/ui/badge/Badge.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
 import {useEffect, useMemo, useState} from "react";
 import Alert from "../../../app/components/ui/alert/Alert.jsx";
+import TrangThaiBadge from "../../../shared/components/TrangThaiBadge.jsx";
 import {getDanhSachDangKyXayDungVanBan} from "../api/dangKyXayDungVanBanApi.js";
-
-const badgeColor = (color) => ({
-    blue: "primary",
-    green: "success",
-    red: "error",
-    orange: "warning",
-    cyan: "info",
-    purple: "primary",
-    gray: "light",
-}[color] || "primary");
 
 const toError = (error) =>
     error?.response?.data?.message ||

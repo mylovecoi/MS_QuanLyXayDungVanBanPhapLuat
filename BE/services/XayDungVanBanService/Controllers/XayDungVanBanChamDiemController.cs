@@ -60,7 +60,7 @@ public sealed class XayDungVanBanChamDiemController(
     public async Task<ActionResult> Chot(Guid id, ChuyenTrangThaiChamDiemRequest request, CancellationToken ct) => await ChuyenTrangThai(id, request, "DA_CHOT", ct);
 
     [HttpPost("{id:guid}/huy-chot")]
-    public async Task<ActionResult> HuyChot(Guid id, ChuyenTrangThaiChamDiemRequest request, CancellationToken ct) => await ChuyenTrangThai(id, request, "DA_HUY", ct);
+    public async Task<ActionResult> HuyChot(Guid id, ChuyenTrangThaiChamDiemRequest request, CancellationToken ct) => await ChuyenTrangThai(id, request, "NHAP", ct);
 
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> Delete(Guid id, CancellationToken ct) { var denied = await Check("Delete", ct); if (denied is not null) return denied; try { return await service.DeleteAsync(id, ct) ? NoContent() : NotFound(); } catch (InvalidOperationException ex) { return BadRequest(ex.Message); } }

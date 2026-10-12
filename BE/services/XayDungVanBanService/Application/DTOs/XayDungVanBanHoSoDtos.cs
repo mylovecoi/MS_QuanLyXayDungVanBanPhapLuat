@@ -33,7 +33,9 @@ public sealed record XayDungVanBanHoSoListItemDto(
     Guid? NguoiPhuTrachId,
     int NamXayDung,
     DateTime CreatedAt,
-    int SoYKienDonVi);
+    int SoYKienDonVi,
+    string? TenTrangThaiHoSo,
+    string? MaMauHexTrangThaiHoSo);
 
 public sealed record XayDungVanBanHoSoDetailDto(
     Guid Id,

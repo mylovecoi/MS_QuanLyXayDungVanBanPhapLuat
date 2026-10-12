@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import Alert from "../../../app/components/ui/alert/Alert";
 import Badge from "../../../app/components/ui/badge/Badge";
+import TrangThaiBadge from "../../../shared/components/TrangThaiBadge";
 import { Modal } from "../../../app/components/ui/modal";
 import Input from "../../../app/components/forms/input/InputField";
 import TextArea from "../../../app/components/forms/input/TextArea";
@@ -14,7 +15,6 @@ import { getVanBans } from "../../danh-muc/api/vanBanApi";
 import { deleteHoSoSoanThao, getHoSoXayDungVanBans, kiemTraTruocTrinhThamDinh, trinhThamDinh } from "../api/xayDungVanBanApi";
 
 const ALL_VALUE = "__ALL__";
-const HO_SO_STATUS_GROUP = "HO_SO_XAY_DUNG_VAN_BAN";
 const DEFAULT_PROCESSING_DAYS = 5;
 const EDITABLE_STATUS_CODES = new Set(["NHAP", "TRA_LAI", "BI_TRA_LAI", "DANG_XU_LY"]);
 const emptyTransfer = { buocQuyTrinhTiepTheoId: "", trangThaiHoSoTiepTheoId: "", donViNhanThamDinhId: "", ngayChuyen: "", soNgayXuLy: DEFAULT_PROCESSING_DAYS, hanDeNghiTraKetQua: "", soNgayCanhBao: 0, thoiGianCanhBao: "", noiDungGhiChu: "" };
@@ -65,7 +65,11 @@ function hasYKien(item) {
 function canModifyByStatus(status) {
   const code = `${status?.maTrangThai || ""}`.toUpperCase();
   const name = `${status?.tenTrangThai || ""}`.toLowerCase();
-  return EDITABLE_STATUS_CODES.has(code) || name.includes("nháp") || name.includes("trả lại");
+  return EDITABLE_STATUS_CODES.has(code)
+    || name.includes("nháp")
+    || name.includes("soạn thảo")
+    || name.includes("trả lại")
+    || name.includes("bổ sung");
 }
 
 function Field({ label, required, children }) {
@@ -156,7 +160,9 @@ export default function HoSoListPage() {
         getVanBans({ pageSize: 100, pageCurrent: 1 }),
         getQuyTrinhs({ pageSize: 100, pageCurrent: 1 }),
         getDonViOptions(),
-        getTrangThais({ nhomTrangThai: HO_SO_STATUS_GROUP, pageSize: 100, pageCurrent: 1 }),
+        // Không lọc theo nhóm: dữ liệu lịch sử có thể đang tham chiếu trạng thái
+        // thuộc nhóm nghiệp vụ khác. Tra cứu theo Id là nguồn chính xác nhất.
+        getTrangThais({ pageSize: 500, pageCurrent: 1 }),
       ]);
       setVanBans(vanBanResponse?.data || []);
       setQuyTrinhs(quyTrinhResponse?.data || []);
@@ -381,7 +387,11 @@ export default function HoSoListPage() {
               {loading ? (
                 <tr><td colSpan="7" className="px-5 py-10 text-center text-sm text-gray-500">Đang tải dữ liệu...</td></tr>
               ) : items.length ? items.map((item) => {
-                const trangThai = trangThaiMap.get(item.trangThaiHoSoId);
+                const trangThai = {
+                  ...trangThaiMap.get(item.trangThaiHoSoId),
+                  tenTrangThai: item.tenTrangThaiHoSo || trangThaiMap.get(item.trangThaiHoSoId)?.tenTrangThai,
+                  maMauHex: item.maMauHexTrangThaiHoSo || trangThaiMap.get(item.trangThaiHoSoId)?.maMauHex,
+                };
                 const canModify = canModifyByStatus(trangThai);
                 return (
                   <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
@@ -395,8 +405,7 @@ export default function HoSoListPage() {
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600 dark:text-gray-300">{donViMap.get(item.donViChuTriSoanThaoId) || item.donViChuTriSoanThaoId}</td>
                     <td className="px-5 py-4 text-center">
-                      <Badge size="sm" color={canModify ? "warning" : "light"}>{trangThai?.tenTrangThai || trangThai?.maTrangThai || item.trangThaiHoSoId || "-"}</Badge>
-                      {trangThai?.maTrangThai && <div className="mt-1 text-xs text-gray-500">{trangThai.maTrangThai}</div>}
+                      <TrangThaiBadge tenTrangThai={trangThai.tenTrangThai} maMauHex={trangThai.maMauHex} />
                     </td>
                     <td className="px-5 py-4 text-center"><Badge size="sm" color="light">{item.namXayDung}</Badge></td>
                     <td className="px-5 py-4 text-center text-sm text-gray-500">{formatDate(item.createdAt)}</td>

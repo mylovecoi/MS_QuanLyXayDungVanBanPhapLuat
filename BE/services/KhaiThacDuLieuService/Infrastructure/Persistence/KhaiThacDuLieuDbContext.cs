@@ -121,6 +121,9 @@ public sealed class KhaiThacDuLieuDbContext(DbContextOptions<KhaiThacDuLieuDbCon
         modelBuilder.Entity<DanhMucDonViTraCuu>(entity =>
         {
             entity.ToTable("DanhMucDonVis", "dm", table => table.ExcludeFromMigrations());
+            // Bảng danh mục dùng chung hiện chưa có cột soft-delete.
+            // Đây là entity chỉ đọc nên không ánh xạ cột IsDeleted kế thừa.
+            entity.Ignore(x => x.IsDeleted);
             entity.HasIndex(x => x.TenDonVi);
         });
 

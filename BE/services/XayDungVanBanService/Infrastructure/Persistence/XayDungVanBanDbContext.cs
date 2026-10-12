@@ -23,9 +23,19 @@ public sealed class XayDungVanBanDbContext(DbContextOptions<XayDungVanBanDbConte
     public DbSet<HoSoXayDungVanBanChamDiem> HoSoXayDungVanBanChamDiems => Set<HoSoXayDungVanBanChamDiem>();
     public DbSet<HoSoXayDungVanBanChamDiemChiTiet> HoSoXayDungVanBanChamDiemChiTiets => Set<HoSoXayDungVanBanChamDiemChiTiet>();
     public DbSet<HoSoXayDungVanBanChamDiemLichSu> HoSoXayDungVanBanChamDiemLichSus => Set<HoSoXayDungVanBanChamDiemLichSu>();
+    public DbSet<DanhMucTrangThaiNghiepVuQuyTrinh> DanhMucTrangThaiNghiepVuQuyTrinhs => Set<DanhMucTrangThaiNghiepVuQuyTrinh>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<DanhMucTrangThaiNghiepVuQuyTrinh>(entity =>
+        {
+            entity.ToTable("DanhMucTrangThaiNghiepVuQuyTrinhs", "dm", table => table.ExcludeFromMigrations());
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.MaTrangThai).HasMaxLength(100);
+            entity.Property(x => x.TenTrangThai).HasMaxLength(255);
+            entity.Property(x => x.MaMauHex).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<HoSoXayDungVanBan>(entity =>
         {
             entity.HasIndex(x => x.MaHoSo).IsUnique();

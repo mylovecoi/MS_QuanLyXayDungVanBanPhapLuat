@@ -34,13 +34,15 @@ export function App() {
 
         <Routes>
           {/* Auth */}
+          <Route path="/" element={<TinTuc/>}/>
+          <Route path="/tin-tuc" element={<TinTuc/>}/>
           <Route path="/signin" element={<SignIn/>}/>
           <Route path="/signup" element={<SignUp/>}/>
 
           {/* Require authentication */}
           <Route element={<ProtectedRoute/>}>
             <Route element={<AppLayout/>}>
-              <Route path="/" element={<TrangChu/>}/>
+              <Route path="/trang-chu" element={<DashboardKhaiThacDuLieuPage/>}/>
               <Route path="/ecommerce" element={<Home/>}/>
 
               <Route

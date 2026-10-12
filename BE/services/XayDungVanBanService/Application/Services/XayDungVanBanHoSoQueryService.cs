@@ -18,25 +18,45 @@ public sealed class XayDungVanBanHoSoQueryService(
             .Where(x => !x.IsDeleted), request);
 
         var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
+        var hoSos = await query
             .OrderByDescending(x => x.CreatedAt)
             .Skip((pageCurrent - 1) * pageSize)
             .Take(pageSize)
-            .Select(x => new XayDungVanBanHoSoListItemDto(
-                x.Id,
-                x.MaHoSo,
-                x.TenHoSo,
-                x.TenDuThaoVanBan,
-                x.DanhMucVanBanId,
-                x.QuyTrinhSoanThaoId,
-                x.BuocHienTaiId,
-                x.TrangThaiHoSoId,
-                x.DonViChuTriSoanThaoId,
-                x.NguoiPhuTrachId,
-                x.NamXayDung,
-                x.CreatedAt,
-                dbContext.HoSoXayDungVanBanYKienDonVis.Count(y => y.HoSoXayDungVanBanId == x.Id && !y.IsDeleted)))
             .ToListAsync(cancellationToken);
+
+        var trangThaiIds = hoSos.Select(x => x.TrangThaiHoSoId).Distinct().ToList();
+        var trangThaiMap = await dbContext.DanhMucTrangThaiNghiepVuQuyTrinhs
+            .AsNoTracking()
+            .Where(x => trangThaiIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var hoSoIds = hoSos.Select(x => x.Id).ToList();
+        var soYKienMap = await dbContext.HoSoXayDungVanBanYKienDonVis
+            .AsNoTracking()
+            .Where(x => hoSoIds.Contains(x.HoSoXayDungVanBanId) && !x.IsDeleted)
+            .GroupBy(x => x.HoSoXayDungVanBanId)
+            .Select(x => new { HoSoId = x.Key, SoLuong = x.Count() })
+            .ToDictionaryAsync(x => x.HoSoId, x => x.SoLuong, cancellationToken);
+
+        var items = hoSos.Select(hoSo =>
+        {
+            trangThaiMap.TryGetValue(hoSo.TrangThaiHoSoId, out var trangThai);
+            return new XayDungVanBanHoSoListItemDto(
+                hoSo.Id,
+                hoSo.MaHoSo,
+                hoSo.TenHoSo,
+                hoSo.TenDuThaoVanBan,
+                hoSo.DanhMucVanBanId,
+                hoSo.QuyTrinhSoanThaoId,
+                hoSo.BuocHienTaiId,
+                hoSo.TrangThaiHoSoId,
+                hoSo.DonViChuTriSoanThaoId,
+                hoSo.NguoiPhuTrachId,
+                hoSo.NamXayDung,
+                hoSo.CreatedAt,
+                soYKienMap.GetValueOrDefault(hoSo.Id),
+                trangThai?.TenTrangThai,
+                trangThai?.MaMauHex);
+        }).ToList();
 
         return new PagedResultDto<XayDungVanBanHoSoListItemDto>(items, totalCount, pageSize, pageCurrent);
     }
