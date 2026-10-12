@@ -5,18 +5,11 @@ import Button from "../ui/button/Button";
 import Input from "../forms/input/InputField";
 import Label from "../forms/Label";
 
-export default function UserInfoCard() {
+export default function UserInfoCard({
+                                         userInfo = {},
+                                         onUserInfoChange,
+                                     }) {
     const {isOpen, openModal, closeModal} = useModal();
-
-    const getUserInfo = () => {
-        try {
-            return JSON.parse(localStorage.getItem("userInfo") || "{}");
-        } catch {
-            return {};
-        }
-    };
-
-    const [userInfo, setUserInfo] = useState(getUserInfo);
 
     const [form, setForm] = useState({
         displayName: userInfo.displayName || "",
@@ -25,15 +18,12 @@ export default function UserInfoCard() {
 
     useEffect(() => {
         if (isOpen) {
-            const currentUser = getUserInfo();
-
-            setUserInfo(currentUser);
             setForm({
-                displayName: currentUser.displayName || "",
-                username: currentUser.username || "",
+                displayName: userInfo.displayName || "",
+                username: userInfo.username || "",
             });
         }
-    }, [isOpen]);
+    }, [isOpen, userInfo.displayName, userInfo.username]);
 
     const handleChange = (e) => {
         const {name, value} = e.target;
@@ -53,9 +43,12 @@ export default function UserInfoCard() {
             username: form.username.trim(),
         };
 
-        localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
+        localStorage.setItem(
+            "userInfo",
+            JSON.stringify(updatedUserInfo)
+        );
 
-        setUserInfo(updatedUserInfo);
+        onUserInfoChange?.(updatedUserInfo);
         closeModal();
     };
 
@@ -67,7 +60,9 @@ export default function UserInfoCard() {
         {label: "Nhóm quyền", value: userInfo.groupPermissionId},
         {
             label: "Loại tài khoản",
-            value: userInfo.isSSA ? "Quản trị hệ thống (SSA)" : "Người dùng",
+            value: userInfo.isSSA
+                ? "Quản trị hệ thống (SSA)"
+                : "Người dùng",
         },
     ];
 
@@ -163,12 +158,20 @@ export default function UserInfoCard() {
 
                                     <div className="col-span-2 lg:col-span-1">
                                         <Label>Mã người dùng</Label>
-                                        <Input type="text" value={userInfo.userId || ""} disabled/>
+                                        <Input
+                                            type="text"
+                                            value={userInfo.userId || ""}
+                                            disabled
+                                        />
                                     </div>
 
                                     <div className="col-span-2 lg:col-span-1">
                                         <Label>Mã đơn vị</Label>
-                                        <Input type="text" value={userInfo.donViId || ""} disabled/>
+                                        <Input
+                                            type="text"
+                                            value={userInfo.donViId || ""}
+                                            disabled
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -192,4 +195,3 @@ export default function UserInfoCard() {
         </div>
     );
 }
-

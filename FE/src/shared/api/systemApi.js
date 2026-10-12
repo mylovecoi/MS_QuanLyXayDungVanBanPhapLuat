@@ -2,6 +2,7 @@ import {
   quanTriHeThongRequest,
   quanTriHeThongPagedRequest,
 } from './quanTriHeThongApi';
+import axiosClient from "./axiosClient.js";
 
 export function getSystemInfo() {
   return quanTriHeThongRequest(
@@ -21,3 +22,5 @@ export function getRoleActionList(params) {
 export function getFrontendMenu() {
   return quanTriHeThongRequest('/he-thong/auth/frontend-menu');
 }
+
+
