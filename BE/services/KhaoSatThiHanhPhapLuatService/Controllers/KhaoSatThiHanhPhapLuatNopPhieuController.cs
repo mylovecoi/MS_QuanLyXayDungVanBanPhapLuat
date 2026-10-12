@@ -37,7 +37,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
     }
     [HttpPost("ket-qua-tong-hop/upload")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<ActionResult> UploadAggregate(Guid cuocKhaoSatId, Guid nhomDoiTuongId, Guid mauPhieuId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, string? tenPhanMem, string? phienBanPhanMem, string? duongDanHeThongNguon, string? ghiChuNguonDuLieu, CancellationToken ct)
+    public async Task<ActionResult> UploadAggregate([FromForm] Guid cuocKhaoSatId, [FromForm] Guid nhomDoiTuongId, [FromForm] Guid mauPhieuId, [FromForm] Guid trangThaiThanhCongId, [FromForm] Guid trangThaiLoiId, [FromForm] IFormFile file, [FromForm] string? tenPhanMem, [FromForm] string? phienBanPhanMem, [FromForm] string? duongDanHeThongNguon, [FromForm] string? ghiChuNguonDuLieu, CancellationToken ct)
     {
         if (file.Length == 0 || !string.Equals(Path.GetExtension(file.FileName), ".docx", StringComparison.OrdinalIgnoreCase)) return BadRequest("Chỉ nhận file kết quả Word .docx.");
         var template = await db.MauPhieuKhaoSats.SingleOrDefaultAsync(x => x.Id == mauPhieuId && x.CuocKhaoSatId == cuocKhaoSatId && x.NhomDoiTuongKhaoSatId == nhomDoiTuongId && !x.IsDeleted, ct);
@@ -67,7 +67,7 @@ public sealed class KhaoSatThiHanhPhapLuatNopPhieuController(KhaoSatThiHanhPhapL
     }
     [HttpPost("{doiTuongId:guid}/upload")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<ActionResult> Upload(Guid doiTuongId, Guid trangThaiThanhCongId, Guid trangThaiLoiId, IFormFile file, string? tenPhanMem, string? phienBanPhanMem, string? duongDanHeThongNguon, string? ghiChuNguonDuLieu, CancellationToken ct)
+    public async Task<ActionResult> Upload(Guid doiTuongId, [FromForm] Guid trangThaiThanhCongId, [FromForm] Guid trangThaiLoiId, [FromForm] IFormFile file, [FromForm] string? tenPhanMem, [FromForm] string? phienBanPhanMem, [FromForm] string? duongDanHeThongNguon, [FromForm] string? ghiChuNguonDuLieu, CancellationToken ct)
     {
         var subject = await db.DoiTuongKhaoSats.SingleOrDefaultAsync(x => x.Id == doiTuongId && !x.IsDeleted, ct);
         if (subject is null) return NotFound();

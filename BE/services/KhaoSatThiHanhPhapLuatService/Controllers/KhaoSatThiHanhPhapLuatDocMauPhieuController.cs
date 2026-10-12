@@ -13,7 +13,7 @@ namespace KhaoSatThiHanhPhapLuatService.Controllers;
 public sealed class KhaoSatThiHanhPhapLuatDocMauPhieuController(KhaoSatThiHanhPhapLuatDbContext db, IWordSurveyParser parser, IWordDocumentConverter converter, IWebHostEnvironment environment) : ControllerBase
 {
     [HttpPost("upload")]
-    public async Task<ActionResult> Upload(Guid cuocKhaoSatId, Guid nhomDoiTuongId, IFormFile file, CancellationToken ct)
+    public async Task<ActionResult> Upload([FromForm] Guid cuocKhaoSatId, [FromForm] Guid nhomDoiTuongId, [FromForm] IFormFile file, CancellationToken ct)
     {
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant(); if (extension is not ".doc" and not ".docx") return BadRequest("Chỉ nhận file Word .doc hoặc .docx.");
         if (!await db.NhomDoiTuongKhaoSats.AnyAsync(x => x.Id == nhomDoiTuongId && x.CuocKhaoSatId == cuocKhaoSatId && !x.IsDeleted, ct)) return NotFound();
@@ -53,6 +53,8 @@ public sealed class KhaoSatThiHanhPhapLuatDocMauPhieuController(KhaoSatThiHanhPh
         var session = await db.PhienDocMauPhieuKhaoSats.SingleOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
         if (session is null) return NotFound();
         if (session.TrangThai == "DA_XAC_NHAN") return Conflict("Phiên đọc đã được xác nhận.");
+        var groupInfo = await db.NhomDoiTuongKhaoSats.AsNoTracking().SingleOrDefaultAsync(x => x.Id == session.NhomDoiTuongKhaoSatId && !x.IsDeleted, ct);
+        if (groupInfo is null) return NotFound("Không tìm thấy nhóm đối tượng khảo sát.");
         var rows = await db.CauHoiNhapMauPhieuKhaoSats.Where(x => x.PhienDocMauPhieuKhaoSatId == id && !x.IsDeleted).OrderBy(x => x.ThuTu).ToListAsync(ct);
         if (rows.Count == 0 || rows.Any(x => string.IsNullOrWhiteSpace(x.MaCauHoi) || string.IsNullOrWhiteSpace(x.NoiDung))) return BadRequest("Bản nháp chưa có câu hỏi hợp lệ.");
         if (rows.GroupBy(x => new { x.MaCauHoi, x.MaLuaChon }).Any(x => !string.IsNullOrWhiteSpace(x.Key.MaLuaChon) && x.Count() > 1)) return BadRequest("Có mã đáp án trùng trong cùng câu hỏi.");
@@ -62,14 +64,36 @@ public sealed class KhaoSatThiHanhPhapLuatDocMauPhieuController(KhaoSatThiHanhPh
         foreach (var group in rows.GroupBy(x => x.MaCauHoi, StringComparer.OrdinalIgnoreCase))
         {
             var first = group.First();
-            var standard = await db.CauHoiThongKes.SingleOrDefaultAsync(x => x.CuocKhaoSatId == session.CuocKhaoSatId && x.MaCauHoiThongKe == first.MaCauHoi && !x.IsDeleted, ct)
-                ?? new CauHoiThongKe { CuocKhaoSatId = session.CuocKhaoSatId, MaCauHoiThongKe = first.MaCauHoi, NoiDung = first.NoiDung, LoaiCauHoi = first.LoaiCauHoi, ChoPhepNhieuLuaChon = first.ChoPhepNhieuLuaChon, CoYKienTuDo = first.CoYKienTuDo };
+            var statisticalCode = BuildStatisticalQuestionCode(groupInfo.MaNhom, first.MaCauHoi);
+            var standard = await FindStandardQuestionAsync(session.CuocKhaoSatId, session.NhomDoiTuongKhaoSatId, statisticalCode, first.MaCauHoi, ct)
+                ?? new CauHoiThongKe { CuocKhaoSatId = session.CuocKhaoSatId, MaCauHoiThongKe = statisticalCode, NoiDung = first.NoiDung, LoaiCauHoi = first.LoaiCauHoi, ChoPhepNhieuLuaChon = first.ChoPhepNhieuLuaChon, CoYKienTuDo = first.CoYKienTuDo };
             var question = new CauHoiMauPhieu { MauPhieuKhaoSatId = template.Id, CauHoiThongKeId = standard.Id, MaCauHoi = first.MaCauHoi, NoiDung = first.NoiDung, LoaiCauHoi = first.LoaiCauHoi, BatBuoc = first.BatBuoc, ChoPhepNhieuLuaChon = first.ChoPhepNhieuLuaChon, CoYKienTuDo = first.CoYKienTuDo, ThuTu = first.ThuTu };
             if (db.Entry(standard).State == EntityState.Detached) db.CauHoiThongKes.Add(standard); db.CauHoiMauPhieus.Add(question);
             foreach (var row in group.Where(x => !string.IsNullOrWhiteSpace(x.MaLuaChon))) db.LuaChonTraLois.Add(new LuaChonTraLoi { CauHoiMauPhieuId = question.Id, MaLuaChon = row.MaLuaChon!, NoiDung = row.NoiDungLuaChon ?? string.Empty, ThuTu = row.ThuTu });
         }
         session.TrangThai = "DA_XAC_NHAN"; session.UpdatedAt = DateTime.UtcNow; await db.SaveChangesAsync(ct);
         return Ok(new { template.Id, template.PhienBan });
+    }
+
+    private static string BuildStatisticalQuestionCode(string groupCode, string questionCode) => $"{groupCode.Trim().ToUpperInvariant()}::{questionCode.Trim()}";
+
+    private async Task<CauHoiThongKe?> FindStandardQuestionAsync(Guid cuocKhaoSatId, Guid nhomDoiTuongId, string statisticalCode, string questionCode, CancellationToken ct)
+    {
+        var scoped = await db.CauHoiThongKes.SingleOrDefaultAsync(x => x.CuocKhaoSatId == cuocKhaoSatId && x.MaCauHoiThongKe == statisticalCode && !x.IsDeleted, ct);
+        if (scoped is not null) return scoped;
+
+        var existingStandardId = await (from template in db.MauPhieuKhaoSats.AsNoTracking()
+                                        join question in db.CauHoiMauPhieus.AsNoTracking() on template.Id equals question.MauPhieuKhaoSatId
+                                        where template.CuocKhaoSatId == cuocKhaoSatId
+                                              && template.NhomDoiTuongKhaoSatId == nhomDoiTuongId
+                                              && !template.IsDeleted
+                                              && !question.IsDeleted
+                                              && question.MaCauHoi == questionCode
+                                        select question.CauHoiThongKeId).FirstOrDefaultAsync(ct);
+
+        return existingStandardId == Guid.Empty
+            ? null
+            : await db.CauHoiThongKes.SingleOrDefaultAsync(x => x.Id == existingStandardId && !x.IsDeleted, ct);
     }
 }
 

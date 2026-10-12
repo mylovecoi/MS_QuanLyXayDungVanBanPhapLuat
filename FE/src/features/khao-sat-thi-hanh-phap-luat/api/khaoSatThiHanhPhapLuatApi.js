@@ -12,6 +12,21 @@ export async function getCuocKhaoSat(id) {
   return response.data;
 }
 
+export async function createCuocKhaoSat(input) {
+  const response = await axiosClient.post(BASE_PATH, input, { baseURL: "" });
+  return response.data;
+}
+
+export async function createNhomDoiTuongKhaoSat(cuocKhaoSatId, input) {
+  const response = await axiosClient.post(`${BASE_PATH}/${cuocKhaoSatId}/nhom-doi-tuong`, input, { baseURL: "" });
+  return response.data;
+}
+
+export async function createDoiTuongKhaoSat(cuocKhaoSatId, input) {
+  const response = await axiosClient.post(`${BASE_PATH}/${cuocKhaoSatId}/doi-tuong`, input, { baseURL: "" });
+  return response.data;
+}
+
 export async function uploadMauPhieu({ cuocKhaoSatId, nhomDoiTuongId, phienBan, file }) {
   const form = new FormData();
   form.append("cuocKhaoSatId", cuocKhaoSatId);

@@ -1,10 +1,12 @@
 using DangKyXayDungVanBanService.Application.Abstractions;
 using DangKyXayDungVanBanService.Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DangKyXayDungVanBanService.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/dang-ky-xay-dung-van-ban/ket-qua")]
 public class DangKyXayDungVanBanKetQuaController(IDangKyXayDungVanBanAppService appService) : ControllerBase
 {

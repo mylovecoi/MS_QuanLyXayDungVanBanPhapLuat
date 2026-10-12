@@ -10,14 +10,15 @@ function unwrapResponse(response) {
     if (payload.isSuccess === false) {
         throw new Error(payload?.message || "Thao tác không thành công.");
     }
-    return payload;
+
+    return payload?.data ?? payload;
 }
 
 export async function getDangKyXayDungVanBanById(id) {
     const response = await axiosClient.get(`${BASE_URL}/${id}`, {
         baseURL: "",
     });
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function getDanhSachDangKyXayDungVanBan(params = {}) {
@@ -36,11 +37,20 @@ export async function getKetQuaDangKyXayDungVanBan(params = {}) {
     return unwrapResponse(response);
 }
 
+export async function capNhatKetQuaPheDuyet(id, data) {
+    const response = await axiosClient.post(
+        `${RESULT_URL}/${id}/ket-qua-phe-duyet`,
+        data,
+        {baseURL: ""}
+    );
+    return unwrapResponse(response);
+}
+
 export async function createDangKyXayDungVanBan(data) {
     const response = await axiosClient.post(BASE_URL, data, {
         baseURL: "",
     });
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function updateDangKyXayDungVanBan(id, data) {
@@ -61,7 +71,7 @@ export async function getDangKyXayDungVanBanTimeline(id) {
     const response = await axiosClient.get(`${BASE_URL}/${id}/timeline`, {
         baseURL: "",
     });
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function getHanhDongKhaDung(id) {
@@ -69,14 +79,14 @@ export async function getHanhDongKhaDung(id) {
         `${BASE_URL}/${id}/hanh-dong-kha-dung`,
         {baseURL: ""}
     );
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function getDangKyXayDungVanBanFiles(id) {
     const response = await axiosClient.get(`${BASE_URL}/${id}/files`, {
         baseURL: "",
     });
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function uploadDangKyXayDungVanBanFile(id, formData) {
@@ -85,7 +95,7 @@ export async function uploadDangKyXayDungVanBanFile(id, formData) {
         formData,
         {baseURL: ""}
     );
-    return unwrapResponse(response).data;
+    return unwrapResponse(response);
 }
 
 export async function deleteDangKyXayDungVanBanFile(id, fileId) {

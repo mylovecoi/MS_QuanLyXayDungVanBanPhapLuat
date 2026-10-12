@@ -93,11 +93,8 @@ DECLARE @Buoc TABLE
 
 INSERT INTO @Buoc VALUES
 -- Đăng ký xây dựng QPPL
-('33333333-3333-3333-3333-333333333311', N'DXDM_DKXD_QPPL', N'LAP_HO_SO', N'Lập hồ sơ đề nghị/đăng ký', 1, N'NhapLieu', 0, 0, N'Cơ quan chủ trì soạn thảo lập hồ sơ đề xuất danh mục/đăng ký trên phần mềm.'),
-('33333333-3333-3333-3333-333333333312', N'DXDM_DKXD_QPPL', N'TRINH_HO_SO', N'Trình hồ sơ/Chờ phê duyệt', 2, N'XuLy', 0, 1, N'Hồ sơ đã trình sang cơ quan có thẩm quyền phê duyệt.'),
-('33333333-3333-3333-3333-333333333313', N'DXDM_DKXD_QPPL', N'PHE_DUYET', N'Phê duyệt hồ sơ', 3, N'PheDuyet', 0, 1, N'Cơ quan thẩm quyền phê duyệt phối hợp Sở Tư pháp xem xét hồ sơ.'),
-('33333333-3333-3333-3333-333333333314', N'DXDM_DKXD_QPPL', N'CAP_NHAT_KET_QUA', N'Cập nhật kết quả phê duyệt', 4, N'NhapLieu', 1, 0, N'Cơ quan chủ trì cập nhật kết quả phê duyệt lên phần mềm.'),
-('33333333-3333-3333-3333-333333333315', N'DXDM_DKXD_QPPL', N'HOAN_THANH', N'Hoàn thành', 5, N'KetThuc', 0, 0, N'Hoàn thành quy trình đăng ký xây dựng văn bản.'),
+('33333333-3333-3333-3333-333333333311', N'DXDM_DKXD_QPPL', N'DE_XUAT_DANG_KY', N'Đề xuất danh mục/Đăng ký xây dựng văn bản QPPL', 1, N'NhapLieu', 0, 1, N'Cơ quan chủ trì lập hồ sơ, trình hồ sơ đến cơ quan có thẩm quyền và hệ thống lưu trữ hồ sơ đề xuất/đăng ký.'),
+('33333333-3333-3333-3333-333333333313', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'Phê duyệt và cập nhật kết quả', 2, N'XuLy', 1, 1, N'Việc phê duyệt diễn ra ngoài hệ thống; cơ quan chủ trì cập nhật kết quả phê duyệt lên phần mềm.'),
 
 -- Xây dựng Quyết định UBND
 ('44444444-4444-4444-4444-444444444111', N'XD_QD_UBND_TINH', N'SOAN_THAO_LAY_Y_KIEN', N'Tổ chức soạn thảo, lấy ý kiến góp ý', 1, N'NhapLieu', 1, 0, N'Tạo hồ sơ xây dựng dự thảo Quyết định và đính kèm tài liệu dự thảo, tổng hợp ý kiến.'),
@@ -173,12 +170,12 @@ DECLARE @TrangThai TABLE
 );
 
 INSERT INTO @TrangThai VALUES
-('55555555-5555-5555-5555-555555555101', N'DXDM_DKXD_QPPL', N'LAP_HO_SO', N'DANG_SOAN_THAO', N'Đang soạn thảo', N'#2563EB', 1, 1, 0, N'Hồ sơ đang được lập/cập nhật.'),
-('55555555-5555-5555-5555-555555555102', N'DXDM_DKXD_QPPL', N'TRINH_HO_SO', N'DA_TRINH_PHE_DUYET', N'Đã trình phê duyệt', N'#F59E0B', 2, 0, 0, N'Hồ sơ đã trình cơ quan thẩm quyền.'),
-('55555555-5555-5555-5555-555555555103', N'DXDM_DKXD_QPPL', N'LAP_HO_SO', N'BI_TRA_LAI', N'Bị trả lại', N'#EF4444', 3, 0, 0, N'Hồ sơ bị trả lại để bổ sung.'),
-('55555555-5555-5555-5555-555555555104', N'DXDM_DKXD_QPPL', N'CAP_NHAT_KET_QUA', N'DA_PHE_DUYET', N'Đã phê duyệt', N'#10B981', 4, 0, 0, N'Hồ sơ đăng ký được phê duyệt.'),
-('55555555-5555-5555-5555-555555555105', N'DXDM_DKXD_QPPL', N'HOAN_THANH', N'HOAN_THANH', N'Hoàn thành', N'#16A34A', 5, 0, 1, N'Hoàn thành quy trình đăng ký.'),
-('55555555-5555-5555-5555-555555555106', N'DXDM_DKXD_QPPL', N'HOAN_THANH', N'KHONG_PHE_DUYET', N'Không phê duyệt', N'#DC2626', 6, 0, 1, N'Hồ sơ không được phê duyệt.'),
+('55555555-5555-5555-5555-555555555101', N'DXDM_DKXD_QPPL', N'DE_XUAT_DANG_KY', N'DANG_SOAN_THAO', N'Đang soạn thảo', N'#2563EB', 1, 1, 0, N'Hồ sơ đang được lập/cập nhật.'),
+('55555555-5555-5555-5555-555555555102', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'DA_TRINH_PHE_DUYET', N'Đã trình phê duyệt', N'#F59E0B', 2, 0, 0, N'Hồ sơ đã trình cơ quan thẩm quyền.'),
+('55555555-5555-5555-5555-555555555103', N'DXDM_DKXD_QPPL', N'DE_XUAT_DANG_KY', N'BI_TRA_LAI', N'Bị trả lại', N'#EF4444', 3, 0, 0, N'Hồ sơ bị trả lại để bổ sung.'),
+('55555555-5555-5555-5555-555555555104', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'DA_PHE_DUYET', N'Đã phê duyệt', N'#10B981', 4, 0, 0, N'Hồ sơ đăng ký được phê duyệt.'),
+('55555555-5555-5555-5555-555555555105', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'HOAN_THANH', N'Hoàn thành', N'#16A34A', 5, 0, 1, N'Hoàn thành quy trình đăng ký.'),
+('55555555-5555-5555-5555-555555555106', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'KHONG_PHE_DUYET', N'Không phê duyệt', N'#DC2626', 6, 0, 1, N'Hồ sơ không được phê duyệt.'),
 
 ('55555555-5555-5555-5555-555555555201', N'XD_QD_UBND_TINH', N'SOAN_THAO_LAY_Y_KIEN', N'DANG_SOAN_THAO', N'Đang soạn thảo', N'#2563EB', 1, 1, 0, N'Hồ sơ dự thảo Quyết định đang được soạn thảo, lấy ý kiến.'),
 ('55555555-5555-5555-5555-555555555202', N'XD_QD_UBND_TINH', N'GUI_THAM_DINH', N'CHO_THAM_DINH', N'Chờ thẩm định', N'#F59E0B', 2, 0, 0, N'Hồ sơ đã gửi Sở Tư pháp thẩm định.'),
@@ -250,12 +247,9 @@ DECLARE @ChuyenBuoc TABLE
 
 INSERT INTO @ChuyenBuoc VALUES
 -- Đăng ký xây dựng QPPL
-('33333333-3333-3333-3333-333333333321', N'DXDM_DKXD_QPPL', N'LAP_HO_SO', N'TRINH_HO_SO', N'TRINH_PHE_DUYET', N'Forward', 1, 0, 0, N'Trình hồ sơ đăng ký đến cơ quan có thẩm quyền.'),
-('33333333-3333-3333-3333-333333333322', N'DXDM_DKXD_QPPL', N'TRINH_HO_SO', N'PHE_DUYET', N'TIEP_NHAN_PHE_DUYET', N'Forward', 1, 0, 0, N'Tiếp nhận hồ sơ để xem xét, phê duyệt.'),
-('33333333-3333-3333-3333-333333333323', N'DXDM_DKXD_QPPL', N'PHE_DUYET', N'CAP_NHAT_KET_QUA', N'PHE_DUYET', N'Approve', 1, 0, 0, N'Hồ sơ được phê duyệt, chuyển cập nhật kết quả.'),
-('33333333-3333-3333-3333-333333333324', N'DXDM_DKXD_QPPL', N'PHE_DUYET', N'LAP_HO_SO', N'TRA_LAI', N'Return', 0, 1, 0, N'Trả lại hồ sơ để bổ sung.'),
-('33333333-3333-3333-3333-333333333325', N'DXDM_DKXD_QPPL', N'PHE_DUYET', N'HOAN_THANH', N'KHONG_PHE_DUYET', N'Reject', 0, 1, 1, N'Không phê duyệt hồ sơ đăng ký.'),
-('33333333-3333-3333-3333-333333333326', N'DXDM_DKXD_QPPL', N'CAP_NHAT_KET_QUA', N'HOAN_THANH', N'HOAN_THANH', N'Forward', 1, 0, 1, N'Hoàn thành quy trình đăng ký.'),
+('33333333-3333-3333-3333-333333333321', N'DXDM_DKXD_QPPL', N'DE_XUAT_DANG_KY', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'TRINH_PHE_DUYET', N'Forward', 1, 0, 0, N'Trình hồ sơ đề xuất/đăng ký sang bước phê duyệt và cập nhật kết quả.'),
+('33333333-3333-3333-3333-333333333324', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'DE_XUAT_DANG_KY', N'TRA_LAI', N'Return', 0, 1, 0, N'Trả hồ sơ về bước đề xuất/đăng ký để chỉnh sửa.'),
+('33333333-3333-3333-3333-333333333326', N'DXDM_DKXD_QPPL', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'PHE_DUYET_CAP_NHAT_KET_QUA', N'HOAN_THANH', N'Complete', 0, 0, 1, N'Kết thúc quy trình đăng ký sau khi cập nhật kết quả.'),
 
 -- Xây dựng Quyết định UBND
 ('44444444-4444-4444-4444-444444444131', N'XD_QD_UBND_TINH', N'SOAN_THAO_LAY_Y_KIEN', N'GUI_THAM_DINH', N'GUI_THAM_DINH', N'Forward', 1, 0, 0, N'Gửi hồ sơ dự thảo Quyết định đến Sở Tư pháp thẩm định.'),

@@ -223,15 +223,15 @@
 
 .modern-admin-shell {
     background:
-        radial-gradient(circle at top left, rgba(70, 95, 255, 0.08), transparent 30rem),
-        linear-gradient(180deg, #f6f8fb 0%, var(--admin-bg) 100%);
+            radial-gradient(circle at top left, rgba(70, 95, 255, 0.08), transparent 30rem),
+            linear-gradient(180deg, #f6f8fb 0%, var(--admin-bg) 100%);
     min-height: 100vh;
 }
 
 .dark .modern-admin-shell {
     background:
-        radial-gradient(circle at top left, rgba(70, 95, 255, 0.16), transparent 30rem),
-        linear-gradient(180deg, #111827 0%, var(--admin-bg) 100%);
+            radial-gradient(circle at top left, rgba(70, 95, 255, 0.16), transparent 30rem),
+            linear-gradient(180deg, #111827 0%, var(--admin-bg) 100%);
 }
 
 .modern-admin-content {
