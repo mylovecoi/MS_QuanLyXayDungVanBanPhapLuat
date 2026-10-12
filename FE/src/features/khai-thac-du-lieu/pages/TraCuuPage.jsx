@@ -1,11 +1,57 @@
-import {useMemo, useState,useEffect} from "react";
-import { getDonViOptions } from "../../danh-muc/api/donViApi";
+import {useMemo, useState, useEffect} from "react";
+import {getDonViOptions} from "../../danh-muc/api/donViApi";
 import Label from "../../../app/components/forms/Label.jsx";
 import Select from "../../../app/components/forms/Select.jsx";
 import Alert from "../../../app/components/ui/alert/Alert.jsx";
 import BasicTableTwo from "../../../app/components/tables/BasicTables/BasicTableTwo.jsx";
 import {searchTraCuu} from "../api/traCuuApi";
 import DatePicker from "../../../app/components/forms/date-picker.jsx";
+import Badge from "../../../app/components/ui/badge/Badge.jsx";
+
+const getTrangThaiBadge = (tinhTrang = "") => {
+    const status = tinhTrang.toLowerCase().trim();
+
+    if (
+        status.includes("hoàn thành") ||
+        status.includes("đã hoàn tất")
+    ) {
+        return {color: "green", label: tinhTrang};
+    }
+
+    if (
+        status.includes("trả lại") ||
+        status.includes("từ chối") ||
+        status.includes("quá hạn")
+    ) {
+        return {color: "red", label: tinhTrang};
+    }
+
+    if (
+        status.includes("phê duyệt") ||
+        status.includes("đã trình")
+    ) {
+        return {color: "blue", label: tinhTrang};
+    }
+
+    if (
+        status.includes("chờ") ||
+        status.includes("đang")
+    ) {
+        return {color: "orange", label: tinhTrang};
+    }
+
+    return {color: "gray", label: tinhTrang || "-"};
+};
+
+const badgeColor = (color) => ({
+    blue: "primary",
+    green: "success",
+    red: "error",
+    orange: "warning",
+    cyan: "info",
+    purple: "primary",
+    gray: "light",
+}[color] || "primary");
 
 const configs = {
     "tong-hop": {
@@ -121,11 +167,18 @@ export default function TraCuuPage({source}) {
             {
                 key: "tinhTrang",
                 header: "Tình trạng",
-                render: (item) => (
-                    <span className="text-gray-700 dark:text-gray-300">
-                        {item.tinhTrang || "-"}
-                    </span>
-                ),
+                headerClassName:
+                    "px-5 py-3 text-center font-medium text-gray-500 text-theme-xs dark:text-gray-400",
+                cellClassName: "px-5 py-4 text-center",
+                render: (item) => {
+                    const badge = getTrangThaiBadge(item.tinhTrang);
+
+                    return (
+                        <Badge size="sm" color={badgeColor(badge.color)}>
+                            {badge.label}
+                        </Badge>
+                    );
+                },
             },
             {
                 key: "ngayBatDau",
@@ -277,7 +330,7 @@ export default function TraCuuPage({source}) {
                                     handleFilterChange("donViId", value)
                                 }
                                 options={[
-                                    { value: "", label: "Tất cả đơn vị" },
+                                    {value: "", label: "Tất cả đơn vị"},
                                     ...donViOptions.map((item) => ({
                                         value: item.id,
                                         label: item.tenDonVi,
@@ -295,7 +348,7 @@ export default function TraCuuPage({source}) {
                                     handleFilterChange("nguoiPhuTrachId", value)
                                 }
                                 options={[
-                                    { value: "", label: "Tất cả người phụ trách" },
+                                    {value: "", label: "Tất cả người phụ trách"},
                                 ]}
                             />
                         </div>
@@ -309,7 +362,7 @@ export default function TraCuuPage({source}) {
                                     handleFilterChange("loaiVanBanId", value)
                                 }
                                 options={[
-                                    { value: "", label: "Tất cả loại văn bản" },
+                                    {value: "", label: "Tất cả loại văn bản"},
                                 ]}
                             />
                         </div>
@@ -323,7 +376,7 @@ export default function TraCuuPage({source}) {
                                     handleFilterChange("trangThaiId", value)
                                 }
                                 options={[
-                                    { value: "", label: "Tất cả trạng thái" },
+                                    {value: "", label: "Tất cả trạng thái"},
                                 ]}
                             />
                         </div>
